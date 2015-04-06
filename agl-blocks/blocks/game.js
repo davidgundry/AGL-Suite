@@ -117,6 +117,7 @@ var menuState = {
     play: function()
     {
 		gameLevel = 1;
+		updateProgress();
 		game.state.start('level');
     },
     
@@ -261,22 +262,37 @@ var levelState = {
 		{
 		  var minDimension = maxWidth;
 		}
-		  
-		this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: minDimension/6+'px Sans', fill: '#111111' });
-		this.lText.anchor.setTo(0.5, 0.5);
-		this.time.events.add(700, function () { this.game.state.start('main') }, this);
-		this.lText.alpha = 0;
-		
-		var tween = game.add.tween(this.lText);
-		tween.to({alpha: 0.7}, 400);
-		tween.onComplete.add(this.tweenOut,this);
-		tween.start();
+		 
+		if (progress < 1)
+		{
+			 
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: minDimension/6+'px Sans', fill: '#111111' });
+			this.lText.anchor.setTo(0.5, 0.5);
+			this.time.events.add(700, function () { this.game.state.start('main') }, this);
+			this.lText.alpha = 0;
+			
+			var tween = game.add.tween(this.lText);
+			tween.to({alpha: 0.7}, 400);
+			tween.onComplete.add(this.tweenOut,this);
+			tween.start();
+		}
+		else
+		{
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: minDimension/6+'px Sans', fill: '#111111' });
+			this.lText.anchor.setTo(0.5, 0.5);
+			this.time.events.add(1500, function () { this.game.state.start('menu') }, this);
+			this.lText.alpha = 0;
+			var tween = game.add.tween(this.lText);
+			tween.to({alpha: 0.7}, 800);
+			tween.onComplete.add(this.tweenOut,this);
+			tween.start();
+		}
     },
 	
 	tweenOut: function()
 	{
 		var tween = game.add.tween(this.lText);
-		tween.to({alpha: 0}, 200);
+		tween.to({alpha: 0}, 700);
 		tween.start();
 	}
 }
@@ -346,7 +362,7 @@ function getProgressHeight(p)
 
 function updateProgress()
 {
-	progress = (gameLevel/10);
+	progress = ((gameLevel-1)/totalLevels);
 	progress = Math.max(progress,0);
 	progress = Math.min(progress,1);
 }
@@ -506,4 +522,5 @@ game.state.add('menu', menuState);
 
 var gameLevel = 0;
 var progress = 0;
+var totalLevels = 2;
 game.state.start('preload');
