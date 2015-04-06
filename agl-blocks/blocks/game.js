@@ -268,7 +268,7 @@ var levelState = {
 		this.lText.alpha = 0;
 		
 		var tween = game.add.tween(this.lText);
-		tween.to({alpha: 1}, 400);
+		tween.to({alpha: 0.7}, 400);
 		tween.onComplete.add(this.tweenOut,this);
 		tween.start();
     },
@@ -347,6 +347,8 @@ function getProgressHeight(p)
 function updateProgress()
 {
 	progress = (gameLevel/10);
+	progress = Math.max(progress,0);
+	progress = Math.min(progress,1);
 }
 
 var mainState = {
