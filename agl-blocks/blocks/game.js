@@ -553,7 +553,25 @@ var mainState = {
 
 function createLevel(level)
 {
-	return [[0,1,2,3,4]];
+	return shuffleLevel([[0,1,2,3,4],[0,1,2,3,4]]);
+}
+
+/**
+ * Currently only shuffles within rows.
+ */
+function shuffleLevel(level)
+{
+	for (var i=level.length*level[0].length;i>=0;i--)
+	{
+		var r = Math.floor(Math.random()*i)
+		var c = level[Math.floor(r/level[0].length)][r%level[0].length];
+				level[Math.floor(r/level[0].length)].push(c);
+		level[Math.floor(r/level[0].length)].splice(r%level[0].length,1);
+	}
+	if (!checkLevel(level))
+		return level;
+	else
+		return shuffleLevel(level);
 }
 
 function checkLevel(level)
@@ -564,8 +582,8 @@ function checkLevel(level)
 }
 
 
-var minHeight = 300;
-var minWidth = 300;
+var minHeight = 200;
+var minWidth = 200;
 
 var playable = false;
 
