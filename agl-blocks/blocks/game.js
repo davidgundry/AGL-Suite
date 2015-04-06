@@ -522,7 +522,7 @@ var mainState = {
 			for (var j=0;j<this.tiles[i].length;j++)
 				this.tiles[i][j].getChildAt(1).visible = true;
 		playable = false;
-		this.time.events.add(500, this.levelExitTween, this);
+		this.time.events.add(1000, this.levelExitTween, this);
 		
 		var oldHeight = getProgressHeight(progress);
 		gameLevel++;
@@ -531,7 +531,7 @@ var mainState = {
 		tween.to({
 			height: progress*(this.game.height-boxMarginTop-boxMarginBottom),
 			y: this.progressBar.y+oldHeight-getProgressHeight(progress)
-		}, 400);
+		}, 800);
 		this.progressBar.visible = true;
 		tween.start();
 		
@@ -553,6 +553,15 @@ var mainState = {
 
 function createLevel(level)
 {
+	switch(level)
+	{
+		case 1:
+			return [[1,0]];
+		case 2:
+			return [[2,1,0]];
+		case 3:
+			return [[1,0,0]];
+	}
 	return shuffleLevel([[0,1,2,3,4],[0,1,2,3,4]]);
 }
 
@@ -576,9 +585,31 @@ function shuffleLevel(level)
 
 function checkLevel(level)
 {
-  if (level[0][0] == 2)
-    return true;
-  return false;
+	var falsified = false;
+	var i=0;
+	var j=0;
+	while ((i<level.length) && (!falsified))
+	{
+		j = 0;
+		while ((j<level[i].length) && (!falsified))
+		{
+			switch (level[i][j])
+			{
+				case 0:
+					if (level[i][j+1] != 1)
+						falsified = true;
+					break;
+				case 1:
+					if ((j+1 < level[i].length) && (level[i][j+1] != 2))
+						falsified = true;
+					break;
+			}
+			j++;
+		}
+		i++;
+	}
+
+  return !falsified;
 }
 
 
