@@ -485,7 +485,7 @@ var minWidth = 300;
 
 var playable = false;
 
-var game = new Phaser.Game(Math.max(minWidth,window.innerWidth-20), Math.max(minHeight,window.innerHeight-20), Phaser.AUTO, 'gameDiv');
+var game = new Phaser.Game(Math.max(minWidth,window.innerWidth), Math.max(minHeight,window.innerHeight), Phaser.AUTO, 'gameDiv');
 var paddingLeft = Math.round(game.width/8);
 var paddingRight = Math.round(game.width/8);
 var paddingTop  = Math.round(game.height/8);
