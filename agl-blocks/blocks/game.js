@@ -139,6 +139,8 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
 {
   if (typeof state == 'undefined')
     state == null;
+
+
  
   var bmd = this.game.add.bitmapData(width+3, height+3);
   var ctx=bmd.context;
@@ -162,7 +164,7 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
   ctx.fillstyle='0x111111';
   roundRect(ctx,shadowDrop,shadowDrop,width,height,5,true,false);
   var shadow = game.add.sprite(0, 0, bmd);
-  shadow.alpha = 0.5;
+  shadow.alpha = 0.0;
   
   var bmd = this.game.add.bitmapData(width+width/5, height+height/5);
   var ctx=bmd.context;
@@ -174,6 +176,7 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
   
   mainTile.addChild(shadow);
   mainTile.addChild(outline);
+  mainTile.bringToTop();
   
   return mainTile;
 }
@@ -243,6 +246,7 @@ function tileDown(iy,ix,group,state)
 var levelState = {
     preload: function () {
         drawBackground();
+		drawProgressBar();
 		playable = false;
     },
     create: function () {
@@ -317,9 +321,38 @@ function makeLevel(tiles,xOffset,state)
     return tileSprites;
 }
 
+function drawProgressBar()
+{
+	var graphics = game.add.graphics(0, 0);
+	graphics.beginFill(0x917c6f);
+	graphics.lineStyle(5, 0xa39791, 1);
+	graphics.drawRect(this.game.width-boxMarginRight+boxMarginRight/3, boxMarginTop, boxMarginRight/3, this.game.height-boxMarginTop-boxMarginBottom);
+	  
+	var progressHeight = getProgressHeight(progress);
+	  
+	var bmd = this.game.add.bitmapData(boxMarginRight/3, progressHeight);
+	var ctx=bmd.context;
+	ctx.fillStyle="blue";
+	roundRect(ctx,0,0,boxMarginRight/3,progressHeight,5,true,false);
+	
+	return game.add.sprite(this.game.width-boxMarginRight+boxMarginRight/3,
+						   this.game.height-boxMarginBottom-progressHeight,bmd);
+}
+
+function getProgressHeight(p)
+{
+	return Math.max(1,p*(this.game.height-boxMarginTop-boxMarginBottom));
+}
+
+function updateProgress()
+{
+	progress = (gameLevel/10);
+}
+
 var mainState = {
 	preload: function () {
 		drawBackground();
+		this.progressBar = drawProgressBar();
 		playable = false;
 	},
 	create: function () {
@@ -335,11 +368,9 @@ var mainState = {
 				this.tilesGroup.add(this.tiles[i][j]);
 		
 		var tween = game.add.tween(this.tilesGroup);
-			tween.to({x: -xOffset},400);
-			tween.onComplete.add(this.startPlay, this);
-			tween.start();
-
-
+		tween.to({x: -xOffset},400);
+		tween.onComplete.add(this.startPlay, this);
+		tween.start();
 	},
 
 	startPlay: function() {
@@ -407,7 +438,26 @@ var mainState = {
 	
 	levelComplete: function()
 	{
+		for (var i=0;i<this.tiles.length;i++)
+			for (var j=0;j<this.tiles[i].length;j++)
+				this.tiles[i][j].getChildAt(1).visible = true;
 		playable = false;
+		this.time.events.add(500, this.levelExitTween, this);
+		
+		var oldHeight = getProgressHeight(progress);
+		gameLevel++;
+		updateProgress();
+		var tween = game.add.tween(this.progressBar);
+		tween.to({
+			height: progress*(this.game.height-boxMarginTop-boxMarginBottom),
+			y: this.progressBar.y+oldHeight-getProgressHeight(progress)
+		}, 400);
+		tween.start();
+		
+	},
+	
+	levelExitTween: function()
+	{
 		var tween = game.add.tween(this.tilesGroup);
 		tween.to({x: 2*game.width}, 400);
 		tween.onComplete.add(this.changeLevel,this);
@@ -416,7 +466,6 @@ var mainState = {
 	
 	changeLevel: function()
 	{
-		gameLevel++;
 	    game.state.start('level');
 	}
 };
@@ -454,4 +503,5 @@ game.state.add('level', levelState);
 game.state.add('menu', menuState);
 
 var gameLevel = 0;
+var progress = 0;
 game.state.start('preload');
