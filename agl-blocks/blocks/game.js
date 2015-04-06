@@ -28,7 +28,6 @@ var loadState = {
 	}
 };
 
-var tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#241c1c'];
 
 function boxCenterX()
 {
@@ -46,77 +45,78 @@ var menuState = {
 		playable = true;
     },
     create: function () {
-	var maxWidth = Math.floor(game.world.width-paddingLeft-paddingRight);
-	var maxHeight = Math.floor(game.world.height-paddingTop-paddingBottom);
-	
-	if (maxWidth/7 > maxHeight/5)
-	{
-	  var minDimension = maxHeight;
-	  var size = maxHeight/5;
-	}
-	else
-	{
-	  var minDimension = maxWidth;
-	  var size = maxWidth/7;
-	}
-	
-	var originX = Math.round(boxCenterX()-(size*7)/2);
-	var originY = Math.round(boxCenterY()-(size*5)/2);
-	
-	var tilePadding = Math.round(size/10);
-	size = Math.round(size * (9/10));
-	
-	this.tilesGroup = game.add.group();
-	
-	for (var i=0;i<7;i++)
-	  for (var j=0;j<5;j++)
-	  {
-	      var tileColour = Math.floor(Math.random()*5);
-	      if ((i==0) && (j==0))
-		tileColour = 0;
-	      else if  ((i==5) && (j==4))
-		tileColour = 1;
-	      else if ((i==6) && (j==4))
-		tileColour = 2;
-	      
-	      var s = makeTile(i*size+i*tilePadding+originX,j*size+j*tilePadding+originY,j,i,size,size,tileColours[tileColour],this);
-	      s.alpha = 0.3;
-	      
-	      if ((i==0) && (j==0))
-	      {
-		var qText = s.addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
-		qText.anchor.setTo(0.5, 0.5);
-		s.alpha =1;
-		s.events.onInputDown.add(this.quit);
-	      }
-	      else if  ((i==5) && (j==4))
-	      {
-		var pText = s.addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px Sans', fill: '#222222' }));
-		pText.anchor.setTo(0.5, 0.5);
-		s.alpha = 1;
-		s.events.onInputDown.add(this.play);
-	      }
-	      else if ((i==6) && (j==4))
-	      {
-		var iText = s.addChild(game.add.text(+size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
-		iText.anchor.setTo(0.5, 0.5);
-		s.alpha = 1;
-		s.events.onInputDown.add(this.info);
-	      }
-		this.tilesGroup.add(s);
-	  }
-	this.tilesGroup.alpha = -0.2;
-	var tween = game.add.tween(this.tilesGroup);
-	tween.to({alpha: 1},2000);
-	tween.start();
-	 
-	var titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: minDimension/4+'px Sans', fill: '#000000' });
-	titleText.anchor.setTo(0.5, 0.5);
-	titleText.alpha= 0;
-	var texttween = game.add.tween(titleText);
-	texttween.to({alpha: 0.8},700);
-	texttween.start();
-	
+		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#241c1c'];
+		var maxWidth = Math.floor(game.world.width-paddingLeft-paddingRight);
+		var maxHeight = Math.floor(game.world.height-paddingTop-paddingBottom);
+		
+		if (maxWidth/7 > maxHeight/5)
+		{
+		  var minDimension = maxHeight;
+		  var size = maxHeight/5;
+		}
+		else
+		{
+		  var minDimension = maxWidth;
+		  var size = maxWidth/7;
+		}
+		
+		var originX = Math.round(boxCenterX()-(size*7)/2);
+		var originY = Math.round(boxCenterY()-(size*5)/2);
+		
+		var tilePadding = Math.round(size/10);
+		size = Math.round(size * (9/10));
+		
+		this.tilesGroup = game.add.group();
+		
+		for (var i=0;i<7;i++)
+		  for (var j=0;j<5;j++)
+		  {
+			  var tileColour = Math.floor(Math.random()*5);
+			  if ((i==0) && (j==0))
+			tileColour = 0;
+			  else if  ((i==5) && (j==4))
+			tileColour = 1;
+			  else if ((i==6) && (j==4))
+			tileColour = 2;
+			  
+			  var s = makeTile(i*size+i*tilePadding+originX,j*size+j*tilePadding+originY,j,i,size,size,tileColours[tileColour],this);
+			  s.alpha = 0.3;
+			  
+			  if ((i==0) && (j==0))
+			  {
+			var qText = s.addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
+			qText.anchor.setTo(0.5, 0.5);
+			s.alpha =1;
+			s.events.onInputDown.add(this.quit);
+			  }
+			  else if  ((i==5) && (j==4))
+			  {
+			var pText = s.addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px Sans', fill: '#222222' }));
+			pText.anchor.setTo(0.5, 0.5);
+			s.alpha = 1;
+			s.events.onInputDown.add(this.play);
+			  }
+			  else if ((i==6) && (j==4))
+			  {
+			var iText = s.addChild(game.add.text(+size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
+			iText.anchor.setTo(0.5, 0.5);
+			s.alpha = 1;
+			s.events.onInputDown.add(this.info);
+			  }
+			this.tilesGroup.add(s);
+		  }
+		this.tilesGroup.alpha = -0.2;
+		var tween = game.add.tween(this.tilesGroup);
+		tween.to({alpha: 1},2000);
+		tween.start();
+		 
+		var titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: minDimension/4+'px Sans', fill: '#000000' });
+		titleText.anchor.setTo(0.5, 0.5);
+		titleText.alpha= 0;
+		var texttween = game.add.tween(titleText);
+		texttween.to({alpha: 0.8},700);
+		texttween.start();
+		
     },
     
     quit: function()
@@ -128,6 +128,13 @@ var menuState = {
     {
 		gameLevel = 1;
 		updateProgress();
+		for (var i=tileColours.length;i>=0;i--)
+		{
+			var r = Math.round(Math.random()*i)
+			var c = tileColours[r];
+			tileColours.splice(r,1);
+			tileColours.push(c);
+		}
 		game.state.start('level');
     },
     
@@ -403,7 +410,7 @@ var mainState = {
 	},
 	create: function () {
 		var xOffset = -game.width;
-	    this.level = [[0,1,2,3,4]];
+	    this.level = createLevel(gameLevel);
 	    this.tiles = makeLevel(this.level,xOffset,this);
 	    this.indexX = -1;
 	    this.indexY = -1;
@@ -442,8 +449,6 @@ var mainState = {
 		y /= size;
 		y = Math.floor(y);
 		
-		console.log(y);
-		
 		if (((x != this.indexX) || (y != this.indexY)) && (x >= 0) && (y >= 0) && (y<this.tiles.length))
 			if (x < this.tiles[y].length)
 			{
@@ -460,54 +465,54 @@ var mainState = {
 			this.indexY = iy;
 	    }
 	    else
-	    {
-		if ((this.indexX != ix) || (this.indexY != iy))
 		{
-			var size = getTileSize(this.tiles);
-		    var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
-		    var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
+			if ((this.indexX != ix) || (this.indexY != iy))
+			{
+				var size = getTileSize(this.tiles);
+				var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
+				var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
+				
+				var depth = this.tiles[iy][ix].height/40;
+				var newX = this.tiles[this.indexY][this.indexX].x;
+				var newY = this.tiles[this.indexY][this.indexX].y;
+				
+				var x1 = this.tiles[iy][ix].x - originX;
+				x1 /= size;
+				x1 = Math.round(x1);
+				
+				var y1 = this.tiles[iy][ix].y - originY;
+				y1 /= size;
+				y1 = Math.round(y1);
+				
+				var x2 = newX - originX;
+				x2 /= size;
+				x2 = Math.round(x2);
+				
+				var y2 = newY - originY;
+				y2 /= size;
+				y2 = Math.round(Math.abs(y2));
+				
+				var lvlTmp = this.level[y2][x2];
+				this.level[y2][x2] = this.level[y1][x1];
+				this.level[y1][x1] = lvlTmp;
 			
-		    var depth = this.tiles[iy][ix].height/40;
-		    var newX = this.tiles[this.indexY][this.indexX].x;
-		    var newY = this.tiles[this.indexY][this.indexX].y;
-		    
-			var x1 = this.tiles[iy][ix].x - originX;
-			x1 /= size;
-			x1 = Math.floor(x1);
-			
-			var y1 = this.tiles[iy][ix].y - originY;
-			y1 /= size;
-			y1 = Math.floor(y1);
-			
-			var x2 = newX - originX;
-			x2 /= size;
-			x2 = Math.floor(x2);
-			
-			var y2 = newY - originY;
-			y2 /= size;
-			y2 = Math.floor(y2);
-			
-		    var lvlTmp = this.level[y2][x2];
-		    this.level[y2][x2] = this.level[y1][x1];
-		    this.level[y1][x1] = lvlTmp;
-		
+				this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
+				this.tiles[iy][ix].getChildAt(1).visible = false;
+				
+				this.tiles[this.indexY][this.indexX].x = originX+size*x1;
+				this.tiles[this.indexY][this.indexX].y = originY+size*y1;
+				this.tiles[iy][ix].x = originX+size*x2;
+				this.tiles[iy][ix].y = originY+size*y2;
+				console.log(this.level[0]);
+				//hoverOverTileOut(this.tiles[this.indexY][this.indexX]);
+				//hoverOverTileOut(this.tiles[iy][ix]);
+				if (checkLevel(this.level))
+				  this.levelComplete();
+			}
 			this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
 			this.tiles[iy][ix].getChildAt(1).visible = false;
-			
-		    this.tiles[this.indexY][this.indexX].x = originX+size*x1;
-		    this.tiles[this.indexY][this.indexX].y = originY+size*y1;
-		    this.tiles[iy][ix].x = originX+size*x2;
-		    this.tiles[iy][ix].y = originY+size*y2;
-		    console.log(this.level[0]);
-		    //hoverOverTileOut(this.tiles[this.indexY][this.indexX]);
-		    //hoverOverTileOut(this.tiles[iy][ix]);
-		    if (checkLevel(this.level))
-		      this.levelComplete();
-		}
-		//this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
-		//this.tiles[iy][ix].getChildAt(1).visible = false;
-		this.indexX = -1;
-		this.indexY = -1;
+			this.indexX = -1;
+			this.indexY = -1;
 	    }
 	},
 	
@@ -546,6 +551,11 @@ var mainState = {
 	}
 };
 
+function createLevel(level)
+{
+	return [[0,1,2,3,4]];
+}
+
 function checkLevel(level)
 {
   if (level[0][0] == 2)
@@ -558,6 +568,8 @@ var minHeight = 300;
 var minWidth = 300;
 
 var playable = false;
+
+var tileColours = [];
 
 var game = new Phaser.Game(Math.max(minWidth,window.innerWidth), Math.max(minHeight,window.innerHeight), Phaser.AUTO, 'gameDiv');
 var paddingLeft = Math.round(game.width/8);
