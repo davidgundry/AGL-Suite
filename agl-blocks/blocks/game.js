@@ -320,7 +320,7 @@ function makeLevel(tiles,xOffset,state)
 {
     var size = getTileSize(tiles);
     var originY = Math.round(boxCenterY()-(size*tiles.length)/2);
-    var originX = Math.round(boxCenterX()-(size*tiles[0].length)/2)+xOffset;
+    var originX = Math.round(boxCenterX()-(size*tiles[0].length)/2);
     
     var tilePadding = Math.round(size/10);
     size = Math.round(size * (9/10));
@@ -351,8 +351,11 @@ function drawProgressBar()
 	ctx.fillStyle="blue";
 	roundRect(ctx,0,0,boxMarginRight/3,progressHeight,5,true,false);
 	
-	return game.add.sprite(this.game.width-boxMarginRight+boxMarginRight/3,
+	var sprite = game.add.sprite(this.game.width-boxMarginRight+boxMarginRight/3,
 						   this.game.height-boxMarginBottom-progressHeight,bmd);
+	if (progress ==0)
+		sprite.visible = false;
+	return sprite;
 }
 
 function getProgressHeight(p)
@@ -375,7 +378,7 @@ var mainState = {
 	},
 	create: function () {
 		var xOffset = -game.width;
-	    this.level = [[0,1,2,3,4]];
+	    this.level = [[0,1,2,3,4],[0,3,5]];
 	    this.tiles = makeLevel(this.level,xOffset,this);
 	    this.indexX = -1;
 	    this.indexY = -1;
@@ -384,9 +387,10 @@ var mainState = {
 		for (var i=0;i<this.tiles.length;i++)
 			for (var j=0;j<this.tiles[i].length;j++)
 				this.tilesGroup.add(this.tiles[i][j]);
+		this.tilesGroup.x +=xOffset;
 		
 		var tween = game.add.tween(this.tilesGroup);
-		tween.to({x: -xOffset},400);
+		tween.to({x: 0},400);
 		tween.onComplete.add(this.startPlay, this);
 		tween.start();
 	},
@@ -410,47 +414,51 @@ var mainState = {
 	    {
 		if ((this.indexX != ix) || (this.indexY != iy))
 		{
+			var size = getTileSize(this.tiles);
+		    var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
+		    var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
+			
 		    var depth = this.tiles[iy][ix].height/40;
 		    var newX = this.tiles[this.indexY][this.indexX].x;
 		    var newY = this.tiles[this.indexY][this.indexX].y;
 		    
-		    var lvlTmp = this.level[this.indexY][this.indexX];
-		    this.level[this.indexY][this.indexX] = this.level[iy][ix];
-		    this.level[iy][ix] = lvlTmp;
-		    
-		    var size = getTileSize(this.tiles);
-		    var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
-		    var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
-		    
-		    var sprite = this.tiles[this.indexY][this.indexX];
-		    var sprite2 = this.tiles[iy][ix];
-		    this.tiles[this.indexY][this.indexX] = null;
-		    this.tiles[iy][ix] = null;
-		    this.tiles[this.indexY][this.indexX] = sprite2;
-		    this.tiles[iy][ix] = sprite;
-		    sprite = null;
-		    sprite2 = null;
-		    
-		    this.tiles[this.indexY][this.indexX].x = this.indexX*size+originX;
-		    this.tiles[this.indexY][this.indexX].y = this.indexY*size+originY;
-		    this.tiles[iy][ix].x = ix*size+originX;
-		    this.tiles[iy][ix].y = iy*size+originY;
-		    
-		    //this.tiles[this.indexY][this.indexX].x = this.tiles[iy][ix].x;
-		    //this.tiles[this.indexY][this.indexX].y = this.tiles[iy][ix].y;
-		    //this.tiles[iy][ix].x = newX;
-		    //this.tiles[iy][ix].y = newY;
-		    //console.log(this.level);
+			var x1 = this.tiles[iy][ix].x - originX;
+			x1 /= size;
+			x1 = Math.round(x1);
+			
+			var y1 = this.tiles[iy][ix].y - originY;
+			y1 /= size;
+			y1 = Math.round(y1);
+			
+			var x2 = newX - originX;
+			x2 /= size;
+			x2 = Math.round(x2);
+			
+			var y2 = newY - originY;
+			y2 /= size;
+			y2 = Math.round(y2);
+			
+		    var lvlTmp = this.level[y2][x2];
+		    this.level[y2][x2] = this.level[y1][x1];
+		    this.level[y1][x1] = lvlTmp;
+		
+			this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
+			this.tiles[iy][ix].getChildAt(1).visible = false;
+			
+		    this.tiles[this.indexY][this.indexX].x = originX+size*x1;
+		    this.tiles[this.indexY][this.indexX].y = originY+size*y1;
+		    this.tiles[iy][ix].x = originX+size*x2;
+		    this.tiles[iy][ix].y = originY+size*y2;
+		    console.log(this.level[0]);
 		    //hoverOverTileOut(this.tiles[this.indexY][this.indexX]);
 		    //hoverOverTileOut(this.tiles[iy][ix]);
-		    if (checkLevel(this.tiles))
+		    if (checkLevel(this.level))
 		      this.levelComplete();
 		}
-		this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
-		this.tiles[iy][ix].getChildAt(1).visible = false;
+		//this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
+		//this.tiles[iy][ix].getChildAt(1).visible = false;
 		this.indexX = -1;
 		this.indexY = -1;
-		this.levelComplete();
 	    }
 	},
 	
@@ -470,6 +478,7 @@ var mainState = {
 			height: progress*(this.game.height-boxMarginTop-boxMarginBottom),
 			y: this.progressBar.y+oldHeight-getProgressHeight(progress)
 		}, 400);
+		this.progressBar.visible = true;
 		tween.start();
 		
 	},
@@ -488,9 +497,9 @@ var mainState = {
 	}
 };
 
-function checkLevel(tiles)
+function checkLevel(level)
 {
-  if (tiles[0][0] == 2)
+  if (level[0][0] == 2)
     return true;
   return false;
 }
