@@ -1,8 +1,13 @@
 ﻿var loadState = {
 	preload: function (){
 		drawBackground();
-		var loadingLabel = game.add.text(game.world.centerX, 150, 'loading...', { font: '15px Courier New', fill: '#ffffff' });
+		
+		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px '+defaultFont, fill: '#333333' });
+		this.titleText.anchor.setTo(0.5, 0.5);
+		
+		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#333333' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
+		
 
 		//game.load.audio('plock', 'assets/plock.wav');
 	},
@@ -27,10 +32,7 @@ var menuState = {
 	    this.tiles = makeLevel(this.level,0,this);
 	    this.indexX = -1;
 	    this.indexY = -1;
-		
-		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Sans', fill: '#000000' });
-		this.titleText.anchor.setTo(0.5, 0.5);
-		
+			
 		var size = getTileSize(this.tiles)*(9/10);
 		
 		this.tilesGroup = game.add.group();
@@ -41,21 +43,21 @@ var menuState = {
 			  
 				if ((j==0) && (i==0))
 				{
-					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
+					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+defaultFont, fill: '#222222' }));
 					qText.anchor.setTo(0.5, 0.5);
 					this.tiles[i][j].alpha =1;
 					this.tiles[i][j].events.onInputDown.add(this.quit,this);
 				}
 				else if  ((j==5) && (i==4))
 				{
-					var pText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px Sans', fill: '#222222' }));
+					var pText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px '+defaultFont, fill: '#222222' }));
 					this.tiles[i][j].alpha = 1;
 					pText.anchor.setTo(0.5, 0.5);
 					this.tiles[i][j].events.onInputDown.add(this.play,this);
 				}
 				else if ((j==6) && (i==4))
 				{
-					var iText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
+					var iText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'info', { font: size/3+'px '+defaultFont, fill: '#222222' }));
 					iText.anchor.setTo(0.5, 0.5);
 					this.tiles[i][j].alpha = 1;
 					this.tiles[i][j].events.onInputDown.add(this.info,this);
@@ -63,7 +65,8 @@ var menuState = {
 				this.tilesGroup.add(this.tiles[i][j]);
 				}
 
-		  
+		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px '+defaultFont, fill: '#000000' });
+		this.titleText.anchor.setTo(0.5, 0.5);
 		this.createIntroTweens();
 		
     },
@@ -96,6 +99,7 @@ var menuState = {
     
     quit: function()
     {
+		playable = false;
 		this.createOutroTweens();
 		this.time.events.add(1000,function() {game.state.start('load')},this);
     },
@@ -118,6 +122,7 @@ var menuState = {
     
     info: function()
     {
+		playable = false;
 		this.createOutroTweens();
 		this.time.events.add(1000,function() {game.state.start('load')},this);
     }
@@ -133,13 +138,13 @@ var levelState = {
 		var textTime = 0;
 		if (progress < 1)
 		{
-			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: getMinDimension()/6+'px Sans', fill: '#111111' });
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: getMinDimension()/6+'px '+defaultFont, fill: '#111111' });
 			this.lText.anchor.setTo(0.5, 0.5);
 			this.time.events.add(800, function () { this.game.state.start('main') }, this);
 		}
 		else
 		{
-			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: getMinDimension()/6+'px Sans', fill: '#111111' });
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: getMinDimension()/6+'px '+defaultFont, fill: '#111111' });
 			this.lText.anchor.setTo(0.5, 0.5);
 			this.time.events.add(1800, function () { this.game.state.start('menu') }, this);
 			textTime = 1000;
@@ -288,7 +293,6 @@ function randomLevel(height,width)
 	}
 	return level;
 }
-
 
 function drawBackground()
 {
@@ -468,7 +472,7 @@ function makeLevel(tiles,xOffset,state)
 	tileSprites.push([]);
 	for (var i=0;i<tiles[j].length;i++)
 	    if (tiles[j][i] > -1)
-		tileSprites[j][i] = makeTile(originX+i*(size+tilePadding),originY+j*(size+tilePadding),j,i,size,size,tileColours[tiles[j][i]],state); 
+		tileSprites[j][i] = makeTile(originX+i*(size+tilePadding)+tilePadding/2,originY+j*(size+tilePadding)+tilePadding/2,j,i,size,size,tileColours[tiles[j][i]],state); 
     }
     return tileSprites;
 }
@@ -484,7 +488,7 @@ function drawProgressBar()
 	  
 	var bmd = this.game.add.bitmapData(boxMarginRight/3, progressHeight);
 	var ctx=bmd.context;
-	ctx.fillStyle="blue";
+	ctx.fillStyle="lightblue";
 	roundRect(ctx,0,0,boxMarginRight/3,progressHeight,5,true,false);
 	
 	var sprite = game.add.sprite(this.game.width-boxMarginRight+boxMarginRight/3,
@@ -625,15 +629,13 @@ function checkLevel(level)
   return !falsified;
 }
 
+var totalLevels = 2;
 
 var minHeight = 200;
 var minWidth = 200;
 
-var playable = false;
-
-var tileColours = [];
-
 var game = new Phaser.Game(Math.max(minWidth,window.innerWidth), Math.max(minHeight,window.innerHeight), Phaser.AUTO, 'gameDiv');
+
 var paddingLeft = Math.round(game.width/8);
 var paddingRight = Math.round(game.width/8);
 var paddingTop  = Math.round(game.height/8);
@@ -645,15 +647,15 @@ var boxMarginTop = Math.round(game.height/10);
 var boxMarginBottom = Math.round(game.height/10);
 
 var maxBlockSize = Math.min(Math.round(game.width/3),Math.round(game.height/3));
+var defaultFont = 'Sans-Serif';
 
-console.log(boxMarginLeft);
+var gameLevel = 0;
+var progress = 0;
+var tileColours = [];
+var playable = false;
 
 game.state.add('load', loadState);
 game.state.add('main', mainState);
 game.state.add('level', levelState);
 game.state.add('menu', menuState);
-
-var gameLevel = 0;
-var progress = 0;
-var totalLevels = 2;
 game.state.start('load');
