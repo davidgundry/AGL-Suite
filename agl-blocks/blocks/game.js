@@ -13,6 +13,251 @@
 	}
 };
 
+var menuState = {
+    preload: function () {
+		drawBackground();
+		playable = true;
+    },
+    create: function () {
+		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#241c1c'];
+		this.level = randomLevel(5,7);
+		this.level[0][0] = 0;
+		this.level[4][5] = 1;
+		this.level[4][6] = 2
+	    this.tiles = makeLevel(this.level,0,this);
+	    this.indexX = -1;
+	    this.indexY = -1;
+		
+		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Sans', fill: '#000000' });
+		this.titleText.anchor.setTo(0.5, 0.5);
+		
+		var size = getTileSize(this.tiles)*(9/10);
+		
+		this.tilesGroup = game.add.group();
+		for (var i=0;i<this.tiles.length;i++)
+			for (var j=0;j<this.tiles[i].length;j++)
+			{
+				this.tiles[i][j].alpha = 0.3;
+			  
+				if ((j==0) && (i==0))
+				{
+					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
+					qText.anchor.setTo(0.5, 0.5);
+					this.tiles[i][j].alpha =1;
+					this.tiles[i][j].events.onInputDown.add(this.quit);
+				}
+				else if  ((j==5) && (i==4))
+				{
+					var pText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px Sans', fill: '#222222' }));
+					this.tiles[i][j].alpha = 1;
+					pText.anchor.setTo(0.5, 0.5);
+					this.tiles[i][j].events.onInputDown.add(this.play,this);
+				}
+				else if ((j==6) && (i==4))
+				{
+					var iText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
+					iText.anchor.setTo(0.5, 0.5);
+					this.tiles[i][j].alpha = 1;
+					this.tiles[i][j].events.onInputDown.add(this.info);
+				}
+				this.tilesGroup.add(this.tiles[i][j]);
+				}
+
+		  
+		this.createIntroTweens();
+		
+    },
+	
+	createIntroTweens: function()
+	{
+		game.tweens.removeAll();
+		this.tilesGroup.alpha = -0.2;
+		var tween = game.add.tween(this.tilesGroup);
+		tween.to({alpha: 1},2000);
+		tween.start();
+		 
+		this.titleText.alpha= 0;
+		var texttween = game.add.tween(this.titleText);
+		texttween.to({alpha: 1},700);
+		texttween.start();
+	},
+	
+	createOutroTweens: function()
+	{
+		game.tweens.removeAll();
+		var tween = game.add.tween(this.tilesGroup);
+		tween.to({alpha: 0},800);
+		tween.start();
+		 
+		var texttween = game.add.tween(this.titleText);
+		texttween.to({alpha: 0},700);
+		texttween.start();
+	},
+    
+    quit: function()
+    {
+		game.state.start('preload');
+    },
+    
+    play: function()
+    {
+		playable = false;
+		this.createOutroTweens();
+		gameLevel = 1;
+		updateProgress();
+		for (var i=tileColours.length;i>=0;i--)
+		{
+			var r = Math.round(Math.random()*i)
+			var c = tileColours[r];
+			tileColours.splice(r,1);
+			tileColours.push(c);
+		}
+		this.time.events.add(1000,function() {game.state.start('level');},this);
+    },
+    
+    info: function()
+    {
+      
+    }
+}
+
+var levelState = {
+    preload: function () {
+        drawBackground();
+		drawProgressBar();
+		playable = false;
+    },
+    create: function () {
+		if (progress < 1)
+		{
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: getMinDimension()/6+'px Sans', fill: '#111111' });
+			this.lText.anchor.setTo(0.5, 0.5);
+			this.time.events.add(700, function () { this.game.state.start('main') }, this);
+		}
+		else
+		{
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: getMinDimension()/6+'px Sans', fill: '#111111' });
+			this.lText.anchor.setTo(0.5, 0.5);
+			this.time.events.add(1500, function () { this.game.state.start('menu') }, this);
+		}
+		
+		this.lText.alpha = 0;
+		var tween = game.add.tween(this.lText);
+		tween.to({alpha: 0.7}, 800);
+		tween.onComplete.add(this.tweenOut,this);
+		tween.start();
+    },
+	
+	tweenOut: function()
+	{
+		var tween = game.add.tween(this.lText);
+		tween.to({alpha: 0}, 700);
+		tween.start();
+	}
+}
+
+var mainState = {
+	preload: function () {
+		drawBackground();
+		this.progressBar = drawProgressBar();
+		playable = false;
+	},
+	create: function () {
+		var xOffset = -game.width;
+	    this.level = createLevel(gameLevel);
+	    this.tiles = makeLevel(this.level,xOffset,this);
+	    this.indexX = -1;
+	    this.indexY = -1;
+		
+		this.tilesGroup = game.add.group();
+		for (var i=0;i<this.tiles.length;i++)
+			for (var j=0;j<this.tiles[i].length;j++)
+				this.tilesGroup.add(this.tiles[i][j]);
+		this.tilesGroup.x +=xOffset;
+		
+		this.introTween();
+	},
+
+	startPlay: function() {
+		playable = true;
+	},
+	
+	update: function () {
+	   
+	},
+	
+	pointerUp: function(x,y)
+	{
+		var size = getTileSize(this.tiles);
+		var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
+		var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
+		
+		var x = x - originX;
+		x /= size;
+		x = Math.floor(x);
+		
+		var y = y - originY;
+		y /= size;
+		y = Math.floor(y);
+		
+		if (((x != this.indexX) || (y != this.indexY)) && (x >= 0) && (y >= 0) && (y<this.tiles.length))
+			if (x < this.tiles[y].length)
+			{
+				//this.tiles[y][x].getChildAt(1).visible = !this.tiles[y][x].getChildAt(1).visible;
+				//selected(state,y,x);
+			}
+	},
+	
+	levelComplete: function()
+	{
+		for (var i=0;i<this.tiles.length;i++)
+			for (var j=0;j<this.tiles[i].length;j++)
+				this.tiles[i][j].getChildAt(1).visible = true;
+		playable = false;
+		
+		this.progressBarTween();
+		this.time.events.add(1000, this.levelExitTween, this);
+	},
+	
+	progressBarTween: function()
+	{
+		var oldHeight = getProgressHeight(progress);
+		gameLevel++;
+		updateProgress();
+		
+		var tween = game.add.tween(this.progressBar);
+		tween.to({
+			height: progress*(this.game.height-boxMarginTop-boxMarginBottom),
+			y: this.progressBar.y+oldHeight-getProgressHeight(progress)
+		}, 800);
+		this.progressBar.visible = true;
+		tween.start();
+	},
+	
+	introTween: function()
+	{
+		game.tweens.removeAll();
+		var tween = game.add.tween(this.tilesGroup);
+		tween.to({x: 0},400);
+		tween.onComplete.add(this.startPlay, this);
+		tween.start();
+	},
+	
+	levelExitTween: function()
+	{
+		game.tweens.removeAll();
+		var tween = game.add.tween(this.tilesGroup);
+		tween.to({x: 2*game.width}, 400);
+		tween.onComplete.add(this.changeLevel,this);
+		tween.start();
+	},
+	
+	changeLevel: function()
+	{
+	    game.state.start('level');
+	}
+};
+
 
 function boxCenterX()
 {
@@ -36,155 +281,61 @@ function randomLevel(height,width)
 	return level;
 }
 
-var menuState = {
-    preload: function () {
-		drawBackground();
-		playable = true;
-    },
-    create: function () {
-		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#241c1c'];
-		this.level = randomLevel(5,7);
-		this.level[0][0] = 0;
-		this.level[4][5] = 1;
-		this.level[4][6] = 2
-	    this.tiles = makeLevel(this.level,0,this);
-	    this.indexX = -1;
-	    this.indexY = -1;
-		
-		var size = getTileSize(this.tiles);
-		
-		this.tilesGroup = game.add.group();
-		for (var i=0;i<this.tiles.length;i++)
-			for (var j=0;j<this.tiles[i].length;j++)
-			{
-				this.tiles[i][j].alpha = 0.3;
-			  
-				if ((j==0) && (i==0))
-				{
-					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
-					qText.anchor.setTo(0.5, 0.5);
-					this.tiles[i][j].alpha =1;
-					this.tiles[i][j].events.onInputDown.add(this.quit);
-				}
-				else if  ((j==5) && (i==4))
-				{
-					var pText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px Sans', fill: '#222222' }));
-					pText.anchor.setTo(0.5, 0.5);
-					this.tiles[i][j].alpha = 1;
-					this.tiles[i][j].events.onInputDown.add(this.play);
-				}
-				else if ((j==6) && (i==4))
-				{
-					var iText = this.tiles[i][j].addChild(game.add.text(+size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
-					iText.anchor.setTo(0.5, 0.5);
-					this.tiles[i][j].alpha = 1;
-					this.tiles[i][j].events.onInputDown.add(this.info);
-				}
-				this.tilesGroup.add(this.tiles[i][j]);
-				}
-
-		  
-		this.createIntroTweens();
-		
-    },
-	
-	createIntroTweens: function()
-	{
-		this.tilesGroup.alpha = -0.2;
-		var tween = game.add.tween(this.tilesGroup);
-		tween.to({alpha: 1},2000);
-		tween.start();
-		 
-		var titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Sans', fill: '#000000' });
-		titleText.anchor.setTo(0.5, 0.5);
-		titleText.alpha= 0;
-		var texttween = game.add.tween(titleText);
-		texttween.to({alpha: 0.8},700);
-		texttween.start();
-	},
-    
-    quit: function()
-    {
-		game.state.start('preload');
-    },
-    
-    play: function()
-    {
-		gameLevel = 1;
-		updateProgress();
-		for (var i=tileColours.length;i>=0;i--)
-		{
-			var r = Math.round(Math.random()*i)
-			var c = tileColours[r];
-			tileColours.splice(r,1);
-			tileColours.push(c);
-		}
-		game.state.start('level');
-    },
-    
-    info: function()
-    {
-      
-    }
-}
 
 function drawBackground()
 {
-  game.stage.backgroundColor = "#fff6d5";
-  var graphics = game.add.graphics(0, 0);
-  graphics.beginFill(0xffffe7);
-  graphics.lineStyle(10, 0xFFEEAA, 1);
-  graphics.drawRect(boxMarginLeft, boxMarginTop, this.game.width-boxMarginLeft-boxMarginRight, this.game.height-boxMarginTop-boxMarginBottom);
+	game.stage.backgroundColor = "#fff6d5";
+	var graphics = game.add.graphics(0, 0);
+	graphics.beginFill(0xffffe7);
+	graphics.lineStyle(10, 0xFFEEAA, 1);
+	graphics.drawRect(boxMarginLeft, boxMarginTop, this.game.width-boxMarginLeft-boxMarginRight, this.game.height-boxMarginTop-boxMarginBottom);
 }
 
 function makeTile(x,y,iy,ix,width,height,colour,state)
 {
-  if (typeof state == 'undefined')
-    state == null;
+	if (typeof state == 'undefined')
+		state == null;
+	var bmd = this.game.add.bitmapData(width+3, height+3);
+	var ctx=bmd.context;
+	ctx.fillStyle=colour;
+	roundRect(ctx,0,0,width,height,5,true,false);
+	var mainTile = game.add.sprite(x,y,bmd);
+	mainTile.inputEnabled = true;
+	mainTile.events.onInputOver.add(function() {
+		hoverOverTile(this);
+	}, mainTile);
+	mainTile.events.onInputOut.add(function() {
+		hoverOverTileOut(this);
+	}, mainTile);
+	mainTile.events.onInputDown.add(function() {
+		tileDown(this.iy,this.ix,this.sprite,this.state);
+	}, {ix:ix,iy:iy,sprite:mainTile, state:state});
 
+	mainTile.events.onInputUp.add(function() {
+		tileUp(this.state);
+	}, {ix:ix,iy:iy,sprite:mainTile, state:state});
 
- 
-  var bmd = this.game.add.bitmapData(width+3, height+3);
-  var ctx=bmd.context;
-  ctx.fillStyle=colour;
-  roundRect(ctx,0,0,width,height,5,true,false);
-  var mainTile = game.add.sprite(x,y,bmd);
-  mainTile.inputEnabled = true;
-  mainTile.events.onInputOver.add(function() {
-    hoverOverTile(this);
-  }, mainTile);
-  mainTile.events.onInputOut.add(function() {
-    hoverOverTileOut(this);
-  }, mainTile);
-  mainTile.events.onInputDown.add(function() {
-    tileDown(this.iy,this.ix,this.sprite,this.state);
-  }, {ix:ix,iy:iy,sprite:mainTile, state:state});
-  
-  mainTile.events.onInputUp.add(function() {
-    tileUp(this.state);
-  }, {ix:ix,iy:iy,sprite:mainTile, state:state});
+	var shadowDrop = Math.floor(height/40);
+	var bmd = this.game.add.bitmapData(width+shadowDrop, height+shadowDrop);
+	var ctx=bmd.context;
+	ctx.fillstyle='0x111111';
+	roundRect(ctx,shadowDrop,shadowDrop,width,height,5,true,false);
+	var shadow = game.add.sprite(0, 0, bmd);
+	shadow.alpha = 0.0;
 
-  var shadowDrop = Math.floor(height/40);
-  var bmd = this.game.add.bitmapData(width+shadowDrop, height+shadowDrop);
-  var ctx=bmd.context;
-  ctx.fillstyle='0x111111';
-  roundRect(ctx,shadowDrop,shadowDrop,width,height,5,true,false);
-  var shadow = game.add.sprite(0, 0, bmd);
-  shadow.alpha = 0.0;
-  
-  var bmd = this.game.add.bitmapData(width+width/5, height+height/5);
-  var ctx=bmd.context;
-  ctx.strokeStyle='blue';
-  ctx.lineWidth=height/10;
-  roundRect(ctx,ctx.lineWidth/2,ctx.lineWidth/2,width,height,5,false,true);
-  var outline = game.add.sprite(-ctx.lineWidth/2,-ctx.lineWidth/2,bmd);
-  outline.visible = false;
-  
-  mainTile.addChild(shadow);
-  mainTile.addChild(outline);
-  mainTile.bringToTop();
-  
-  return mainTile;
+	var bmd = this.game.add.bitmapData(width+width/5, height+height/5);
+	var ctx=bmd.context;
+	ctx.strokeStyle='blue';
+	ctx.lineWidth=height/10;
+	roundRect(ctx,ctx.lineWidth/2,ctx.lineWidth/2,width,height,5,false,true);
+	var outline = game.add.sprite(-ctx.lineWidth/2,-ctx.lineWidth/2,bmd);
+	outline.visible = false;
+
+	mainTile.addChild(shadow);
+	mainTile.addChild(outline);
+	mainTile.bringToTop();
+
+	return mainTile;
 }
 
 function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
@@ -244,8 +395,7 @@ function tileDown(iy,ix,group,state)
 		game.sound.play('plock');
 		group.getChildAt(1).visible = !group.getChildAt(1).visible;
 		if (typeof state != 'undefined')
-		  if (typeof state.selected != 'undefined')
-			state.selected(iy,ix);
+			selected(state,iy,ix);
 	}
 }
 
@@ -272,49 +422,6 @@ function getMinDimension()
 	else
 	{
 	  return maxWidth;
-	}
-}
-
-var levelState = {
-    preload: function () {
-        drawBackground();
-		drawProgressBar();
-		playable = false;
-    },
-    create: function () {
-      	
-		 
-		if (progress < 1)
-		{
-			 
-			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: getMinDimension()/6+'px Sans', fill: '#111111' });
-			this.lText.anchor.setTo(0.5, 0.5);
-			this.time.events.add(700, function () { this.game.state.start('main') }, this);
-			this.lText.alpha = 0;
-			
-			var tween = game.add.tween(this.lText);
-			tween.to({alpha: 0.7}, 400);
-			tween.onComplete.add(this.tweenOut,this);
-			tween.start();
-		}
-		else
-		{
-			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: getMinDimension()/6+'px Sans', fill: '#111111' });
-			this.lText.anchor.setTo(0.5, 0.5);
-			this.time.events.add(1500, function () { this.game.state.start('menu') }, this);
-			this.lText.alpha = 0;
-			var tween = game.add.tween(this.lText);
-			tween.to({alpha: 0.7}, 800);
-			tween.onComplete.add(this.tweenOut,this);
-			tween.start();
-		}
-    },
-	
-	tweenOut: function()
-	{
-		var tween = game.add.tween(this.lText);
-		tween.to({alpha: 0}, 700);
-		tween.start();
 	}
 }
 
@@ -391,154 +498,63 @@ function updateProgress()
 	progress = Math.min(progress,1);
 }
 
-var mainState = {
-	preload: function () {
-		drawBackground();
-		this.progressBar = drawProgressBar();
-		playable = false;
-	},
-	create: function () {
-		var xOffset = -game.width;
-	    this.level = createLevel(gameLevel);
-	    this.tiles = makeLevel(this.level,xOffset,this);
-	    this.indexX = -1;
-	    this.indexY = -1;
-		
-		this.tilesGroup = game.add.group();
-		for (var i=0;i<this.tiles.length;i++)
-			for (var j=0;j<this.tiles[i].length;j++)
-				this.tilesGroup.add(this.tiles[i][j]);
-		this.tilesGroup.x +=xOffset;
-		
-		var tween = game.add.tween(this.tilesGroup);
-		tween.to({x: 0},400);
-		tween.onComplete.add(this.startPlay, this);
-		tween.start();
-	},
-
-	startPlay: function() {
-		playable = true;
-	},
-	
-	update: function () {
-	   
-	},
-	
-	pointerUp: function(x,y)
+function selected(state,iy,ix)
+{
+	if (state.indexX == -1)
 	{
-		var size = getTileSize(this.tiles);
-		var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
-		var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
-		
-		var x = x - originX;
-		x /= size;
-		x = Math.floor(x);
-		
-		var y = y - originY;
-		y /= size;
-		y = Math.floor(y);
-		
-		if (((x != this.indexX) || (y != this.indexY)) && (x >= 0) && (y >= 0) && (y<this.tiles.length))
-			if (x < this.tiles[y].length)
-			{
-				//this.tiles[y][x].getChildAt(1).visible = !this.tiles[y][x].getChildAt(1).visible;
-				//this.selected(y,x);
-			}
-	},
-	
-	selected: function(iy,ix)
-	{
-	    if (this.indexX == -1)
-	    {
-			this.indexX = ix;
-			this.indexY = iy;
-	    }
-	    else
-		{
-			if ((this.indexX != ix) || (this.indexY != iy))
-			{
-				var size = getTileSize(this.tiles);
-				var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
-				var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
-				
-				var depth = this.tiles[iy][ix].height/40;
-				var newX = this.tiles[this.indexY][this.indexX].x;
-				var newY = this.tiles[this.indexY][this.indexX].y;
-				
-				var x1 = this.tiles[iy][ix].x - originX;
-				x1 /= size;
-				x1 = Math.round(x1);
-				
-				var y1 = this.tiles[iy][ix].y - originY;
-				y1 /= size;
-				y1 = Math.round(y1);
-				
-				var x2 = newX - originX;
-				x2 /= size;
-				x2 = Math.round(x2);
-				
-				var y2 = newY - originY;
-				y2 /= size;
-				y2 = Math.round(Math.abs(y2));
-				
-				var lvlTmp = this.level[y2][x2];
-				this.level[y2][x2] = this.level[y1][x1];
-				this.level[y1][x1] = lvlTmp;
-			
-				this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
-				this.tiles[iy][ix].getChildAt(1).visible = false;
-				
-				this.tiles[this.indexY][this.indexX].x = originX+size*x1;
-				this.tiles[this.indexY][this.indexX].y = originY+size*y1;
-				this.tiles[iy][ix].x = originX+size*x2;
-				this.tiles[iy][ix].y = originY+size*y2;
-				console.log(this.level[0]);
-				//hoverOverTileOut(this.tiles[this.indexY][this.indexX]);
-				//hoverOverTileOut(this.tiles[iy][ix]);
-				if (checkLevel(this.level))
-				  this.levelComplete();
-			}
-			this.tiles[this.indexY][this.indexX].getChildAt(1).visible = false;
-			this.tiles[iy][ix].getChildAt(1).visible = false;
-			this.indexX = -1;
-			this.indexY = -1;
-	    }
-	},
-	
-	levelComplete: function()
-	{
-		for (var i=0;i<this.tiles.length;i++)
-			for (var j=0;j<this.tiles[i].length;j++)
-				this.tiles[i][j].getChildAt(1).visible = true;
-		playable = false;
-		this.time.events.add(1000, this.levelExitTween, this);
-		
-		var oldHeight = getProgressHeight(progress);
-		gameLevel++;
-		updateProgress();
-		var tween = game.add.tween(this.progressBar);
-		tween.to({
-			height: progress*(this.game.height-boxMarginTop-boxMarginBottom),
-			y: this.progressBar.y+oldHeight-getProgressHeight(progress)
-		}, 800);
-		this.progressBar.visible = true;
-		tween.start();
-		
-	},
-	
-	levelExitTween: function()
-	{
-		var tween = game.add.tween(this.tilesGroup);
-		tween.to({x: 2*game.width}, 400);
-		tween.onComplete.add(this.changeLevel,this);
-		tween.start();
-	},
-	
-	changeLevel: function()
-	{
-	    game.state.start('level');
+		state.indexX = ix;
+		state.indexY = iy;
 	}
-};
+	else
+	{
+		if ((state.indexX != ix) || (state.indexY != iy))
+		{
+			var size = getTileSize(state.tiles);
+			var originY = Math.round(boxCenterY()-(size*state.tiles.length)/2);
+			var originX = Math.round(boxCenterX()-(size*state.tiles[0].length)/2);
+			
+			var depth = state.tiles[iy][ix].height/40;
+			var newX = state.tiles[state.indexY][state.indexX].x;
+			var newY = state.tiles[state.indexY][state.indexX].y;
+			
+			var x1 = state.tiles[iy][ix].x - originX;
+			x1 /= size;
+			x1 = Math.round(x1);
+			
+			var y1 = state.tiles[iy][ix].y - originY;
+			y1 /= size;
+			y1 = Math.round(y1);
+			
+			var x2 = newX - originX;
+			x2 /= size;
+			x2 = Math.round(x2);
+			
+			var y2 = newY - originY;
+			y2 /= size;
+			y2 = Math.round(Math.abs(y2));
+			
+			var lvlTmp = state.level[y2][x2];
+			state.level[y2][x2] = state.level[y1][x1];
+			state.level[y1][x1] = lvlTmp;
+		
+			state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
+			state.tiles[iy][ix].getChildAt(1).visible = false;
+			
+			state.tiles[state.indexY][state.indexX].x = originX+size*x1;
+			state.tiles[state.indexY][state.indexX].y = originY+size*y1;
+			state.tiles[iy][ix].x = originX+size*x2;
+			state.tiles[iy][ix].y = originY+size*y2;
+			//hoverOverTileOut(state.tiles[state.indexY][state.indexX]);
+			//hoverOverTileOut(state.tiles[iy][ix]);
+			if (checkLevel(state.level))
+			  state.levelComplete();
+		}
+		state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
+		state.tiles[iy][ix].getChildAt(1).visible = false;
+		state.indexX = -1;
+		state.indexY = -1;
+	}
+}
 
 function createLevel(level)
 {
