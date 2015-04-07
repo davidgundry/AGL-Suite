@@ -15,9 +15,6 @@
 	create: function ()
 	{
 		game.state.start('menu');
-	},
-	update: function ()
-	{
 	}
 };
 
@@ -203,12 +200,7 @@ var mainState = {
 	{
 		playable = true;
 	},
-	
-	update: function ()
-	{
-	   
-	},
-	
+
 	pointerUp: function(x,y)
 	{
 		var size = getTileSize(this.tiles);
