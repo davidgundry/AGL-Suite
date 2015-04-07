@@ -1,5 +1,6 @@
 ﻿var loadState = {
-	preload: function (){
+	preload: function ()
+	{
 		drawBackground();
 		
 		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#999999' });
@@ -11,19 +12,23 @@
 
 		//game.load.audio('plock', 'assets/plock.wav');
 	},
-	create: function () {
+	create: function ()
+	{
 		game.state.start('menu');
 	},
-	update: function () {
+	update: function ()
+	{
 	}
 };
 
 var menuState = {
-    preload: function () {
+    preload: function ()
+	{
 		drawBackground();
 		playable = true;
     },
-    create: function () {
+    create: function ()
+	{
 		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#241c1c'];
 		this.level = randomLevel(5,7);
 		this.level[0][0] = 0;
@@ -68,7 +73,6 @@ var menuState = {
 		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#000000' });
 		this.titleText.anchor.setTo(0.5, 0.5);
 		this.createIntroTweens();
-		
     },
 	
 	createIntroTweens: function()
@@ -129,12 +133,14 @@ var menuState = {
 }
 
 var levelState = {
-    preload: function () {
+    preload: function ()
+	{
         drawBackground();
 		drawProgressBar();
 		playable = false;
     },
-    create: function () {
+    create: function ()
+	{
 		var textTime = 0;
 		if (progress < 1)
 		{
@@ -170,12 +176,14 @@ var levelState = {
 }
 
 var mainState = {
-	preload: function () {
+	preload: function ()
+	{
 		drawBackground();
 		this.progressBar = drawProgressBar();
 		playable = false;
 	},
-	create: function () {
+	create: function ()
+	{
 		var xOffset = -game.width;
 	    this.level = createLevel(gameLevel);
 	    this.tiles = makeLevel(this.level,xOffset,this);
@@ -191,11 +199,13 @@ var mainState = {
 		this.introTween();
 	},
 
-	startPlay: function() {
+	startPlay: function()
+	{
 		playable = true;
 	},
 	
-	update: function () {
+	update: function ()
+	{
 	   
 	},
 	
@@ -350,7 +360,8 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
 	return mainTile;
 }
 
-function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+function roundRect(ctx, x, y, width, height, radius, fill, stroke)
+{
   if (typeof stroke == "undefined" ) {
     stroke = true;
   }
