@@ -1,5 +1,5 @@
 ﻿var loadState = {
-	preload: function () {
+	preload: function (){
 		drawBackground();
 		var loadingLabel = game.add.text(game.world.centerX, 150, 'loading...', { font: '15px Courier New', fill: '#ffffff' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
@@ -44,7 +44,7 @@ var menuState = {
 					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
 					qText.anchor.setTo(0.5, 0.5);
 					this.tiles[i][j].alpha =1;
-					this.tiles[i][j].events.onInputDown.add(this.quit);
+					this.tiles[i][j].events.onInputDown.add(this.quit,this);
 				}
 				else if  ((j==5) && (i==4))
 				{
@@ -58,7 +58,7 @@ var menuState = {
 					var iText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
 					iText.anchor.setTo(0.5, 0.5);
 					this.tiles[i][j].alpha = 1;
-					this.tiles[i][j].events.onInputDown.add(this.info);
+					this.tiles[i][j].events.onInputDown.add(this.info,this);
 				}
 				this.tilesGroup.add(this.tiles[i][j]);
 				}
@@ -96,7 +96,8 @@ var menuState = {
     
     quit: function()
     {
-		game.state.start('preload');
+		this.createOutroTweens();
+		this.time.events.add(1000,function() {game.state.start('load')},this);
     },
     
     play: function()
@@ -117,7 +118,8 @@ var menuState = {
     
     info: function()
     {
-      
+		this.createOutroTweens();
+		this.time.events.add(1000,function() {game.state.start('load')},this);
     }
 }
 
@@ -128,30 +130,36 @@ var levelState = {
 		playable = false;
     },
     create: function () {
+		var textTime = 0;
 		if (progress < 1)
 		{
 			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: getMinDimension()/6+'px Sans', fill: '#111111' });
 			this.lText.anchor.setTo(0.5, 0.5);
-			this.time.events.add(700, function () { this.game.state.start('main') }, this);
+			this.time.events.add(800, function () { this.game.state.start('main') }, this);
 		}
 		else
 		{
 			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: getMinDimension()/6+'px Sans', fill: '#111111' });
 			this.lText.anchor.setTo(0.5, 0.5);
-			this.time.events.add(1500, function () { this.game.state.start('menu') }, this);
+			this.time.events.add(1800, function () { this.game.state.start('menu') }, this);
+			textTime = 1000;
 		}
-		
+		this.tweenIn();
+		this.time.events.add(textTime+400,function() {this.tweenOut();},this);
+    },
+	
+	tweenIn: function()
+	{
 		this.lText.alpha = 0;
 		var tween = game.add.tween(this.lText);
-		tween.to({alpha: 0.7}, 800);
-		tween.onComplete.add(this.tweenOut,this);
+		tween.to({alpha: 0.7}, 400);
 		tween.start();
-    },
+	},
 	
 	tweenOut: function()
 	{
 		var tween = game.add.tween(this.lText);
-		tween.to({alpha: 0}, 700);
+		tween.to({alpha: 0}, 400);
 		tween.start();
 	}
 }
