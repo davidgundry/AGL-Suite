@@ -1,25 +1,10 @@
-﻿var preloadState = {
-	preload: function () {
-		game.stage.backgroundColor = "#fff6d5";
-	},
-	create: function () {
-		game.state.start('load');
-	}
-}
-
-var loadState = {
+﻿var loadState = {
 	preload: function () {
 		drawBackground();
-
 		var loadingLabel = game.add.text(game.world.centerX, 150, 'loading...', { font: '15px Courier New', fill: '#ffffff' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
-		//var loadingBar = game.add.sprite(game.world.centerX, 200, 'loadingBar');
-		//loadingBar.anchor.setTo(0.5, 0.5);
-		//game.load.setPreloadSprite(loadingBar);
-		
-		
-		//game.load.audio('plock', 'assets/plock.wav');
 
+		//game.load.audio('plock', 'assets/plock.wav');
 	},
 	create: function () {
 		game.state.start('menu');
@@ -633,7 +618,6 @@ var boxMarginBottom = Math.round(game.height/10);
 
 console.log(boxMarginLeft);
 
-game.state.add('preload', preloadState);
 game.state.add('load', loadState);
 game.state.add('main', mainState);
 game.state.add('level', levelState);
@@ -642,4 +626,4 @@ game.state.add('menu', menuState);
 var gameLevel = 0;
 var progress = 0;
 var totalLevels = 2;
-game.state.start('preload');
+game.state.start('load');
