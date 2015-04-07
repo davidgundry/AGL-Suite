@@ -24,6 +24,18 @@ function boxCenterY()
     return ((game.world.height-boxMarginBottom)+boxMarginTop)/2
 }
 
+function randomLevel(height,width)
+{
+	var level = [];
+	for (var i=0;i<height;i++)
+	{
+		level.push([]);
+		for (var j=0;j<width;j++)
+			level[i].push(Math.floor(Math.random()*tileColours.length));
+	}
+	return level;
+}
+
 var menuState = {
     preload: function () {
 		drawBackground();
@@ -31,78 +43,65 @@ var menuState = {
     },
     create: function () {
 		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#241c1c'];
-		var maxWidth = Math.floor(game.world.width-paddingLeft-paddingRight);
-		var maxHeight = Math.floor(game.world.height-paddingTop-paddingBottom);
+		this.level = randomLevel(5,7);
+		this.level[0][0] = 0;
+		this.level[4][5] = 1;
+		this.level[4][6] = 2
+	    this.tiles = makeLevel(this.level,0,this);
+	    this.indexX = -1;
+	    this.indexY = -1;
 		
-		if (maxWidth/7 > maxHeight/5)
-		{
-		  var minDimension = maxHeight;
-		  var size = maxHeight/5;
-		}
-		else
-		{
-		  var minDimension = maxWidth;
-		  var size = maxWidth/7;
-		}
-		
-		var originX = Math.round(boxCenterX()-(size*7)/2);
-		var originY = Math.round(boxCenterY()-(size*5)/2);
-		
-		var tilePadding = Math.round(size/10);
-		size = Math.round(size * (9/10));
+		var size = getTileSize(this.tiles);
 		
 		this.tilesGroup = game.add.group();
+		for (var i=0;i<this.tiles.length;i++)
+			for (var j=0;j<this.tiles[i].length;j++)
+			{
+				this.tiles[i][j].alpha = 0.3;
+			  
+				if ((j==0) && (i==0))
+				{
+					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
+					qText.anchor.setTo(0.5, 0.5);
+					this.tiles[i][j].alpha =1;
+					this.tiles[i][j].events.onInputDown.add(this.quit);
+				}
+				else if  ((j==5) && (i==4))
+				{
+					var pText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px Sans', fill: '#222222' }));
+					pText.anchor.setTo(0.5, 0.5);
+					this.tiles[i][j].alpha = 1;
+					this.tiles[i][j].events.onInputDown.add(this.play);
+				}
+				else if ((j==6) && (i==4))
+				{
+					var iText = this.tiles[i][j].addChild(game.add.text(+size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
+					iText.anchor.setTo(0.5, 0.5);
+					this.tiles[i][j].alpha = 1;
+					this.tiles[i][j].events.onInputDown.add(this.info);
+				}
+				this.tilesGroup.add(this.tiles[i][j]);
+				}
+
+		  
+		this.createIntroTweens();
 		
-		for (var i=0;i<7;i++)
-		  for (var j=0;j<5;j++)
-		  {
-			  var tileColour = Math.floor(Math.random()*5);
-			  if ((i==0) && (j==0))
-			tileColour = 0;
-			  else if  ((i==5) && (j==4))
-			tileColour = 1;
-			  else if ((i==6) && (j==4))
-			tileColour = 2;
-			  
-			  var s = makeTile(i*size+i*tilePadding+originX,j*size+j*tilePadding+originY,j,i,size,size,tileColours[tileColour],this);
-			  s.alpha = 0.3;
-			  
-			  if ((i==0) && (j==0))
-			  {
-			var qText = s.addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px Sans', fill: '#222222' }));
-			qText.anchor.setTo(0.5, 0.5);
-			s.alpha =1;
-			s.events.onInputDown.add(this.quit);
-			  }
-			  else if  ((i==5) && (j==4))
-			  {
-			var pText = s.addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px Sans', fill: '#222222' }));
-			pText.anchor.setTo(0.5, 0.5);
-			s.alpha = 1;
-			s.events.onInputDown.add(this.play);
-			  }
-			  else if ((i==6) && (j==4))
-			  {
-			var iText = s.addChild(game.add.text(+size/2,size/2, 'info', { font: size/3+'px Sans', fill: '#222222' }));
-			iText.anchor.setTo(0.5, 0.5);
-			s.alpha = 1;
-			s.events.onInputDown.add(this.info);
-			  }
-			this.tilesGroup.add(s);
-		  }
+    },
+	
+	createIntroTweens: function()
+	{
 		this.tilesGroup.alpha = -0.2;
 		var tween = game.add.tween(this.tilesGroup);
 		tween.to({alpha: 1},2000);
 		tween.start();
 		 
-		var titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: minDimension/4+'px Sans', fill: '#000000' });
+		var titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Sans', fill: '#000000' });
 		titleText.anchor.setTo(0.5, 0.5);
 		titleText.alpha= 0;
 		var texttween = game.add.tween(titleText);
 		texttween.to({alpha: 0.8},700);
 		texttween.start();
-		
-    },
+	},
     
     quit: function()
     {
@@ -261,6 +260,21 @@ function tileUp(state)
 	}
 }
 
+function getMinDimension()
+{
+	var maxWidth = Math.floor(game.world.width-paddingLeft-paddingRight);
+	var maxHeight = Math.floor(game.world.height-paddingTop-paddingBottom);
+	
+	if (maxWidth/7 > maxHeight/5)
+	{
+	  return maxHeight;
+	}
+	else
+	{
+	  return maxWidth;
+	}
+}
+
 var levelState = {
     preload: function () {
         drawBackground();
@@ -268,22 +282,12 @@ var levelState = {
 		playable = false;
     },
     create: function () {
-      	var maxWidth = Math.floor(game.world.width-paddingLeft-paddingRight);
-		var maxHeight = Math.floor(game.world.height-paddingTop-paddingBottom);
-		
-		if (maxWidth/7 > maxHeight/5)
-		{
-		  var minDimension = maxHeight;
-		}
-		else
-		{
-		  var minDimension = maxWidth;
-		}
+      	
 		 
 		if (progress < 1)
 		{
 			 
-			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: minDimension/6+'px Sans', fill: '#111111' });
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: getMinDimension()/6+'px Sans', fill: '#111111' });
 			this.lText.anchor.setTo(0.5, 0.5);
 			this.time.events.add(700, function () { this.game.state.start('main') }, this);
 			this.lText.alpha = 0;
@@ -295,7 +299,7 @@ var levelState = {
 		}
 		else
 		{
-			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: minDimension/6+'px Sans', fill: '#111111' });
+			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Well Done!', { font: getMinDimension()/6+'px Sans', fill: '#111111' });
 			this.lText.anchor.setTo(0.5, 0.5);
 			this.time.events.add(1500, function () { this.game.state.start('menu') }, this);
 			this.lText.alpha = 0;
