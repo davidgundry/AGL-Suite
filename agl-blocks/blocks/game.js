@@ -330,7 +330,7 @@ function getTileSize(tiles)
       var size = maxWidth/tiles[0].length;
     }
     
-    return size;
+    return Math.min(maxBlockSize,size);
 }
 
 function makeLevel(tiles,xOffset,state)
@@ -615,6 +615,8 @@ var boxMarginLeft = Math.round(game.width/10);
 var boxMarginRight = Math.round(game.width/10);
 var boxMarginTop = Math.round(game.height/10);
 var boxMarginBottom = Math.round(game.height/10);
+
+var maxBlockSize = Math.min(Math.round(game.width/3),Math.round(game.height/3));
 
 console.log(boxMarginLeft);
 
