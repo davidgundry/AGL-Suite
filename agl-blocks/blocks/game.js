@@ -2,10 +2,10 @@
 	preload: function (){
 		drawBackground();
 		
-		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px '+defaultFont, fill: '#333333' });
+		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#999999' });
 		this.titleText.anchor.setTo(0.5, 0.5);
 		
-		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#333333' });
+		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#999999' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
 		
 
@@ -45,7 +45,7 @@ var menuState = {
 				{
 					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+defaultFont, fill: '#222222' }));
 					qText.anchor.setTo(0.5, 0.5);
-					this.tiles[i][j].alpha =1;
+					this.tiles[i][j].alpha = 1;
 					this.tiles[i][j].events.onInputDown.add(this.quit,this);
 				}
 				else if  ((j==5) && (i==4))
@@ -65,7 +65,7 @@ var menuState = {
 				this.tilesGroup.add(this.tiles[i][j]);
 				}
 
-		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px '+defaultFont, fill: '#000000' });
+		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#000000' });
 		this.titleText.anchor.setTo(0.5, 0.5);
 		this.createIntroTweens();
 		
