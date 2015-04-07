@@ -9,7 +9,6 @@
 		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#999999' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
 		
-
 		//game.load.audio('plock', 'assets/plock.wav');
 	},
 	create: function ()
@@ -34,7 +33,9 @@ var menuState = {
 	    this.tiles = makeLevel(this.level,0,this);
 	    this.indexX = -1;
 	    this.indexY = -1;
-			
+		this.swapX = -1;
+		this.swapY = -1;
+		
 		var size = getTileSize(this.tiles)*(9/10);
 		
 		this.tilesGroup = game.add.group();
@@ -48,6 +49,7 @@ var menuState = {
 					var qText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+defaultFont, fill: '#222222' }));
 					qText.anchor.setTo(0.5, 0.5);
 					this.tiles[i][j].alpha = 1;
+					this.tiles[i][j].events.onInputDown.removeAll();
 					this.tiles[i][j].events.onInputDown.add(this.quit,this);
 				}
 				else if  ((j==5) && (i==4))
@@ -55,6 +57,7 @@ var menuState = {
 					var pText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'play', { font: size/3+'px '+defaultFont, fill: '#222222' }));
 					this.tiles[i][j].alpha = 1;
 					pText.anchor.setTo(0.5, 0.5);
+					this.tiles[i][j].events.onInputDown.removeAll();
 					this.tiles[i][j].events.onInputDown.add(this.play,this);
 				}
 				else if ((j==6) && (i==4))
@@ -62,6 +65,7 @@ var menuState = {
 					var iText = this.tiles[i][j].addChild(game.add.text(size/2,size/2, 'info', { font: size/3+'px '+defaultFont, fill: '#222222' }));
 					iText.anchor.setTo(0.5, 0.5);
 					this.tiles[i][j].alpha = 1;
+					this.tiles[i][j].events.onInputDown.removeAll();
 					this.tiles[i][j].events.onInputDown.add(this.info,this);
 				}
 				this.tilesGroup.add(this.tiles[i][j]);
@@ -71,6 +75,8 @@ var menuState = {
 		this.titleText.anchor.setTo(0.5, 0.5);
 		this.createIntroTweens();
     },
+	
+	update: update,
 	
 	createIntroTweens: function()
 	{
@@ -179,6 +185,7 @@ var mainState = {
 		this.progressBar = drawProgressBar();
 		playable = false;
 	},
+	
 	create: function ()
 	{
 		var xOffset = -game.width;
@@ -186,6 +193,8 @@ var mainState = {
 	    this.tiles = makeLevel(this.level,xOffset,this);
 	    this.indexX = -1;
 	    this.indexY = -1;
+		this.swapX = -1;
+		this.swapY = -1;
 		
 		this.tilesGroup = game.add.group();
 		for (var i=0;i<this.tiles.length;i++)
@@ -195,6 +204,8 @@ var mainState = {
 		
 		this.introTween();
 	},
+	
+	update: update,
 
 	startPlay: function()
 	{
@@ -203,20 +214,10 @@ var mainState = {
 
 	pointerUp: function(x,y)
 	{
-		var size = getTileSize(this.tiles);
-		var originY = Math.round(boxCenterY()-(size*this.tiles.length)/2);
-		var originX = Math.round(boxCenterX()-(size*this.tiles[0].length)/2);
+		var tileCoord = pointToTile(x,y,this.tiles);
 		
-		var x = x - originX;
-		x /= size;
-		x = Math.floor(x);
-		
-		var y = y - originY;
-		y /= size;
-		y = Math.floor(y);
-		
-		if (((x != this.indexX) || (y != this.indexY)) && (x >= 0) && (y >= 0) && (y<this.tiles.length))
-			if (x < this.tiles[y].length)
+		if (((tileCoord.x != this.indexX) || (tileCoord.y != this.indexY)) && (tileCoord.x >= 0) && (tileCoord.y >= 0) && (tileCoord.y<this.tiles.length))
+			if (x < this.tiles[tileCoord.y].length)
 			{
 				//this.tiles[y][x].getChildAt(1).visible = !this.tiles[y][x].getChildAt(1).visible;
 				//selected(state,y,x);
@@ -273,6 +274,65 @@ var mainState = {
 	}
 };
 
+function update()
+{
+	if (this.indexX != -1)
+	{
+		if (this.swapX == -1)
+		{
+			var tileCoord = pointToTile(game.input.x,game.input.y,this.tiles);
+			if (tileCoord != null)
+			{
+				swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
+				this.swapX = tileCoord.x;
+				this.swapY = tileCoord.y;
+			}
+		} else
+		{
+			var tileCoord = pointToTile(game.input.x,game.input.y,this.tiles);
+			if (tileCoord != null)
+			{
+				if ((this.swapX != tileCoord.x) || (this.swapY != tileCoord.y))
+				{
+					if (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4)))
+					{}
+					else
+					{
+						swap(this,this.indexX,this.indexY,this.swapX,this.swapY);
+						swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
+						this.tiles[this.swapY][this.swapX].getChildAt(1).visible = false;
+						this.swapX = tileCoord.x;
+						this.swapY = tileCoord.y;
+					}
+				}
+			}
+			this.tiles[this.indexY][this.indexX].getChildAt(1).visible = true;
+			this.tiles[this.swapY][this.swapX].getChildAt(1).visible = true;
+		}
+		//this.tiles[this.indexY][this.indexX].x = game.input.x;
+		//this.tiles[this.indexY][this.indexX].y = game.input.y;
+	}
+}
+
+function pointToTile(x,y,tiles)
+{
+	var size = getTileSize(tiles);
+	var originY = Math.round(boxCenterY()-(size*tiles.length)/2);
+	var originX = Math.round(boxCenterX()-(size*tiles[0].length)/2);
+	
+	x = x - originX;
+	x /= size;
+	x = Math.floor(x);
+	
+	y = y - originY;
+	y /= size;
+	y = Math.floor(y);
+	
+	if ((x>=0) && (x < tiles[0].length))
+		if ((y>=0) && (y < tiles.length))
+			return {x:x,y:y};
+	return null;
+}
 
 function boxCenterX()
 {
@@ -329,7 +389,7 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
 		tileUp(this.state);
 	}, {ix:ix,iy:iy,sprite:mainTile, state:state});
 
-	var shadowDrop = Math.floor(height/40);
+	var shadowDrop = Math.floor(height*dropDepth);
 	var bmd = this.game.add.bitmapData(width+shadowDrop, height+shadowDrop);
 	var ctx=bmd.context;
 	ctx.fillstyle='0x111111';
@@ -383,7 +443,7 @@ function hoverOverTile(sprite)
 {
 	if (playable)
 	{
-		var depth = sprite.height/40;
+		var depth = sprite.height*dropDepth;
 		sprite.y +=depth;
 		sprite.x +=depth;
 		sprite.getChildAt(0).y = -depth;
@@ -395,7 +455,7 @@ function hoverOverTileOut(sprite)
 {
 	if (playable)
 	{
-		var depth = sprite.height/40;
+		var depth = sprite.height*dropDepth;
 		sprite.y -= depth;
 		sprite.x -= depth;
 		sprite.getChildAt(0).y = 0;
@@ -407,6 +467,8 @@ function tileDown(iy,ix,group,state)
 {
 	if (playable)
 	{
+		state.swapX = -1;
+		state.swapY = -1;
 		game.sound.play('plock');
 		group.getChildAt(1).visible = !group.getChildAt(1).visible;
 		if (typeof state != 'undefined')
@@ -513,6 +575,50 @@ function updateProgress()
 	progress = Math.min(progress,1);
 }
 
+function swap(state,indexX,indexY,ix,iy)
+{
+	if ((state.indexX != ix) || (state.indexY != iy))
+	{
+		var size = getTileSize(state.tiles);
+		var tilePadding = size/10;
+		var originY = Math.round(boxCenterY()-(size*state.tiles.length)/2);
+		var originX = Math.round(boxCenterX()-(size*state.tiles[0].length)/2);
+		
+		var depth = state.tiles[iy][ix].height*dropDepth;
+		var newX = state.tiles[state.indexY][state.indexX].x;
+		var newY = state.tiles[state.indexY][state.indexX].y;
+		
+		var x1 = state.tiles[iy][ix].x - originX;
+		x1 /= size;
+		x1 = Math.round(x1);
+		
+		var y1 = state.tiles[iy][ix].y - originY;
+		y1 /= size;
+		y1 = Math.round(y1);
+		
+		var x2 = newX - originX;
+		x2 /= size;
+		x2 = Math.round(x2);
+		
+		var y2 = newY - originY;
+		y2 /= size;
+		y2 = Math.round(Math.abs(y2));
+		
+		var lvlTmp = state.level[y2][x2];
+		state.level[y2][x2] = state.level[y1][x1];
+		state.level[y1][x1] = lvlTmp;
+		
+		state.tiles[state.indexY][state.indexX].x = originX+size*x1+tilePadding/2;
+		state.tiles[state.indexY][state.indexX].y = originY+size*y1+tilePadding/2;
+		state.tiles[iy][ix].x = originX+size*x2+tilePadding/2;
+		state.tiles[iy][ix].y = originY+size*y2+tilePadding/2;
+		
+		var tmpTile = state.tiles[state.indexY][state.indexX];
+		state.tiles[state.indexY][state.indexX] = state.tiles[iy][ix];
+		state.tiles[iy][ix] = tmpTile;
+	}
+}
+
 function selected(state,iy,ix)
 {
 	if (state.indexX == -1)
@@ -522,48 +628,9 @@ function selected(state,iy,ix)
 	}
 	else
 	{
-		if ((state.indexX != ix) || (state.indexY != iy))
-		{
-			var size = getTileSize(state.tiles);
-			var originY = Math.round(boxCenterY()-(size*state.tiles.length)/2);
-			var originX = Math.round(boxCenterX()-(size*state.tiles[0].length)/2);
-			
-			var depth = state.tiles[iy][ix].height/40;
-			var newX = state.tiles[state.indexY][state.indexX].x;
-			var newY = state.tiles[state.indexY][state.indexX].y;
-			
-			var x1 = state.tiles[iy][ix].x - originX;
-			x1 /= size;
-			x1 = Math.round(x1);
-			
-			var y1 = state.tiles[iy][ix].y - originY;
-			y1 /= size;
-			y1 = Math.round(y1);
-			
-			var x2 = newX - originX;
-			x2 /= size;
-			x2 = Math.round(x2);
-			
-			var y2 = newY - originY;
-			y2 /= size;
-			y2 = Math.round(Math.abs(y2));
-			
-			var lvlTmp = state.level[y2][x2];
-			state.level[y2][x2] = state.level[y1][x1];
-			state.level[y1][x1] = lvlTmp;
-		
-			state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
-			state.tiles[iy][ix].getChildAt(1).visible = false;
-			
-			state.tiles[state.indexY][state.indexX].x = originX+size*x1;
-			state.tiles[state.indexY][state.indexX].y = originY+size*y1;
-			state.tiles[iy][ix].x = originX+size*x2;
-			state.tiles[iy][ix].y = originY+size*y2;
-			//hoverOverTileOut(state.tiles[state.indexY][state.indexX]);
-			//hoverOverTileOut(state.tiles[iy][ix]);
-			if (checkLevel(state.level))
-			  state.levelComplete();
-		}
+		swap(state,this.indexX,this.indexY,ix,iy);
+		if (checkLevel(state.level))
+		  state.levelComplete();
 		state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
 		state.tiles[iy][ix].getChildAt(1).visible = false;
 		state.indexX = -1;
@@ -651,6 +718,7 @@ var boxMarginBottom = Math.round(game.height/10);
 
 var maxBlockSize = Math.min(Math.round(game.width/3),Math.round(game.height/3));
 var defaultFont = 'Sans-Serif';
+var dropDepth = 1/40;
 
 var gameLevel = 0;
 var progress = 0;
