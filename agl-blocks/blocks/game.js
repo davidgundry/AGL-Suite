@@ -23,6 +23,7 @@ var menuState = {
 		drawBackground();
 		playable = true;
 		this.tileAlpha = 0.3;
+		this.menu = true;
     },
     create: function ()
 	{
@@ -246,24 +247,12 @@ var mainState = {
 		this.introTween();
 	},
 	
-	//update: update,
+	update: update,
 
 	startPlay: function()
 	{
 		playable = true;
 		recordEvent("started");
-	},
-
-	pointerUp: function(x,y)
-	{
-		var tileCoord = pointToTile(x,y,this.tiles);
-		
-		if (((tileCoord.x != this.indexX) || (tileCoord.y != this.indexY)) && (tileCoord.x >= 0) && (tileCoord.y >= 0) && (tileCoord.y<this.tiles.length))
-			if (x < this.tiles[tileCoord.y].length)
-			{
-				//this.tiles[y][x].getChildAt(1).visible = !this.tiles[y][x].getChildAt(1).visible;
-				//selected(state,y,x);
-			}
 	},
 	
 	levelComplete: function()
@@ -322,61 +311,54 @@ var mainState = {
 
 function update()
 {
-	if (this.indexX != -1)
+	if (dragging)
 	{
-		if (this.swapX == -1)
+		if (this.indexX != -1)
 		{
-			var tileCoord = pointToTile(game.input.x,game.input.y,this.tiles);
-			if (tileCoord != null)
+			if (this.swapX == -1)
 			{
-				swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
-				this.swapX = tileCoord.x;
-				this.swapY = tileCoord.y;
-			}
-		} else
-		{
-			var tileCoord = pointToTile(game.input.x,game.input.y,this.tiles);
-			if (tileCoord != null)
-			{
-				if ((this.swapX != tileCoord.x) || (this.swapY != tileCoord.y))
+				var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
+				if (tileCoord != null)
 				{
-					if (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4)))
-					{}
-					else
+					swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
+					this.swapX = this.indexX;
+					this.swapY = this.indexY;
+				}
+			} else
+			{
+				var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
+				if (tileCoord != null)
+				{
+					if ((this.swapX != tileCoord.x) || (this.swapY != tileCoord.y))
 					{
-						swap(this,this.indexX,this.indexY,this.swapX,this.swapY);
-						swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
-						this.tiles[this.swapY][this.swapX].getChildAt(1).visible = false;
-						this.swapX = tileCoord.x;
-						this.swapY = tileCoord.y;
+						if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
+						{}
+						else
+						{
+							swap(this,this.indexX,this.indexY,this.swapX,this.swapY);
+							swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
+							this.tiles[this.swapY][this.swapX].getChildAt(1).visible = false;
+							this.swapX = this.indexX;
+							this.swapY = this.indexY;
+						}
 					}
 				}
+				this.tiles[this.indexY][this.indexX].getChildAt(1).visible = true;
+				this.tiles[this.swapY][this.swapX].getChildAt(1).visible = true;
 			}
-			this.tiles[this.indexY][this.indexX].getChildAt(1).visible = true;
-			this.tiles[this.swapY][this.swapX].getChildAt(1).visible = true;
 		}
-		//this.tiles[this.indexY][this.indexX].x = game.input.x;
-		//this.tiles[this.indexY][this.indexX].y = game.input.y;
 	}
 }
 
-function pointToTile(x,y,tiles)
+function pointToGridIndex(x,y,tiles)
 {
-	var size = getTileSize(tiles);
-	var originY = Math.round(boxCenterY()-(size*tiles.length)/2);
-	var originX = Math.round(boxCenterX()-(size*tiles[0].length)/2);
-	
-	x = x - originX;
-	x /= size;
-	x = Math.floor(x);
-	
-	y = y - originY;
-	y /= size;
-	y = Math.floor(y);
-	
-	if ((x>=0) && (x < tiles[0].length))
-		if ((y>=0) && (y < tiles.length))
-			return {x:x,y:y};
+	for (var i=0;i<tiles.length;i++)
+		for (var j=0;j<tiles[i].length;j++)
+		{
+			var area = new Phaser.Rectangle(tiles[i][j].x, tiles[i][j].y, tiles[i][j].width, tiles[i][j].height);
+			if (area.contains(x, y))
+				return {x:j,y:i};
+		}
 	return null;
 }
 
@@ -418,28 +400,30 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
 	var bmd = this.game.add.bitmapData(width+3, height+3);
 	var ctx=bmd.context;
 	ctx.fillStyle=colour;
-	roundRect(ctx,0,0,width,height,5,true,false);
+	roundRect(ctx,0,0,width,height,width/8,true,false);
 	var mainTile = game.add.sprite(x,y,bmd);
 	mainTile.inputEnabled = true;
 	mainTile.events.onInputOver.add(function() {
 		hoverOverTile(this);
 	}, mainTile);
+	
 	mainTile.events.onInputOut.add(function() {
 		hoverOverTileOut(this);
 	}, mainTile);
+	
 	mainTile.events.onInputDown.add(function() {
 		tileDown(this.iy,this.ix,this.sprite,this.state);
 	}, {ix:ix,iy:iy,sprite:mainTile, state:state});
 
 	mainTile.events.onInputUp.add(function() {
-		tileUp(this.state);
+		tileUp(iy,ix,this.sprite,this.state);
 	}, {ix:ix,iy:iy,sprite:mainTile, state:state});
 
 	var shadowDrop = Math.floor(height*dropDepth);
 	var bmd = this.game.add.bitmapData(width+shadowDrop, height+shadowDrop);
 	var ctx=bmd.context;
 	ctx.fillstyle='0x111111';
-	roundRect(ctx,shadowDrop,shadowDrop,width,height,5,true,false);
+	roundRect(ctx,shadowDrop,shadowDrop,width,height,width/8,true,false);
 	var shadow = game.add.sprite(0, 0, bmd);
 	shadow.alpha = 0.0;
 
@@ -447,13 +431,16 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
 	var ctx=bmd.context;
 	ctx.strokeStyle='blue';
 	ctx.lineWidth=height/10;
-	roundRect(ctx,ctx.lineWidth/2,ctx.lineWidth/2,width,height,5,false,true);
+	roundRect(ctx,ctx.lineWidth/2,ctx.lineWidth/2,width,height,width/8,false,true);
 	var outline = game.add.sprite(-ctx.lineWidth/2,-ctx.lineWidth/2,bmd);
 	outline.visible = false;
 
 	mainTile.addChild(shadow);
 	mainTile.addChild(outline);
 	mainTile.bringToTop();
+	
+	mainTile.gridX = ix;
+	mainTile.gridY = iy;
 
 	return mainTile;
 }
@@ -462,9 +449,6 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke)
 {
   if (typeof stroke == "undefined" ) {
     stroke = true;
-  }
-  if (typeof radius === "undefined") {
-    radius = 5;
   }
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -513,25 +497,41 @@ function tileDown(iy,ix,group,state)
 {
 	if (playable)
 	{
+		dragging = true;
 		state.swapX = -1;
 		state.swapY = -1;
 		game.sound.play('plock');
-		group.getChildAt(1).visible = !group.getChildAt(1).visible;
+		group.getChildAt(1).visible = true;
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
 	}
 }
 
-function tileUp(state)
+function tileUp(iy,ix,group,state)
 {
 	if (playable)
 	{
+		dragging = false;
+		group.getChildAt(1).visible = false;
 		game.sound.play('plock');
 		if (typeof state != 'undefined')
-		  if (typeof state.selected != 'undefined')
-			state.pointerUp(game.input.x,game.input.y);
+			selected(state,iy,ix);
+			//pointerUp(state,game.input.x,game.input.y);
 	}
 }
+	/*
+function pointerUp(state,x,y)
+{
+	var tileCoord = pointToGridIndex(x,y,state.tiles);
+	
+	if (((tileCoord.x != state.indexX) || (tileCoord.y != state.indexY)) && (tileCoord.x >= 0) && (tileCoord.y >= 0) && (tileCoord.y<state.tiles.length))
+		if (x < state.tiles[tileCoord.y].length)
+		{
+			state.tiles[y][x].getChildAt(1).visible = !state.tiles[y][x].getChildAt(1).visible;
+			selected(state,y,x);
+		}
+}*/
+
 
 function getMinDimension()
 {
@@ -621,6 +621,13 @@ function updateProgress()
 	progress = Math.min(progress,1);
 }
 
+function tileToGridIndex(tile)
+{
+	if (tile == null)
+		return null;
+	return {x:tile.gridX,y:tile.gridY};	
+}
+
 function swap(state,indexX,indexY,ix,iy)
 {
 	if ((state.indexX != ix) || (state.indexY != iy))
@@ -633,7 +640,7 @@ function swap(state,indexX,indexY,ix,iy)
 		var depth = state.tiles[iy][ix].height*dropDepth;
 		var newX = state.tiles[state.indexY][state.indexX].x;
 		var newY = state.tiles[state.indexY][state.indexX].y;
-		
+	
 		var x1 = state.tiles[iy][ix].x - originX;
 		x1 /= size;
 		x1 = Math.round(x1);
@@ -845,6 +852,8 @@ var gameLevel = 0;
 var progress = 0;
 var tileColours = [];
 var playable = false;
+
+var dragging = false;
 
 game.state.add('load', loadState);
 game.state.add('main', mainState);
