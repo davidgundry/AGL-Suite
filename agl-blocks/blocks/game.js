@@ -6,7 +6,7 @@
 		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#999999' });
 		this.titleText.anchor.setTo(0.5, 0.5);
 		
-		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#999999' });
+		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#cccccc' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
 		
 		//game.load.audio('plock', 'assets/plock.wav');
@@ -22,10 +22,13 @@ var menuState = {
 	{
 		drawBackground();
 		playable = true;
+		this.tileAlpha = 0.3;
     },
     create: function ()
 	{
-		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#241c1c'];
+		recordEvent("startedmenu")
+		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#aaaaaa','#ccaa33'];
+		
 		this.level = randomLevel(5,7);
 		this.level[0][0] = 0;
 		this.level[4][5] = 1;
@@ -42,7 +45,7 @@ var menuState = {
 		for (var i=0;i<this.tiles.length;i++)
 			for (var j=0;j<this.tiles[i].length;j++)
 			{
-				this.tiles[i][j].alpha = 0.3;
+				this.tiles[i][j].alpha = this.tileAlpha;
 			  
 				if ((j==0) && (i==0))
 				{
@@ -74,7 +77,29 @@ var menuState = {
 		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#000000' });
 		this.titleText.anchor.setTo(0.5, 0.5);
 		this.createIntroTweens();
-    },
+		
+		this.time.events.add(Math.random()*1000+500,function() {this.pretty();},this);
+		this.time.events.add(Math.random()*2000+500,function() {this.pretty();},this);
+
+		},
+	
+	pretty: function()
+	{
+		var y = Math.round(Math.random()*(this.tiles.length-1));
+		var x = Math.round(Math.random()*(this.tiles[y].length-1));
+		if (((y==0) && (x==0)) || ((y==5) && (x==4)) || ((y==6) && (x==4))) {}
+		else
+		{
+			this.tiles[y][x].alpha = 0.1+Math.random()*0.15;
+			this.time.events.add(100+Math.random()*200,function() {this.depretty(y,x);},this)
+		}
+		this.time.events.add(Math.random()*2000+500,function() {this.pretty();},this)
+	},
+	
+	depretty: function(oldY,oldX)
+	{
+		this.tiles[oldY][oldX].alpha = this.tileAlpha;
+	},
 	
 	update: update,
 	
@@ -113,10 +138,12 @@ var menuState = {
     
     play: function()
     {
+		recordEvent("play")
 		playable = false;
 		this.createOutroTweens();
 		gameLevel = 1;
 		updateProgress();
+		
 		for (var i=tileColours.length;i>=0;i--)
 		{
 			var r = Math.round(Math.random()*i)
@@ -178,6 +205,19 @@ var levelState = {
 	}
 }
 
+function recordEvent(description)
+{
+	if (sessionStorage.events)
+		var events = JSON.parse(sessionStorage.events); 
+	else
+		var events = []
+		
+	var time = Date.now();
+	events.push({t:time,d:description,level:gameLevel});
+	sessionStorage.events = JSON.stringify(events)
+	console.log(time + ": " + description);
+}
+
 var mainState = {
 	preload: function ()
 	{
@@ -188,6 +228,7 @@ var mainState = {
 	
 	create: function ()
 	{
+		recordEvent("createdlevel");
 		var xOffset = -game.width;
 	    this.level = createLevel(gameLevel);
 	    this.tiles = makeLevel(this.level,xOffset,this);
@@ -205,11 +246,12 @@ var mainState = {
 		this.introTween();
 	},
 	
-	update: update,
+	//update: update,
 
 	startPlay: function()
 	{
 		playable = true;
+		recordEvent("started");
 	},
 
 	pointerUp: function(x,y)
@@ -230,9 +272,11 @@ var mainState = {
 			for (var j=0;j<this.tiles[i].length;j++)
 				this.tiles[i][j].getChildAt(1).visible = true;
 		playable = false;
+		recordEvent("complete");
 		
 		this.progressBarTween();
-		this.time.events.add(1000, this.levelExitTween, this);
+		game.input.onDown.add(this.levelExitTween, this);
+		//this.time.events.add(1000, this.levelExitTween, this);
 	},
 	
 	progressBarTween: function()
@@ -261,6 +305,7 @@ var mainState = {
 	
 	levelExitTween: function()
 	{
+		recordEvent("moveon");
 		game.tweens.removeAll();
 		var tween = game.add.tween(this.tilesGroup);
 		tween.to({x: 2*game.width}, 400);
@@ -270,6 +315,7 @@ var mainState = {
 	
 	changeLevel: function()
 	{
+		recordEvent("changelevel");
 	    game.state.start('level');
 	}
 };
@@ -613,9 +659,9 @@ function swap(state,indexX,indexY,ix,iy)
 		state.tiles[iy][ix].x = originX+size*x2+tilePadding/2;
 		state.tiles[iy][ix].y = originY+size*y2+tilePadding/2;
 		
-		var tmpTile = state.tiles[state.indexY][state.indexX];
-		state.tiles[state.indexY][state.indexX] = state.tiles[iy][ix];
-		state.tiles[iy][ix] = tmpTile;
+		//var tmpTile = state.tiles[state.indexY][state.indexX];
+		//state.tiles[state.indexY][state.indexX] = state.tiles[iy][ix];
+		//state.tiles[iy][ix] = tmpTile;
 	}
 }
 
@@ -625,10 +671,12 @@ function selected(state,iy,ix)
 	{
 		state.indexX = ix;
 		state.indexY = iy;
+		recordEvent("selected");
 	}
 	else
 	{
 		swap(state,this.indexX,this.indexY,ix,iy);
+		recordEvent("swap");
 		if (checkLevel(state.level))
 		  state.levelComplete();
 		state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
@@ -640,16 +688,38 @@ function selected(state,iy,ix)
 
 function createLevel(level)
 {
+	//return shuffleLevel([[0,1,2,3,4,5],[0,1,2,3,4,5]]);
+	//return shuffleLevel(randomLevel(1,10));
 	switch(level)
 	{
 		case 1:
-			return [[1,0]];
+			return [[0,1]];
 		case 2:
-			return [[2,1,0]];
+			return [[1,2]];
 		case 3:
-			return [[1,0,0]];
+			return [[2,0,1]];
+		case 4:
+			return [[0,2,1]];
+		case 5:
+			return [[0,1,0]];
+		case 6:
+			return [[3,1,1]];
+		case 7:
+			return shuffleLevel([[3,2,1,0]]);
+		case 8:
+			return shuffleLevel([[1,3,2,1,]]);
+		case 9:
+			return shuffleLevel([[4,1,3,1]]);
+		case 10:
+			return shuffleLevel([[5,4,1,4,]]);
+		case 11:
+			return shuffleLevel([[2,1,3,2,1,0]]);
+		case 12:
+			return shuffleLevel([[4,2,1,0,3,1,0,0,4]])
+		//case 10:
+		//	return shuffleLevel([[5,4,2,1,0,3,1,0,0,4]])
 	}
-	return shuffleLevel([[0,1,2,3,4],[0,1,2,3,4]]);
+
 }
 
 /**
@@ -683,12 +753,63 @@ function checkLevel(level)
 			switch (level[i][j])
 			{
 				case 0:
-					if (level[i][j+1] != 1)
+					switch (level[i][j+1])
+					{
+						case 1:
+						case 2:
+						case 5:
 						falsified = true;
+					}
 					break;
 				case 1:
-					if ((j+1 < level[i].length) && (level[i][j+1] != 2))
+					switch (level[i][j+1])
+					{
+						case 1:
+						case 2:
+						case 5:
 						falsified = true;
+					}
+					break;
+				case 2:
+					switch (level[i][j+1])
+					{
+						case 0:
+						case 2:
+						case 3:
+						case 4:
+						case 5:
+						falsified = true;
+					}
+					break;
+				case 3:
+					switch (level[i][j+1])
+					{
+						case 0:
+						case 3:
+						case 4:
+						falsified = true;
+					}
+					break;
+				case 4:
+					switch (level[i][j+1])
+					{
+						case 0:
+						case 3:
+						case 4:
+						case 5:
+						falsified = true;
+					}
+					break;
+				case 5:
+					switch (level[i][j+1])
+					{
+						case 0:
+						case 1:
+						case 2:
+						case 3:
+						case 5:
+						falsified = true;
+					}
 					break;
 			}
 			j++;
@@ -699,7 +820,7 @@ function checkLevel(level)
   return !falsified;
 }
 
-var totalLevels = 2;
+var totalLevels = 10;
 
 var minHeight = 200;
 var minWidth = 200;
