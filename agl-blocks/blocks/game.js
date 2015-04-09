@@ -257,9 +257,9 @@ var mainState = {
 	
 	levelComplete: function()
 	{
-		for (var i=0;i<this.tiles.length;i++)
-			for (var j=0;j<this.tiles[i].length;j++)
-				this.tiles[i][j].getChildAt(1).visible = true;
+		//for (var i=0;i<this.tiles.length;i++)
+		//	for (var j=0;j<this.tiles[i].length;j++)
+		//		this.tiles[i][j].getChildAt(1).visible = false;
 		playable = false;
 		recordEvent("complete");
 		
@@ -516,22 +516,8 @@ function tileUp(iy,ix,group,state)
 		game.sound.play('plock');
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
-			//pointerUp(state,game.input.x,game.input.y);
 	}
 }
-	/*
-function pointerUp(state,x,y)
-{
-	var tileCoord = pointToGridIndex(x,y,state.tiles);
-	
-	if (((tileCoord.x != state.indexX) || (tileCoord.y != state.indexY)) && (tileCoord.x >= 0) && (tileCoord.y >= 0) && (tileCoord.y<state.tiles.length))
-		if (x < state.tiles[tileCoord.y].length)
-		{
-			state.tiles[y][x].getChildAt(1).visible = !state.tiles[y][x].getChildAt(1).visible;
-			selected(state,y,x);
-		}
-}*/
-
 
 function getMinDimension()
 {
@@ -665,10 +651,6 @@ function swap(state,indexX,indexY,ix,iy)
 		state.tiles[state.indexY][state.indexX].y = originY+size*y1+tilePadding/2;
 		state.tiles[iy][ix].x = originX+size*x2+tilePadding/2;
 		state.tiles[iy][ix].y = originY+size*y2+tilePadding/2;
-		
-		//var tmpTile = state.tiles[state.indexY][state.indexX];
-		//state.tiles[state.indexY][state.indexX] = state.tiles[iy][ix];
-		//state.tiles[iy][ix] = tmpTile;
 	}
 }
 
