@@ -74,7 +74,7 @@ var menuState = {
 				}
 				this.tilesGroup.add(this.tiles[i][j]);
 				}
-
+		
 		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#000000' });
 		this.titleText.anchor.setTo(0.5, 0.5);
 		this.createIntroTweens();
@@ -243,7 +243,6 @@ var mainState = {
 			for (var j=0;j<this.tiles[i].length;j++)
 				this.tilesGroup.add(this.tiles[i][j]);
 		this.tilesGroup.x +=xOffset;
-		
 		this.introTween();
 	},
 	
@@ -485,11 +484,12 @@ function hoverOverTileOut(sprite)
 {
 	if (playable)
 	{
-		var depth = sprite.height*dropDepth;
-		sprite.y -= depth;
-		sprite.x -= depth;
-		sprite.getChildAt(0).y = 0;
-		sprite.getChildAt(0).x = 0;
+		//var depth = sprite.height*dropDepth;
+		//sprite.y -= depth;
+		//sprite.x -= depth;
+		//sprite.getChildAt(0).y = 0;
+		//sprite.getChildAt(0).x = 0;
+		resetTilePosition(sprite);
 	}
 }
 
@@ -504,6 +504,7 @@ function tileDown(iy,ix,group,state)
 		group.getChildAt(1).visible = true;
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
+
 	}
 }
 
@@ -517,6 +518,13 @@ function tileUp(iy,ix,group,state)
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
 	}
+}
+
+function resetTilePosition(tile,tiles)
+{
+	tilePadding = size/10;
+	tile.x = originX+tile.gridX*(size)+tilePadding/2;
+	tile.y = originY+tile.gridY*(size)+tilePadding/2;
 }
 
 function getMinDimension()
@@ -553,23 +561,33 @@ function getTileSize(tiles)
     return Math.min(maxBlockSize,size);
 }
 
+function setOrigin(tiles)
+{
+	if (tiles != null)
+	{
+		originY = Math.round(boxCenterY()-(size*tiles.length)/2);
+		originX = Math.round(boxCenterX()-(size*tiles[0].length)/2);
+	}
+}
+
 function makeLevel(tiles,xOffset,state)
 {
-    var size = getTileSize(tiles);
-    var originY = Math.round(boxCenterY()-(size*tiles.length)/2);
-    var originX = Math.round(boxCenterX()-(size*tiles[0].length)/2);
-    
+	size = getTileSize(tiles);
+	setOrigin(tiles);
+	
     var tilePadding = Math.round(size/10);
-    size = Math.round(size * (9/10));
     
     var tileSprites = [];
     
     for (var j=0;j<tiles.length;j++)
     {
-	tileSprites.push([]);
-	for (var i=0;i<tiles[j].length;i++)
-	    if (tiles[j][i] > -1)
-		tileSprites[j][i] = makeTile(originX+i*(size+tilePadding)+tilePadding/2,originY+j*(size+tilePadding)+tilePadding/2,j,i,size,size,tileColours[tiles[j][i]],state); 
+		tileSprites.push([]);
+		for (var i=0;i<tiles[j].length;i++)
+			if (tiles[j][i] > -1)
+			{
+				tileSprites[j][i] = makeTile(0,0,j,i,size-tilePadding,size-tilePadding,tileColours[tiles[j][i]],state); 
+				resetTilePosition(tileSprites[j][i],tiles);
+			}
     }
     return tileSprites;
 }
@@ -618,10 +636,7 @@ function swap(state,indexX,indexY,ix,iy)
 {
 	if ((state.indexX != ix) || (state.indexY != iy))
 	{
-		var size = getTileSize(state.tiles);
 		var tilePadding = size/10;
-		var originY = Math.round(boxCenterY()-(size*state.tiles.length)/2);
-		var originX = Math.round(boxCenterX()-(size*state.tiles[0].length)/2);
 		
 		var depth = state.tiles[iy][ix].height*dropDepth;
 		var newX = state.tiles[state.indexY][state.indexX].x;
@@ -836,6 +851,9 @@ var tileColours = [];
 var playable = false;
 
 var dragging = false;
+var size = 0;
+var originX = 0;
+var originY = 0;
 
 game.state.add('load', loadState);
 game.state.add('main', mainState);
