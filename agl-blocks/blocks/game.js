@@ -88,18 +88,24 @@ var menuState = {
 	{
 		var y = Math.round(Math.random()*(this.tiles.length-1));
 		var x = Math.round(Math.random()*(this.tiles[y].length-1));
-		if (((y==0) && (x==0)) || ((y==5) && (x==4)) || ((y==6) && (x==4))) {}
+		if (((x==0) && (y==0)) || ((y==x) && (y==4)) || ((x==6) && (y==4))) {}
 		else
 		{
-			this.tiles[y][x].alpha = 0.1+Math.random()*0.15;
-			this.time.events.add(100+Math.random()*200,function() {this.depretty(y,x);},this)
+			var tween = game.add.tween(this.tiles[y][x]);
+			tween.to({alpha: 0.1+Math.random()*0.15},200);
+			tween.onComplete.add(function() {this.depretty(y,x);}, this);
+			tween.start();
+			//this.time.events.add(100+Math.random()*200,function() {this.depretty(y,x);},this)
 		}
 		this.time.events.add(Math.random()*2000+500,function() {this.pretty();},this)
 	},
 	
-	depretty: function(oldY,oldX)
+	depretty: function(y,x)
 	{
-		this.tiles[oldY][oldX].alpha = this.tileAlpha;
+		//this.tiles[oldY][oldX].alpha = this.tileAlpha;
+		var tween = game.add.tween(this.tiles[y][x]);
+		tween.to({alpha: this.tileAlpha},200);
+		tween.start();
 	},
 	
 	update: update,
@@ -263,6 +269,7 @@ var mainState = {
 		recordEvent("complete");
 		
 		this.progressBarTween();
+		this.time.events.add(1000, this.clickToContinueTween,this);
 		game.input.onDown.add(this.levelExitTween, this);
 		//this.time.events.add(1000, this.levelExitTween, this);
 	},
@@ -282,6 +289,30 @@ var mainState = {
 		tween.start();
 	},
 	
+	clickToContinueTween: function()
+	{
+		this.continueText = game.add.text(game.world.centerX, game.world.centerY+game.world.centerY*(2/3), 'touch to continue', { font: getMinDimension()/13+'px '+defaultFont, fill: '#111111' });
+		this.continueText.anchor.setTo(0.5, 0.5);
+		this.continueText.alpha = 0;
+		var tween  = game.add.tween(this.continueText);
+		tween.to({y:game.world.centerY+game.world.centerY/2,
+			alpha:1},800);
+		tween.onComplete.add(this.continueTweenFlash,this);
+		tween.start();
+		
+	},
+	
+	continueTweenFlash: function()
+	{
+		var tween  = game.add.tween(this.continueText);
+		if (this.continueText.alpha <1)
+			tween.to({alpha:1},800);
+		else
+			tween.to({alpha:0.5},800);
+		tween.onComplete.add(this.continueTweenFlash,this);
+		tween.start();
+	},
+	
 	introTween: function()
 	{
 		game.tweens.removeAll();
@@ -298,6 +329,11 @@ var mainState = {
 		var tween = game.add.tween(this.tilesGroup);
 		tween.to({x: 2*game.width}, 400);
 		tween.onComplete.add(this.changeLevel,this);
+		tween.start();
+		
+		var tween = game.add.tween(this.continueText);
+		tween.to({x:0,
+			alpha:-1},400);
 		tween.start();
 	},
 	
