@@ -73,39 +73,15 @@ var menuState = {
 					this.tiles[i][j].events.onInputDown.add(this.info,this);
 				}
 				this.tilesGroup.add(this.tiles[i][j]);
-				}
+			}
 		
 		this.titleText = game.add.text(game.world.centerX, game.world.centerY, 'blocks', { font: getMinDimension()/4+'px Serif', fill: '#000000' });
 		this.titleText.anchor.setTo(0.5, 0.5);
 		this.createIntroTweens();
 		
-		this.time.events.add(Math.random()*1000+500,function() {this.pretty();},this);
-		this.time.events.add(Math.random()*2000+500,function() {this.pretty();},this);
+		this.time.events.add(Math.random()*1000+500,function() {pretty(this.tiles,this.tileAlpha,this.time,true);},this);
+		this.time.events.add(Math.random()*2000+500,function() {pretty(this.tiles,this.tileAlpha,this.time,true);},this);
 
-		},
-	
-	pretty: function()
-	{
-		var y = Math.round(Math.random()*(this.tiles.length-1));
-		var x = Math.round(Math.random()*(this.tiles[y].length-1));
-		if (((x==0) && (y==0)) || ((y==x) && (y==4)) || ((x==6) && (y==4))) {}
-		else
-		{
-			var tween = game.add.tween(this.tiles[y][x]);
-			tween.to({alpha: 0.1+Math.random()*0.15},200);
-			tween.onComplete.add(function() {this.depretty(y,x);}, this);
-			tween.start();
-			//this.time.events.add(100+Math.random()*200,function() {this.depretty(y,x);},this)
-		}
-		this.time.events.add(Math.random()*2000+500,function() {this.pretty();},this)
-	},
-	
-	depretty: function(y,x)
-	{
-		//this.tiles[oldY][oldX].alpha = this.tileAlpha;
-		var tween = game.add.tween(this.tiles[y][x]);
-		tween.to({alpha: this.tileAlpha},200);
-		tween.start();
 	},
 	
 	update: update,
@@ -151,13 +127,7 @@ var menuState = {
 		gameLevel = 1;
 		updateProgress();
 		
-		for (var i=tileColours.length;i>=0;i--)
-		{
-			var r = Math.round(Math.random()*i)
-			var c = tileColours[r];
-			tileColours.splice(r,1);
-			tileColours.push(c);
-		}
+		shuffleTileColours();
 		this.time.events.add(1000,function() {game.state.start('level');},this);
     },
     
@@ -173,7 +143,10 @@ var levelState = {
     preload: function ()
 	{
         drawBackground();
-		drawProgressBar();
+		if (gameLevel==1)
+			drawProgressBar(true);
+		else
+			drawProgressBar(false);
 		playable = false;
     },
     create: function ()
@@ -209,7 +182,37 @@ var levelState = {
 		var tween = game.add.tween(this.lText);
 		tween.to({alpha: 0}, 400);
 		tween.start();
+	},
+	
+	progressBarIntro: function()
+	{
+		this.progressBar.alpha = 0;
+		var tween = game.add.tween(this.progressBar);
+		tween.to({alpha:1}, 800)
+		tween.start();
 	}
+}
+
+function pretty(tiles,tileAlpha,time,menu)
+{
+	var y = Math.round(Math.random()*(tiles.length-1));
+	var x = Math.round(Math.random()*(tiles[y].length-1));
+	if ((menu) && (((x==0) && (y==0)) || ((x==5) && (y==4)) || ((x==6) && (y==4)))) {}
+	else
+	{
+		var tween = game.add.tween(tiles[y][x]);
+		tween.to({alpha: tiles[y][x].alpha-0.2+Math.random()*0.15},200);
+		tween.onComplete.add(function() {depretty(y,x,tiles,tileAlpha,time);}, this);
+		tween.start();
+	}
+	time.events.add(Math.random()*2000+500,function() {pretty(tiles,tileAlpha,time,menu);},this)
+}
+
+function depretty(y,x,tiles,tileAlpha)
+{
+	var tween = game.add.tween(tiles[y][x]);
+	tween.to({alpha: tileAlpha},200);
+	tween.start();
 }
 
 function recordEvent(description)
@@ -299,7 +302,6 @@ var mainState = {
 			alpha:1},800);
 		tween.onComplete.add(this.continueTweenFlash,this);
 		tween.start();
-		
 	},
 	
 	continueTweenFlash: function()
@@ -346,7 +348,7 @@ var mainState = {
 
 function update()
 {
-	if (dragging)
+	if ((dragging) && (!inputBlock))
 	{
 		if (this.indexX != -1)
 		{
@@ -382,6 +384,17 @@ function update()
 				this.tiles[this.swapY][this.swapX].getChildAt(1).visible = true;
 			}
 		}
+	}
+}
+
+function shuffleTileColours()
+{
+	for (var i=tileColours.length;i>=0;i--)
+	{
+		var r = Math.round(Math.random()*i)
+		var c = tileColours[r];
+		tileColours.splice(r,1);
+		tileColours.push(c);
 	}
 }
 
@@ -482,33 +495,30 @@ function makeTile(x,y,iy,ix,width,height,colour,state)
 
 function roundRect(ctx, x, y, width, height, radius, fill, stroke)
 {
-  if (typeof stroke == "undefined" ) {
-    stroke = true;
-  }
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  if (stroke) {
-    ctx.stroke();
-  }
-  if (fill) {
-    ctx.fill();
-  }        
+	if (typeof stroke == "undefined" )
+		stroke = true;
+	ctx.beginPath();
+	ctx.moveTo(x + radius, y);
+	ctx.lineTo(x + width - radius, y);
+	ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+	ctx.lineTo(x + width, y + height - radius);
+	ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+	ctx.lineTo(x + radius, y + height);
+	ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+	ctx.lineTo(x, y + radius);
+	ctx.quadraticCurveTo(x, y, x + radius, y);
+	ctx.closePath();
+	if (stroke)
+		ctx.stroke();
+	if (fill)
+		ctx.fill();
 }
 
 function hoverOverTile(sprite)
 {
 	if (playable)
 	{
-		var depth = sprite.height*dropDepth;
+		var depth = 0;//sprite.height*dropDepth;
 		sprite.y +=depth;
 		sprite.x +=depth;
 		sprite.getChildAt(0).y = -depth;
@@ -525,7 +535,7 @@ function hoverOverTileOut(sprite)
 		//sprite.x -= depth;
 		//sprite.getChildAt(0).y = 0;
 		//sprite.getChildAt(0).x = 0;
-		resetTilePosition(sprite);
+		//resetTilePosition(sprite);
 	}
 }
 
@@ -538,9 +548,9 @@ function tileDown(iy,ix,group,state)
 		state.swapY = -1;
 		game.sound.play('plock');
 		group.getChildAt(1).visible = true;
+		group.bringToTop();
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
-
 	}
 }
 
@@ -569,13 +579,9 @@ function getMinDimension()
 	var maxHeight = Math.floor(game.world.height-paddingTop-paddingBottom);
 	
 	if (maxWidth/7 > maxHeight/5)
-	{
-	  return maxHeight;
-	}
+		return maxHeight;
 	else
-	{
-	  return maxWidth;
-	}
+		return maxWidth;
 }
 
 function getTileSize(tiles)
@@ -585,13 +591,13 @@ function getTileSize(tiles)
     
     if (maxWidth/tiles[0].length > maxHeight/tiles.length)
     {
-      var minDimension = maxHeight;
-      var size = maxHeight/tiles.length;
+		  var minDimension = maxHeight;
+		  var size = maxHeight/tiles.length;
     }
     else
     {
-      var minDimension = maxWidth;
-      var size = maxWidth/tiles[0].length;
+		  var minDimension = maxWidth;
+		  var size = maxWidth/tiles[0].length;
     }
     
     return Math.min(maxBlockSize,size);
@@ -628,12 +634,20 @@ function makeLevel(tiles,xOffset,state)
     return tileSprites;
 }
 
-function drawProgressBar()
+function drawProgressBar(fadeIn)
 {
 	var graphics = game.add.graphics(0, 0);
 	graphics.beginFill(0x917c6f);
 	graphics.lineStyle(5, 0xa39791, 1);
 	graphics.drawRect(this.game.width-boxMarginRight+boxMarginRight/3, boxMarginTop, boxMarginRight/3, this.game.height-boxMarginTop-boxMarginBottom);
+	
+	if (fadeIn)
+	{
+		graphics.alpha = 0;
+		var tween = game.add.tween(graphics);
+		tween.to({alpha:1});
+		tween.start();
+	}
 	  
 	var progressHeight = getProgressHeight(progress);
 	  
@@ -698,10 +712,18 @@ function swap(state,indexX,indexY,ix,iy)
 		state.level[y2][x2] = state.level[y1][x1];
 		state.level[y1][x1] = lvlTmp;
 		
-		state.tiles[state.indexY][state.indexX].x = originX+size*x1+tilePadding/2;
-		state.tiles[state.indexY][state.indexX].y = originY+size*y1+tilePadding/2;
-		state.tiles[iy][ix].x = originX+size*x2+tilePadding/2;
-		state.tiles[iy][ix].y = originY+size*y2+tilePadding/2;
+		var tween = game.add.tween(state.tiles[state.indexY][state.indexX]);
+		tween.to({x:originX+size*x1+tilePadding/2,
+		y:originY+size*y1+tilePadding/2},80);
+		tween.onComplete.add(function() {inputBlock = false;},this);
+		tween.start();
+		
+		var tween = game.add.tween(state.tiles[iy][ix]);
+		tween.to({x:originX+size*x2+tilePadding/2,
+		y:originY+size*y2+tilePadding/2},80);
+		tween.onComplete.add(function() {inputBlock = false;},this);
+		tween.start();
+		inputBlock = true;
 	}
 }
 
@@ -890,6 +912,8 @@ var dragging = false;
 var size = 0;
 var originX = 0;
 var originY = 0;
+
+var inputBlock = false;
 
 game.state.add('load', loadState);
 game.state.add('main', mainState);
