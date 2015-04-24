@@ -9,7 +9,10 @@
 		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#cccccc' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
 		
-		//game.load.audio('plock', 'assets/plock.wav');
+		//game.load.audio('pick', 'assets/pick.wav');
+		//game.load.audio('drop', 'assets/drop.wav');
+		//game.load.audio('swipe', 'assets/swipe.wav');
+		//game.load.audio('complete', 'assets/complete.wav');
 	},
 	create: function ()
 	{
@@ -140,7 +143,7 @@ var menuState = {
 }
 
 var levelState = {
-    preload: function ()
+    preload: function()
 	{
         drawBackground();
 		if (gameLevel==1)
@@ -149,7 +152,7 @@ var levelState = {
 			drawProgressBar(false);
 		playable = false;
     },
-    create: function ()
+    create: function()
 	{
 		var textTime = 0;
 		if (progress < 1)
@@ -348,41 +351,24 @@ var mainState = {
 
 function update()
 {
-	if ((dragging) && (!inputBlock))
+	if ((dragging) && (!inputBlock) && (this.inputX != -1))
 	{
-		if (this.indexX != -1)
+		var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
+		if (tileCoord != null)
 		{
-			if (this.swapX == -1)
-			{
-				var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
-				if (tileCoord != null)
+			//if ((this.swapX == -1) || ((Math.abs(this.swapX-tileCoord.x)<2) && (Math.abs(this.swapY-tileCoord.y)<2)))
+			//{
+				if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
+				{}
+				else
 				{
+					game.sound.play('swipe');
 					swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
-					this.swapX = this.indexX;
-					this.swapY = this.indexY;
+
+					this.swapX = tileCoord.x;
+					this.swapY = tileCoord.y;
 				}
-			} else
-			{
-				var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
-				if (tileCoord != null)
-				{
-					if ((this.swapX != tileCoord.x) || (this.swapY != tileCoord.y))
-					{
-						if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
-						{}
-						else
-						{
-							swap(this,this.indexX,this.indexY,this.swapX,this.swapY);
-							swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
-							this.tiles[this.swapY][this.swapX].getChildAt(1).visible = false;
-							this.swapX = this.indexX;
-							this.swapY = this.indexY;
-						}
-					}
-				}
-				this.tiles[this.indexY][this.indexX].getChildAt(1).visible = true;
-				this.tiles[this.swapY][this.swapX].getChildAt(1).visible = true;
-			}
+			//}
 		}
 	}
 }
@@ -546,7 +532,7 @@ function tileDown(iy,ix,group,state)
 		dragging = true;
 		state.swapX = -1;
 		state.swapY = -1;
-		game.sound.play('plock');
+		game.sound.play('pick');
 		group.getChildAt(1).visible = true;
 		group.bringToTop();
 		if (typeof state != 'undefined')
@@ -560,7 +546,7 @@ function tileUp(iy,ix,group,state)
 	{
 		dragging = false;
 		group.getChildAt(1).visible = false;
-		game.sound.play('plock');
+		game.sound.play('drop');
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
 	}
