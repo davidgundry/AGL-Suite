@@ -351,24 +351,31 @@ var mainState = {
 
 function update()
 {
-	if ((dragging) && (!inputBlock) && (this.inputX != -1))
+	if ((dragging) && (!inputBlock) && (this.indexX != -1))
 	{
 		var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
-		if (tileCoord != null)
+		if ((tileCoord != null) && ((tileCoord.x != this.swapX) || (tileCoord.y != this.swapY)))
 		{
-			//if ((this.swapX == -1) || ((Math.abs(this.swapX-tileCoord.x)<2) && (Math.abs(this.swapY-tileCoord.y)<2)))
-			//{
+			console.log(this.swapX);
+			console.log(tileCoord.x);
+			if ( ((Math.abs(this.swapX-tileCoord.x)<2) && (Math.abs(this.swapY-tileCoord.y)<2)))
+			{
 				if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
 				{}
 				else
 				{
 					game.sound.play('swipe');
 					swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
-
 					this.swapX = tileCoord.x;
 					this.swapY = tileCoord.y;
+					console.log("swap");
 				}
-			//}
+			}
+			else if (this.swapX == -1)
+			{
+				this.swapX = tileCoord.x;
+				this.swapY = tileCoord.y;
+			}
 		}
 	}
 }
