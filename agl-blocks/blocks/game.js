@@ -14,7 +14,7 @@
 		game.load.audio('swap', 'assets/swap.wav');
 		game.load.audio('complete', 'assets/complete.wav');
 		
-		if (contentsType="sprite")
+		if (contentsType=="sprite")
 			game.load.spritesheet('symbols', 'assets/symbols.png', 256, 256);
 	},
 	create: function ()
@@ -485,13 +485,14 @@ function makeTile(x,y,iy,ix,width,height,tileContents,contentsIndex,locked,state
 	var bmd = this.game.add.bitmapData(width+3, height+3);
 	var ctx=bmd.context;
 	
-	if ((locked) && (lockedTilesAreGrey))
-		contents = "lightgrey";
 	ctx.save();
-	if (contentsType!="colour")
-		ctx.globalAlpha = 0;
+
 	ctx.fillStyle=tileContents[contentsIndex];
-	
+	if ((locked) && (lockedTilesAreGrey))
+		ctx.fillStyle= "lightgrey";
+	else if (contentsType!="colour")
+		ctx.globalAlpha = 0;
+		
 	if (locked)
 		roundRect(ctx,width/6,height/6,width*(2/3),height*(2/3),width/8,true,false);
 	else
@@ -515,7 +516,10 @@ function makeTile(x,y,iy,ix,width,height,tileContents,contentsIndex,locked,state
 			symbol.height = height;
 		}
 		symbol.frame = contentsIndex;
+		if ((locked) && (lockedTilesAreGrey))
+			symbol.alpha=0;
 		mainTile.addChild(symbol);
+		
 	}
 	else
 	{
@@ -939,7 +943,7 @@ levelList = [
 ]
 var totalLevels = levelList.length;
 var lockedTilesAreGrey = true;
-var contentsType = "sprite";
+var contentsType = "sprite"; //sprite | colour
 
 var minHeight = 200;
 var minWidth = 200;
