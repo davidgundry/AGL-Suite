@@ -11,7 +11,7 @@
 		
 		//game.load.audio('pick', 'assets/pick.wav');
 		//game.load.audio('drop', 'assets/drop.wav');
-		//game.load.audio('swipe', 'assets/swipe.wav');
+		//game.load.audio('swap', 'assets/swap.wav');
 		//game.load.audio('complete', 'assets/complete.wav');
 	},
 	create: function ()
@@ -357,35 +357,31 @@ function update()
 		var tilePosition = pointToGridPosition(game.input.x,game.input.y);
 		
 		if (tileCoord != null)
+		{
+			if (this.swapX == -1)
+			{
+				this.swapX = tilePosition.x;
+				this.swapY = tilePosition.y;
+			}
 			if ((tileCoord.x != this.indexX) || (tileCoord.y != this.indexY))
 			{
 				//console.log("swap "+this.swapX+","+this.swapY+" index "+this.indexX+","+this.indexY+" tilecoord "+tileCoord.x+","+tileCoord.y+" tileposition "+tilePosition.x+","+tilePosition.y);
-
 				var xDiff = Math.abs(this.swapX-tilePosition.x);
 				var yDiff = Math.abs(this.swapY-tilePosition.y);
 				
-				if (this.swapX == -1)
-				{
-					this.swapX = tilePosition.x;
-					this.swapY = tilePosition.y;
-				} else if ((xDiff<2) && (yDiff<2) && (xDiff != yDiff))
+				if ((xDiff<2) && (yDiff<2) && (xDiff != yDiff))
 				{
 					if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
 					{}
 					else
 					{
-						game.sound.play('swipe');
 						swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
 						this.swapX = tilePosition.x;
 						this.swapY = tilePosition.y;
 					}
 				}
 			}
-			else
-			{
-				this.swapX = tilePosition.x;
-				this.swapY = tilePosition.y;
-			}
+		}
 	}
 }
 
@@ -416,9 +412,9 @@ function pointToGridPosition(x,y)
 {
 	var tilepadding = size/10;
 	x -= originX;
-	x /= size;//+tilepadding/2;
+	x /= size;
 	y -= originY;
-	y /= size;//+tilepadding/2;
+	y /= size;
 
 	return {x:Math.floor(x),y:Math.floor(y)};
 }
@@ -739,6 +735,7 @@ function swap(state,indexX,indexY,ix,iy)
 		inputBlock = true;
 		
 		swapping = true;
+		game.sound.play('swap');
 	}
 }
 
