@@ -13,6 +13,9 @@
 		game.load.audio('drop', 'assets/drop.wav');
 		game.load.audio('swap', 'assets/swap.wav');
 		game.load.audio('complete', 'assets/complete.wav');
+		
+		if (contentsType="sprite")
+			game.load.spritesheet('symbols', 'assets/symbols.png', 256, 256);
 	},
 	create: function ()
 	{
@@ -31,7 +34,7 @@ var menuState = {
     create: function ()
 	{
 		recordEvent("startedmenu")
-		tileColours = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#aaaaaa','#ccaa33'];
+		tileContents = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#aaaaaa','#ccaa33'];
 		
 		this.level = randomLevel(5,7);
 		this.level[0][0] = 0;
@@ -131,7 +134,7 @@ var menuState = {
 		gameLevel = 1;
 		updateProgress();
 		
-		shuffleTileColours();
+		shuffletileContents();
 		this.time.events.add(1000,function() {game.state.start('level');},this);
     },
     
@@ -286,7 +289,7 @@ var mainState = {
 	{
 		//for (var i=0;i<this.tiles.length;i++)
 		//	for (var j=0;j<this.tiles[i].length;j++)
-		//		this.tiles[i][j].getChildAt(1).visible = false;
+		//		this.tiles[i][j].getChildAt(2).visible = false;
 		playable = false;
 		recordEvent("complete");
 		
@@ -404,14 +407,14 @@ function update()
 	}
 }
 
-function shuffleTileColours()
+function shuffletileContents()
 {
-	for (var i=tileColours.length;i>=0;i--)
+	for (var i=tileContents.length;i>=0;i--)
 	{
 		var r = Math.round(Math.random()*i)
-		var c = tileColours[r];
-		tileColours.splice(r,1);
-		tileColours.push(c);
+		var c = tileContents[r];
+		tileContents.splice(r,1);
+		tileContents.push(c);
 	}
 }
 
@@ -460,7 +463,7 @@ function randomLevel(height,width)
 	{
 		level.push([]);
 		for (var j=0;j<width;j++)
-			level[i].push(Math.floor(Math.random()*tileColours.length));
+			level[i].push(Math.floor(Math.random()*tileContents.length));
 	}
 	return level;
 }
@@ -474,23 +477,53 @@ function drawBackground()
 	graphics.drawRect(boxMarginLeft, boxMarginTop, this.game.width-boxMarginLeft-boxMarginRight, this.game.height-boxMarginTop-boxMarginBottom);
 }
 
-function makeTile(x,y,iy,ix,width,height,colour,locked,state)
+function makeTile(x,y,iy,ix,width,height,tileContents,contentsIndex,locked,state)
 {
 	if (typeof state == 'undefined')
 		state == null;
+		
 	var bmd = this.game.add.bitmapData(width+3, height+3);
 	var ctx=bmd.context;
+	
 	if ((locked) && (lockedTilesAreGrey))
-		colour = "lightgrey";
-	ctx.fillStyle=colour;
+		contents = "lightgrey";
+	ctx.save();
+	if (contentsType!="colour")
+		ctx.globalAlpha = 0;
+	ctx.fillStyle=tileContents[contentsIndex];
 	
 	if (locked)
 		roundRect(ctx,width/6,height/6,width*(2/3),height*(2/3),width/8,true,false);
 	else
 		roundRect(ctx,0,0,width,height,width/8,true,false);
 	
-	
 	var mainTile = game.add.sprite(x,y,bmd);
+	ctx.restore();
+	
+	if (contentsType=="sprite")
+	{
+		if (locked)
+		{
+			var symbol = game.add.sprite(width/6,height/6,"symbols");
+			symbol.width = width*(2/3);
+			symbol.height = height*(2/3);
+		}
+		else
+		{
+			var symbol = game.add.sprite(0,0,"symbols");
+			symbol.width = width;
+			symbol.height = height;
+		}
+		symbol.frame = contentsIndex;
+		mainTile.addChild(symbol);
+	}
+	else
+	{
+		var emptySprite = game.add.sprite(0,0);
+		mainTile.addChild(emptySprite);
+	}
+
+		
 	mainTile.inputEnabled = true;
 	mainTile.events.onInputOver.add(function() {
 		hoverOverTile(this);
@@ -557,27 +590,10 @@ function roundRect(ctx, x, y, width, height, radius, fill, stroke)
 
 function hoverOverTile(sprite)
 {
-	if (playable)
-	{
-		var depth = 0;//sprite.height*dropDepth;
-		sprite.y +=depth;
-		sprite.x +=depth;
-		sprite.getChildAt(0).y = -depth;
-		sprite.getChildAt(0).x = -depth;
-	}
 }
 
 function hoverOverTileOut(sprite)
 {
-	if (playable)
-	{
-		//var depth = sprite.height*dropDepth;
-		//sprite.y -= depth;
-		//sprite.x -= depth;
-		//sprite.getChildAt(0).y = 0;
-		//sprite.getChildAt(0).x = 0;
-		//resetTilePosition(sprite);
-	}
 }
 
 function tileDown(iy,ix,group,state)
@@ -590,7 +606,7 @@ function tileDown(iy,ix,group,state)
 			state.swapX = -1;
 			state.swapY = -1;
 			game.sound.play('pick');
-			group.getChildAt(1).visible = true;
+			group.getChildAt(2).visible = true;
 			group.bringToTop();
 			if (typeof state != 'undefined')
 				selected(state,iy,ix);
@@ -602,11 +618,14 @@ function tileUp(iy,ix,group,state)
 {
 	if (playable)
 	{
+		if (dragging)
+		{
+			p = tileToGridPosition(state.tiles[iy][ix]);
+			recordEvent("drop x:"+p.x+","+p.y);
+		}
 		dragging = false;
-		group.getChildAt(1).visible = false;
+		group.getChildAt(2).visible = false;
 		game.sound.play('drop');
-		p = tileToGridPosition(state.tiles[iy][ix]);
-		recordEvent("drop x:"+p.x+","+p.y);
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
 	}
@@ -672,7 +691,7 @@ function makeLevel(tiles,lockedTiles,xOffset,state)
 		tileSprites.push([]);
 		for (var i=0;i<tiles[j].length;i++)
 		{
-			tileSprites[j][i] = makeTile(0,0,j,i,size-tilePadding,size-tilePadding,tileColours[tiles[j][i]],lockedTiles[j][i],state); 
+			tileSprites[j][i] = makeTile(0,0,j,i,size-tilePadding,size-tilePadding,tileContents,tiles[j][i],lockedTiles[j][i],state); 
 			resetTilePosition(tileSprites[j][i],tiles);
 		}
     }
@@ -794,8 +813,8 @@ function selected(state,iy,ix)
 			swap(state,this.indexX,this.indexY,ix,iy);
 			if (checkLevel(state.level))
 			  state.levelComplete();
-			state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
-			state.tiles[iy][ix].getChildAt(1).visible = false;
+			state.tiles[state.indexY][state.indexX].getChildAt(2).visible = false;
+			state.tiles[iy][ix].getChildAt(2).visible = false;
 			state.indexX = -1;
 			state.indexY = -1;
 		}
@@ -920,6 +939,7 @@ levelList = [
 ]
 var totalLevels = levelList.length;
 var lockedTilesAreGrey = true;
+var contentsType = "sprite";
 
 var minHeight = 200;
 var minWidth = 200;
@@ -942,7 +962,7 @@ var dropDepth = 1/40;
 
 var gameLevel = 0;
 var progress = 0;
-var tileColours = [];
+var tileContents = [];
 var playable = false;
 
 var dragging = false;
