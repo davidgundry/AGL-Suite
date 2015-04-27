@@ -351,32 +351,41 @@ var mainState = {
 
 function update()
 {
-	if ((dragging) && (!inputBlock) && (this.indexX != -1))
+	if ((!swapping) && (dragging) && (!inputBlock) && (this.indexX != -1))
 	{
 		var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
-		if ((tileCoord != null) && ((tileCoord.x != this.swapX) || (tileCoord.y != this.swapY)))
-		{
-			console.log(this.swapX);
-			console.log(tileCoord.x);
-			if ( ((Math.abs(this.swapX-tileCoord.x)<2) && (Math.abs(this.swapY-tileCoord.y)<2)))
+		var tilePosition = pointToGridPosition(game.input.x,game.input.y);
+		
+		if (tileCoord != null)
+			if ((tileCoord.x != this.indexX) || (tileCoord.y != this.indexY))
 			{
-				if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
-				{}
-				else
+				//console.log("swap "+this.swapX+","+this.swapY+" index "+this.indexX+","+this.indexY+" tilecoord "+tileCoord.x+","+tileCoord.y+" tileposition "+tilePosition.x+","+tilePosition.y);
+
+				var xDiff = Math.abs(this.swapX-tilePosition.x);
+				var yDiff = Math.abs(this.swapY-tilePosition.y);
+				
+				if (this.swapX == -1)
 				{
-					game.sound.play('swipe');
-					swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
-					this.swapX = tileCoord.x;
-					this.swapY = tileCoord.y;
-					console.log("swap");
+					this.swapX = tilePosition.x;
+					this.swapY = tilePosition.y;
+				} else if ((xDiff<2) && (yDiff<2) && (xDiff != yDiff))
+				{
+					if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
+					{}
+					else
+					{
+						game.sound.play('swipe');
+						swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
+						this.swapX = tilePosition.x;
+						this.swapY = tilePosition.y;
+					}
 				}
 			}
-			else if (this.swapX == -1)
+			else
 			{
-				this.swapX = tileCoord.x;
-				this.swapY = tileCoord.y;
+				this.swapX = tilePosition.x;
+				this.swapY = tilePosition.y;
 			}
-		}
 	}
 }
 
@@ -401,6 +410,17 @@ function pointToGridIndex(x,y,tiles)
 				return {x:j,y:i};
 		}
 	return null;
+}
+
+function pointToGridPosition(x,y)
+{
+	var tilepadding = size/10;
+	x -= originX;
+	x /= size;//+tilepadding/2;
+	y -= originY;
+	y /= size;//+tilepadding/2;
+
+	return {x:Math.floor(x),y:Math.floor(y)};
 }
 
 function boxCenterX()
@@ -708,7 +728,7 @@ function swap(state,indexX,indexY,ix,iy)
 		var tween = game.add.tween(state.tiles[state.indexY][state.indexX]);
 		tween.to({x:originX+size*x1+tilePadding/2,
 		y:originY+size*y1+tilePadding/2},80);
-		tween.onComplete.add(function() {inputBlock = false;},this);
+		tween.onComplete.add(function() {inputBlock = false; swapping = false;},this);
 		tween.start();
 		
 		var tween = game.add.tween(state.tiles[iy][ix]);
@@ -717,6 +737,8 @@ function swap(state,indexX,indexY,ix,iy)
 		tween.onComplete.add(function() {inputBlock = false;},this);
 		tween.start();
 		inputBlock = true;
+		
+		swapping = true;
 	}
 }
 
@@ -902,6 +924,7 @@ var tileColours = [];
 var playable = false;
 
 var dragging = false;
+var swapping = false;
 var size = 0;
 var originX = 0;
 var originY = 0;
