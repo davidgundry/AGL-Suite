@@ -9,10 +9,10 @@
 		var loadingLabel = game.add.text(boxCenterX(), boxCenterY()+getMinDimension()/4, '   loading...', { font: getMinDimension()/12+'px '+defaultFont, fill: '#cccccc' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
 		
-		//game.load.audio('pick', 'assets/pick.wav');
-		//game.load.audio('drop', 'assets/drop.wav');
-		//game.load.audio('swap', 'assets/swap.wav');
-		//game.load.audio('complete', 'assets/complete.wav');
+		game.load.audio('pick', 'assets/pick.wav');
+		game.load.audio('drop', 'assets/drop.wav');
+		game.load.audio('swap', 'assets/swap.wav');
+		game.load.audio('complete', 'assets/complete.wav');
 	},
 	create: function ()
 	{
@@ -36,8 +36,9 @@ var menuState = {
 		this.level = randomLevel(5,7);
 		this.level[0][0] = 0;
 		this.level[4][5] = 1;
-		this.level[4][6] = 2
-	    this.tiles = makeLevel(this.level,0,this);
+		this.level[4][6] = 2;
+		this.lockedTiles = fillArray(5,7,false);
+	    this.tiles = makeLevel(this.level,this.lockedTiles,0,this);
 	    this.indexX = -1;
 	    this.indexY = -1;
 		this.swapX = -1;
@@ -142,6 +143,20 @@ var menuState = {
     }
 }
 
+function fillArray(width,height,fill)
+{
+	var array = [];
+	for (var i=0;i<width;i++)
+	{
+		array.push([]);
+		for (var j=0;j<height;j++)
+		{
+			array[i][j] = fill;
+		}
+	}
+	return array;
+}
+
 var levelState = {
     preload: function()
 	{
@@ -155,7 +170,7 @@ var levelState = {
     create: function()
 	{
 		var textTime = 0;
-		if (progress < 1)
+		if (gameLevel-1 < totalLevels)
 		{
 			this.lText = game.add.text(game.world.centerX, game.world.centerY, 'Level ' + gameLevel, { font: getMinDimension()/6+'px '+defaultFont, fill: '#111111' });
 			this.lText.anchor.setTo(0.5, 0.5);
@@ -244,7 +259,8 @@ var mainState = {
 		recordEvent("createdlevel");
 		var xOffset = -game.width;
 	    this.level = createLevel(gameLevel);
-	    this.tiles = makeLevel(this.level,xOffset,this);
+		this.lockedTiles = getLockedTiles(gameLevel);
+	    this.tiles = makeLevel(this.level,this.lockedTiles,xOffset,this);
 	    this.indexX = -1;
 	    this.indexY = -1;
 		this.swapX = -1;
@@ -276,8 +292,7 @@ var mainState = {
 		
 		this.progressBarTween();
 		this.time.events.add(1000, this.clickToContinueTween,this);
-		game.input.onDown.add(this.levelExitTween, this);
-		//this.time.events.add(1000, this.levelExitTween, this);
+		this.time.events.add(1000, function(){game.input.onDown.add(this.levelExitTween, this);}, this);
 	},
 	
 	progressBarTween: function()
@@ -329,6 +344,7 @@ var mainState = {
 	
 	levelExitTween: function()
 	{
+		game.input.onDown.removeAll();
 		recordEvent("moveon");
 		game.tweens.removeAll();
 		var tween = game.add.tween(this.tilesGroup);
@@ -351,33 +367,36 @@ var mainState = {
 
 function update()
 {
-	if ((!swapping) && (dragging) && (!inputBlock) && (this.indexX != -1))
+	if ((playable) && (!swapping) && (dragging) && (!inputBlock) && (this.indexX != -1))
 	{
 		var tileCoord = pointToGridIndex(game.input.x,game.input.y,this.tiles);
 		var tilePosition = pointToGridPosition(game.input.x,game.input.y);
 		
 		if (tileCoord != null)
 		{
-			if (this.swapX == -1)
+			if (this.lockedTiles[tileCoord.y][tileCoord.x]==0)
 			{
-				this.swapX = tilePosition.x;
-				this.swapY = tilePosition.y;
-			}
-			if ((tileCoord.x != this.indexX) || (tileCoord.y != this.indexY))
-			{
-				//console.log("swap "+this.swapX+","+this.swapY+" index "+this.indexX+","+this.indexY+" tilecoord "+tileCoord.x+","+tileCoord.y+" tileposition "+tilePosition.x+","+tilePosition.y);
-				var xDiff = Math.abs(this.swapX-tilePosition.x);
-				var yDiff = Math.abs(this.swapY-tilePosition.y);
-				
-				if ((xDiff<2) && (yDiff<2) && (xDiff != yDiff))
+				if (this.swapX == -1)
 				{
-					if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
-					{}
-					else
+					this.swapX = tilePosition.x;
+					this.swapY = tilePosition.y;
+				}
+				if ((tileCoord.x != this.indexX) || (tileCoord.y != this.indexY))
+				{
+					//console.log("swap "+this.swapX+","+this.swapY+" index "+this.indexX+","+this.indexY+" tilecoord "+tileCoord.x+","+tileCoord.y+" tileposition "+tilePosition.x+","+tilePosition.y);
+					var xDiff = Math.abs(this.swapX-tilePosition.x);
+					var yDiff = Math.abs(this.swapY-tilePosition.y);
+					
+					if ((xDiff<2) && (yDiff<2) && (xDiff != yDiff))
 					{
-						swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
-						this.swapX = tilePosition.x;
-						this.swapY = tilePosition.y;
+						if ((this.menu) && (((tileCoord.x == 0) && (tileCoord.y == 0)) || ((tileCoord.x == 5) && (tileCoord.y == 4)) || ((tileCoord.x == 6) && (tileCoord.y == 4))))
+						{}
+						else
+						{
+							swap(this,this.indexX,this.indexY,tileCoord.x,tileCoord.y);
+							this.swapX = tilePosition.x;
+							this.swapY = tilePosition.y;
+						}
 					}
 				}
 			}
@@ -406,6 +425,11 @@ function pointToGridIndex(x,y,tiles)
 				return {x:j,y:i};
 		}
 	return null;
+}
+
+function tileToGridPosition(tile)
+{
+	return pointToGridPosition(tile.x,tile.y);
 }
 
 function pointToGridPosition(x,y)
@@ -450,14 +474,22 @@ function drawBackground()
 	graphics.drawRect(boxMarginLeft, boxMarginTop, this.game.width-boxMarginLeft-boxMarginRight, this.game.height-boxMarginTop-boxMarginBottom);
 }
 
-function makeTile(x,y,iy,ix,width,height,colour,state)
+function makeTile(x,y,iy,ix,width,height,colour,locked,state)
 {
 	if (typeof state == 'undefined')
 		state == null;
 	var bmd = this.game.add.bitmapData(width+3, height+3);
 	var ctx=bmd.context;
+	if ((locked) && (lockedTilesAreGrey))
+		colour = "lightgrey";
 	ctx.fillStyle=colour;
-	roundRect(ctx,0,0,width,height,width/8,true,false);
+	
+	if (locked)
+		roundRect(ctx,width/6,height/6,width*(2/3),height*(2/3),width/8,true,false);
+	else
+		roundRect(ctx,0,0,width,height,width/8,true,false);
+	
+	
 	var mainTile = game.add.sprite(x,y,bmd);
 	mainTile.inputEnabled = true;
 	mainTile.events.onInputOver.add(function() {
@@ -552,14 +584,17 @@ function tileDown(iy,ix,group,state)
 {
 	if (playable)
 	{
-		dragging = true;
-		state.swapX = -1;
-		state.swapY = -1;
-		game.sound.play('pick');
-		group.getChildAt(1).visible = true;
-		group.bringToTop();
-		if (typeof state != 'undefined')
-			selected(state,iy,ix);
+		if (!state.lockedTiles[iy][ix])
+		{
+			dragging = true;
+			state.swapX = -1;
+			state.swapY = -1;
+			game.sound.play('pick');
+			group.getChildAt(1).visible = true;
+			group.bringToTop();
+			if (typeof state != 'undefined')
+				selected(state,iy,ix);
+		}
 	}
 }
 
@@ -570,6 +605,8 @@ function tileUp(iy,ix,group,state)
 		dragging = false;
 		group.getChildAt(1).visible = false;
 		game.sound.play('drop');
+		p = tileToGridPosition(state.tiles[iy][ix]);
+		recordEvent("drop x:"+p.x+","+p.y);
 		if (typeof state != 'undefined')
 			selected(state,iy,ix);
 	}
@@ -621,7 +658,7 @@ function setOrigin(tiles)
 	}
 }
 
-function makeLevel(tiles,xOffset,state)
+function makeLevel(tiles,lockedTiles,xOffset,state)
 {
 	size = getTileSize(tiles);
 	setOrigin(tiles);
@@ -634,11 +671,10 @@ function makeLevel(tiles,xOffset,state)
     {
 		tileSprites.push([]);
 		for (var i=0;i<tiles[j].length;i++)
-			if (tiles[j][i] > -1)
-			{
-				tileSprites[j][i] = makeTile(0,0,j,i,size-tilePadding,size-tilePadding,tileColours[tiles[j][i]],state); 
-				resetTilePosition(tileSprites[j][i],tiles);
-			}
+		{
+			tileSprites[j][i] = makeTile(0,0,j,i,size-tilePadding,size-tilePadding,tileColours[tiles[j][i]],lockedTiles[j][i],state); 
+			resetTilePosition(tileSprites[j][i],tiles);
+		}
     }
     return tileSprites;
 }
@@ -695,6 +731,9 @@ function swap(state,indexX,indexY,ix,iy)
 {
 	if ((state.indexX != ix) || (state.indexY != iy))
 	{
+		
+		p = tileToGridPosition(state.tiles[iy][ix]);
+		recordEvent("swapto x:"+p.x+","+p.y);
 		var tilePadding = size/10;
 		
 		var depth = state.tiles[iy][ix].height*dropDepth;
@@ -741,59 +780,36 @@ function swap(state,indexX,indexY,ix,iy)
 
 function selected(state,iy,ix)
 {
-	if (state.indexX == -1)
+	if (!state.lockedTiles[iy][ix])
 	{
-		state.indexX = ix;
-		state.indexY = iy;
-		recordEvent("selected");
-	}
-	else
-	{
-		swap(state,this.indexX,this.indexY,ix,iy);
-		recordEvent("swap");
-		if (checkLevel(state.level))
-		  state.levelComplete();
-		state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
-		state.tiles[iy][ix].getChildAt(1).visible = false;
-		state.indexX = -1;
-		state.indexY = -1;
+		if (state.indexX == -1)
+		{
+			state.indexX = ix;
+			state.indexY = iy;
+			p = tileToGridPosition(state.tiles[iy][ix]);
+			recordEvent("selected x:"+p.x+","+p.y);
+		}
+		else
+		{
+			swap(state,this.indexX,this.indexY,ix,iy);
+			if (checkLevel(state.level))
+			  state.levelComplete();
+			state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
+			state.tiles[iy][ix].getChildAt(1).visible = false;
+			state.indexX = -1;
+			state.indexY = -1;
+		}
 	}
 }
 
 function createLevel(level)
 {
-	//return shuffleLevel([[0,1,2,3,4,5],[0,1,2,3,4,5]]);
-	//return shuffleLevel(randomLevel(1,10));
-	switch(level)
-	{
-		case 1:
-			return [[0,1]];
-		case 2:
-			return [[1,2]];
-		case 3:
-			return [[2,0,1]];
-		case 4:
-			return [[0,2,1]];
-		case 5:
-			return [[0,1,0]];
-		case 6:
-			return [[3,1,1]];
-		case 7:
-			return shuffleLevel([[3,2,1,0]]);
-		case 8:
-			return shuffleLevel([[1,3,2,1,]]);
-		case 9:
-			return shuffleLevel([[4,1,3,1]]);
-		case 10:
-			return shuffleLevel([[5,4,1,4,]]);
-		case 11:
-			return shuffleLevel([[2,1,3,2,1,0]]);
-		case 12:
-			return shuffleLevel([[4,2,1,0,3,1,0,0,4]])
-		//case 10:
-		//	return shuffleLevel([[5,4,2,1,0,3,1,0,0,4]])
-	}
+	return levelList[level-1].level;
+}
 
+function getLockedTiles(level)
+{
+	return levelList[level-1].locked;
 }
 
 /**
@@ -894,7 +910,16 @@ function checkLevel(level)
   return !falsified;
 }
 
-var totalLevels = 10;
+levelList = [
+	{level:[[5,4,0,1,3,2,1,0,0,4]],
+	locked:[[true,true,false,false,true,true,true,true,true,true]]},
+	{level:[[5,4,1,0,3,1,2,0,0,4]],
+	locked:[[true,true,true,true,true,false,false,true,true,true]]},
+	{level:[[5,4,1,0,3,0,2,1,0,4]],
+	locked:[[true,true,true,true,false,false,false,true,true,true]]},
+]
+var totalLevels = levelList.length;
+var lockedTilesAreGrey = true;
 
 var minHeight = 200;
 var minWidth = 200;
