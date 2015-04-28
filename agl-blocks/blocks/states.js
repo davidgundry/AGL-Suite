@@ -13,7 +13,7 @@ AGLBlocks.LoadState.prototype.preload = function()
 	this.AGL.drawBackground();
 	if (AGLBlocks.showLoadingScreen)
 	{
-		var titleLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px Serif', fill: '#999999' });
+		var titleLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px '+ AGLBlocks.titleFont, fill: '#999999' });
 		titleLabel.anchor.setTo(0.5, 0.5);
 		
 		var loadingText = '   loading...';
@@ -122,7 +122,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			this.tilesGroup.add(this.tiles[i][j]);
 		}
 	
-	this.titleText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px Serif', fill: '#000000' });
+	this.titleText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px '+AGLBlocks.titleFont, fill: '#000000' });
 	this.titleText.anchor.setTo(0.5, 0.5);
 }
 

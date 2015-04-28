@@ -9,7 +9,7 @@
 		this.contentsType = "colour";
 	else
 		this.contentsType = contentsType;
-	this.audio = typeof audio !== "undefined" ? audio : true;
+	this.audio = typeof audio !== 'undefined' ? audio : true;
 	
 	if (typeof targetDiv !== "undefined")
 	{
@@ -56,6 +56,7 @@ AGLBlocks.totalLevels = AGLBlocks.levelList.length;
 AGLBlocks.minHeight = 200;
 AGLBlocks.minWidth = 200;
 AGLBlocks.defaultFont = 'Sans-Serif';
+AGLBlocks.titleFont = 'Serif';
 AGLBlocks.dropDepth = 1/40;
 AGLBlocks.staticTileContents = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#aaaaaa','#ccaa33'];
 
@@ -255,6 +256,15 @@ AGLBlocks.getLockedTiles = function(level)
 {
 	return AGLBlocks.levelList[level-1].locked;
 }
+
+/*
+AGLBlocks.tileToGridIndex = function(tile)
+{
+	if (tile == null)
+		return null;
+	return {x:tile.gridX,y:tile.gridY};	
+}*/
+
 
 AGLBlocks.prototype.gameLevel = 0;
 AGLBlocks.prototype.progress = 0;
@@ -538,14 +548,6 @@ AGLBlocks.prototype.updateProgress = function()
 	this.progress = Math.max(this.progress,0);
 	this.progress = Math.min(this.progress,1);
 }
-
-/*
-AGLBlocks.tileToGridIndex = function(tile)
-{
-	if (tile == null)
-		return null;
-	return {x:tile.gridX,y:tile.gridY};	
-}*/
 
 AGLBlocks.prototype.swap = function(state,indexX,indexY,ix,iy)
 {
