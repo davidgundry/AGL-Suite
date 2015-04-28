@@ -1,12 +1,45 @@
-﻿function AGLBlocks()
+﻿function AGLBlocks(targetDiv,greyLocked,contentsType,audio)
 {
-	this.lockedTilesAreGrey = false;
-	this.contentsType = "colour"; //sprite | colour
-	this.audio = true;
+	this.lockedTilesAreGrey = typeof greyLocked !== "undefined" ? greyLocked : false;
+	if ((contentsType != "colour") || (contentsType != "sprite"))
+		this.contentsType = "colour";
+	else
+		this.contentsType = contentsType;
+	this.audio = typeof audio !== "undefined" ? audio : true;
+	
+	if (typeof targetDiv !== "undefined")
+	{
+		var container = document.getElementById(targetDiv);
+		if (container != null)
+			this.game = new Phaser.Game(container.clientWidth, container.clientHeight, Phaser.AUTO, container);
+		else
+		{
+			console.log("Invalid target container");
+			return;
+		}
+	}
+	else
+	{	
+		this.game = new Phaser.Game(Math.max(AGLBlocks.minWidth,window.innerWidth), Math.max(AGLBlocks.minHeight,window.innerHeight), Phaser.AUTO);
+	}
+		this.paddingLeft = Math.round(this.game.width/8);
+		this.paddingRight = Math.round(this.game.width/8);
+		this.paddingTop  = Math.round(this.game.height/8);
+		this.paddingBottom = Math.round(this.game.height/8);
+
+		this.boxMarginLeft = Math.round(this.game.width/10);
+		this.boxMarginRight = Math.round(this.game.width/10);
+		this.boxMarginTop = Math.round(this.game.height/10);
+		this.boxMarginBottom = Math.round(this.game.height/10);
+
+		this.maxBlockSize = Math.min(Math.round(this.game.width/3),Math.round(this.game.height/3));
+		
+		this.addGameStates();
+		this.game.state.start('load');
 }
 
 AGLBlocks.title = "blocks";
-
+AGLBlocks.showLoadingScreen = false;
 AGLBlocks.levelList = [
 	{level:[[5,4,0,1,3,2,1,0,0,4]],
 	locked:[[true,true,false,false,true,true,true,true,true,true]]},
@@ -219,20 +252,6 @@ AGLBlocks.getLockedTiles = function(level)
 	return AGLBlocks.levelList[level-1].locked;
 }
 
-AGLBlocks.prototype.game = new Phaser.Game(Math.max(AGLBlocks.minWidth,window.innerWidth), Math.max(AGLBlocks.minHeight,window.innerHeight), Phaser.AUTO, 'gameDiv');
-
-AGLBlocks.prototype.paddingLeft = Math.round(AGLBlocks.prototype.game.width/8);
-AGLBlocks.prototype.paddingRight = Math.round(AGLBlocks.prototype.game.width/8);
-AGLBlocks.prototype.paddingTop  = Math.round(AGLBlocks.prototype.game.height/8);
-AGLBlocks.prototype.paddingBottom = Math.round(AGLBlocks.prototype.game.height/8);
-
-AGLBlocks.prototype.boxMarginLeft = Math.round(AGLBlocks.prototype.game.width/10);
-AGLBlocks.prototype.boxMarginRight = Math.round(AGLBlocks.prototype.game.width/10);
-AGLBlocks.prototype.boxMarginTop = Math.round(AGLBlocks.prototype.game.height/10);
-AGLBlocks.prototype.boxMarginBottom = Math.round(AGLBlocks.prototype.game.height/10);
-
-AGLBlocks.prototype.maxBlockSize = Math.min(Math.round(AGLBlocks.prototype.game.width/3),Math.round(AGLBlocks.prototype.game.height/3));
-
 AGLBlocks.prototype.gameLevel = 0;
 AGLBlocks.prototype.progress = 0;
 AGLBlocks.prototype.tileContents = [];
@@ -353,7 +372,6 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 		var emptySprite = this.game.add.sprite(0,0);
 		mainTile.addChild(emptySprite);
 	}
-
 		
 	mainTile.inputEnabled = true;
 	
@@ -365,13 +383,13 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 		this.scope.tileUp(iy,ix,this.sprite,this.state);
 	}, {ix:ix,iy:iy,sprite:mainTile, state:state, scope:this});
 
-	var shadowDrop = Math.floor(height*AGLBlocks.dropDepth);
+	/*var shadowDrop = Math.floor(height*AGLBlocks.dropDepth);
 	var bmd = this.game.add.bitmapData(width+shadowDrop, height+shadowDrop);
 	var ctx=bmd.context;
 	ctx.fillstyle='0x111111';
 	AGLBlocks.roundRect(ctx,shadowDrop,shadowDrop,width,height,width/8,true,false);
 	var shadow = this.game.add.sprite(0, 0, bmd);
-	shadow.alpha = 0.0;
+	shadow.alpha = 0.0;*/
 
 	var bmd = this.game.add.bitmapData(width+width/5, height+height/5);
 	var ctx=bmd.context;
@@ -381,7 +399,7 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	var outline = this.game.add.sprite(-ctx.lineWidth/2,-ctx.lineWidth/2,bmd);
 	outline.visible = false;
 
-	mainTile.addChild(shadow);
+	//mainTile.addChild(shadow);
 	mainTile.addChild(outline);
 	mainTile.bringToTop();
 	
@@ -402,7 +420,7 @@ AGLBlocks.prototype.tileDown = function(iy,ix,group,state)
 			state.swapX = -1;
 			state.swapY = -1;
 			this.game.sound.play('pick');
-			group.getChildAt(2).visible = true;
+			group.getChildAt(1).visible = true;
 			group.bringToTop();
 			if (typeof state != 'undefined')
 				this.selected(state,iy,ix);
@@ -420,7 +438,7 @@ AGLBlocks.prototype.tileUp = function(iy,ix,group,state)
 			AGLBlocks.recordEvent("drop x:"+p.x+","+p.y);
 		}
 		this.dragging = false;
-		group.getChildAt(2).visible = false;
+		group.getChildAt(1).visible = false;
 		this.game.sound.play('drop');
 		if (typeof state != 'undefined')
 			this.selected(state,iy,ix);
@@ -510,15 +528,13 @@ AGLBlocks.prototype.drawProgressBar = function(fadeIn)
 	}
 	  
 	var progressHeight = this.getProgressHeight(this.progress);
-	  
 	var bmd = this.game.add.bitmapData(this.boxMarginRight/3, progressHeight);
-	var ctx=bmd.context;
+	var ctx = bmd.context;
 	ctx.fillStyle="lightblue";
 	AGLBlocks.roundRect(ctx,0,0,this.boxMarginRight/3,progressHeight,5,true,false);
 	
-	var sprite = this.game.add.sprite(this.game.width-this.boxMarginRight+this.boxMarginRight/3,
-						   this.game.height-this.boxMarginBottom-progressHeight,bmd);
-	if (this.progress ==0)
+	var sprite = this.game.add.sprite(this.game.width-this.boxMarginRight+this.boxMarginRight/3,this.game.height-this.boxMarginBottom-progressHeight,bmd);
+	if (this.progress == 0)
 		sprite.visible = false;
 	return sprite;
 }
@@ -530,7 +546,7 @@ AGLBlocks.prototype.getProgressHeight = function(p)
 
 AGLBlocks.prototype.updateProgress = function()
 {
-	this.progress = ((this.gameLevel-1)/this.totalLevels);
+	this.progress = ((this.gameLevel-1)/AGLBlocks.totalLevels);
 	this.progress = Math.max(this.progress,0);
 	this.progress = Math.min(this.progress,1);
 }
@@ -611,8 +627,8 @@ AGLBlocks.prototype.selected = function(state,iy,ix)
 			this.swap(state,this.indexX,this.indexY,ix,iy);
 			if (AGLBlocks.checkLevel(state.level))
 			  state.levelComplete();
-			state.tiles[state.indexY][state.indexX].getChildAt(2).visible = false;
-			state.tiles[iy][ix].getChildAt(2).visible = false;
+			state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
+			state.tiles[iy][ix].getChildAt(1).visible = false;
 			state.indexX = -1;
 			state.indexY = -1;
 		}
@@ -631,10 +647,3 @@ AGLBlocks.prototype.addGameStates = function()
 	this.game.state.add('level', this.levelState);
 	this.game.state.add('menu', this.menuState);
 }
-
-AGLBlocks.prototype.start = function()
-{
-	this.addGameStates();
-	this.game.state.start('load');
-}
-

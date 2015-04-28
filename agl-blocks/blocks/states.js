@@ -11,13 +11,15 @@ AGLBlocks.LoadState = function(AGL)
 AGLBlocks.LoadState.prototype.preload = function()
 {
 	this.AGL.drawBackground();
-	
-	var titleLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px Serif', fill: '#999999' });
-	titleLabel.anchor.setTo(0.5, 0.5);
-	
-	var loadingText = '   loading...';
-	var loadingLabel = this.AGL.game.add.text(this.AGL.boxCenterX(), this.AGL.boxCenterY()+this.AGL.getMinDimension()/4, loadingText, { font: this.AGL.getMinDimension()/12+'px '+AGLBlocks.defaultFont, fill: '#cccccc' });
-	loadingLabel.anchor.setTo(0.5, 0.5);
+	if (AGLBlocks.showLoadingScreen)
+	{
+		var titleLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px Serif', fill: '#999999' });
+		titleLabel.anchor.setTo(0.5, 0.5);
+		
+		var loadingText = '   loading...';
+		var loadingLabel = this.AGL.game.add.text(this.AGL.boxCenterX(), this.AGL.boxCenterY()+this.AGL.getMinDimension()/4, loadingText, { font: this.AGL.getMinDimension()/12+'px '+AGLBlocks.defaultFont, fill: '#cccccc' });
+		loadingLabel.anchor.setTo(0.5, 0.5);
+	}
 	
 	if (this.AGL.audio)
 	{
@@ -55,7 +57,6 @@ AGLBlocks.MenuState.prototype.indexX = -1;
 AGLBlocks.MenuState.prototype.indexY = -1;
 AGLBlocks.MenuState.prototype.swapX = -1;
 AGLBlocks.MenuState.prototype.swapY = -1;
-AGLBlocks.MenuState.prototype.level = AGLBlocks.randomLevel(5,7,AGLBlocks.staticTileContents.length);
 AGLBlocks.MenuState.prototype.lockedTiles = AGLBlocks.fillArray(5,7,false);
 AGLBlocks.MenuState.prototype.menu = true;
 
@@ -70,7 +71,8 @@ AGLBlocks.MenuState.prototype.create = function ()
 {
 	AGLBlocks.recordEvent("startedmenu")
 
-	this.level = AGLBlocks.shuffleArray(this.level);
+	this.AGL.tileContents = AGLBlocks.staticTileContents;
+	this.level = AGLBlocks.randomLevel(5,7,AGLBlocks.staticTileContents.length);
 	this.level[0][0] = 0;
 	this.level[4][5] = 1;
 	this.level[4][6] = 2;
@@ -201,17 +203,17 @@ AGLBlocks.LevelState.prototype.preload = function()
 AGLBlocks.LevelState.prototype.create = function()
 {
 	var textTime = 0;
-	if (this.AGL.gameLevel-1 < totalLevels)
+	if (this.AGL.gameLevel-1 < AGLBlocks.totalLevels)
 	{
 		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Level ' + this.AGL.gameLevel, { font: this.AGL.getMinDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 		this.lText.anchor.setTo(0.5, 0.5);
-		//this.time.events.add(800, function () { this.game.state.start('main') }, this);
+		this.time.events.add(800, function () { this.AGL.game.state.start('main') }, this);
 	}
 	else
 	{
 		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Well Done!', { font: this.AGL.getMinDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 		this.lText.anchor.setTo(0.5, 0.5);
-		this.time.events.add(1800, function () { this.game.state.start('menu') }, this);
+		this.time.events.add(1800, function () { this.AGL.game.state.start('menu') }, this);
 		textTime = 1000;
 	}
 	this.tweenIn();
@@ -263,9 +265,9 @@ AGLBlocks.MainState.prototype.create =function ()
 {
 	AGLBlocks.recordEvent("createdlevel");
 	var xOffset = -this.AGL.game.width;
-	this.level = this.AGL.createLevel(this.AGL.gameLevel);
-	this.lockedTiles = this.AGL.getLockedTiles(this.AGL.gameLevel);
-	this.tiles = makeLevel(this.level,this.lockedTiles,xOffset,this);
+	this.level = AGLBlocks.createLevel(this.AGL.gameLevel);
+	this.lockedTiles = AGLBlocks.getLockedTiles(this.AGL.gameLevel);
+	this.tiles = this.AGL.makeLevel(this.level,this.lockedTiles,xOffset,this);
 	this.indexX = -1;
 	this.indexY = -1;
 	this.swapX = -1;
@@ -297,14 +299,14 @@ AGLBlocks.MainState.prototype.levelComplete = function()
 	
 AGLBlocks.MainState.prototype.progressBarTween = function()
 {
-	var oldHeight = this.AGL.getProgressHeight(progress);
+	var oldHeight = this.AGL.getProgressHeight(this.AGL.progress);
 	this.AGL.gameLevel++;
 	this.AGL.updateProgress();
 	
 	var tween = this.AGL.game.add.tween(this.progressBar);
 	tween.to({
-		height: progress*(this.AGL.game.height-this.AGL.boxMarginTop-this.AGL.boxMarginBottom),
-		y: this.progressBar.y+oldHeight-this.AGL.getProgressHeight(progress)
+		height: this.AGL.progress*(this.AGL.game.height-this.AGL.boxMarginTop-this.AGL.boxMarginBottom),
+		y: this.progressBar.y+oldHeight-this.AGL.getProgressHeight(this.AGL.progress)
 	}, 800);
 	this.progressBar.visible = true;
 	tween.start();

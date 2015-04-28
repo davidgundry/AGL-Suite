@@ -5,13 +5,11 @@
     <script type="text/javascript" src="phaser.js"></script>
     <script type="text/javascript" src="game.js"></script>
 	<script type="text/javascript" src="states.js"></script>
-	<script type="text/javascript">
-		var aglBlocksGame = new AGLBlocks();
-		aglBlocksGame.start();
-	</script>
 </head>
 <body style="margin:0;">
-    <div id="gameDiv"></div>
-    <div id="gameOutput"></div>
+    <div id="gameTarget" style="width:640px;height:480px;"></div>
 </body>
+	<script type="text/javascript">
+		new AGLBlocks("gameTarget");
+	</script>
 </html>
