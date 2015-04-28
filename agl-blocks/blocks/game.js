@@ -383,14 +383,6 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 		this.scope.tileUp(iy,ix,this.sprite,this.state);
 	}, {ix:ix,iy:iy,sprite:mainTile, state:state, scope:this});
 
-	/*var shadowDrop = Math.floor(height*AGLBlocks.dropDepth);
-	var bmd = this.game.add.bitmapData(width+shadowDrop, height+shadowDrop);
-	var ctx=bmd.context;
-	ctx.fillstyle='0x111111';
-	AGLBlocks.roundRect(ctx,shadowDrop,shadowDrop,width,height,width/8,true,false);
-	var shadow = this.game.add.sprite(0, 0, bmd);
-	shadow.alpha = 0.0;*/
-
 	var bmd = this.game.add.bitmapData(width+width/5, height+height/5);
 	var ctx=bmd.context;
 	ctx.strokeStyle='blue';
@@ -399,7 +391,6 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	var outline = this.game.add.sprite(-ctx.lineWidth/2,-ctx.lineWidth/2,bmd);
 	outline.visible = false;
 
-	//mainTile.addChild(shadow);
 	mainTile.addChild(outline);
 	mainTile.bringToTop();
 	
