@@ -1,7 +1,11 @@
 ﻿function AGLBlocks(targetDiv,greyLocked,contentsType,audio)
 {
-	this.lockedTilesAreGrey = typeof greyLocked !== "undefined" ? greyLocked : false;
-	if ((contentsType != "colour") || (contentsType != "sprite"))
+	if (typeof greyLocked !== "undefined")
+		this.lockedTilesAreGrey = greyLocked;
+	else
+		this.lockedTilesAreGrey = false;
+		
+	if ((contentsType !== "colour") && (contentsType !== "sprite"))
 		this.contentsType = "colour";
 	else
 		this.contentsType = contentsType;
@@ -329,13 +333,13 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 		state == null;
 		
 	var bmd = this.game.add.bitmapData(width+3, height+3);
-	var ctx=bmd.context;
+	var ctx = bmd.context;
 	
-	ctx.save();
+	//ctx.save();
 
-	ctx.fillStyle=tileContents[contentsIndex];
-	if ((this.locked) && (this.lockedTilesAreGrey))
-		ctx.fillStyle= "lightgrey";
+	ctx.fillStyle = tileContents[contentsIndex];
+	if ((locked) && (this.lockedTilesAreGrey))
+		ctx.fillStyle = "lightgrey";
 	else if (this.contentsType!="colour")
 		ctx.globalAlpha = 0;
 		
@@ -345,34 +349,8 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 		AGLBlocks.roundRect(ctx,0,0,width,height,width/8,true,false);
 	
 	var mainTile = this.game.add.sprite(x,y,bmd);
-	ctx.restore();
-	
-	if (this.contentsType=="sprite")
-	{
-		if (locked)
-		{
-			var symbol = this.game.add.sprite(width/6,height/6,"symbols");
-			symbol.width = width*(2/3);
-			symbol.height = height*(2/3);
-		}
-		else
-		{
-			var symbol = this.game.add.sprite(0,0,"symbols");
-			symbol.width = width;
-			symbol.height = height;
-		}
-		symbol.frame = contentsIndex;
-		if ((this.locked) && (this.lockedTilesAreGrey))
-			symbol.alpha=0;
-		mainTile.addChild(symbol);
-		
-	}
-	else
-	{
-		var emptySprite = this.game.add.sprite(0,0);
-		mainTile.addChild(emptySprite);
-	}
-		
+	//ctx.restore();
+			
 	mainTile.inputEnabled = true;
 	
 	mainTile.events.onInputDown.add(function() {
@@ -392,6 +370,25 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	outline.visible = false;
 
 	mainTile.addChild(outline);
+	if (this.contentsType=="sprite")
+	{
+		if (locked)
+		{
+			var symbol = this.game.add.sprite(width/6,height/6,"symbols");
+			symbol.width = width*(2/3);
+			symbol.height = height*(2/3);
+		}
+		else
+		{
+			var symbol = this.game.add.sprite(0,0,"symbols");
+			symbol.width = width;
+			symbol.height = height;
+		}
+		symbol.frame = contentsIndex;
+		if ((locked) && (this.lockedTilesAreGrey))
+			symbol.alpha=0;
+		mainTile.addChild(symbol);
+	}
 	mainTile.bringToTop();
 	
 	mainTile.gridX = ix;
@@ -411,7 +408,7 @@ AGLBlocks.prototype.tileDown = function(iy,ix,group,state)
 			state.swapX = -1;
 			state.swapY = -1;
 			this.game.sound.play('pick');
-			group.getChildAt(1).visible = true;
+			group.getChildAt(0).visible = true;
 			group.bringToTop();
 			if (typeof state != 'undefined')
 				this.selected(state,iy,ix);
@@ -429,7 +426,7 @@ AGLBlocks.prototype.tileUp = function(iy,ix,group,state)
 			AGLBlocks.recordEvent("drop x:"+p.x+","+p.y);
 		}
 		this.dragging = false;
-		group.getChildAt(1).visible = false;
+		group.getChildAt(0).visible = false;
 		this.game.sound.play('drop');
 		if (typeof state != 'undefined')
 			this.selected(state,iy,ix);
@@ -618,8 +615,8 @@ AGLBlocks.prototype.selected = function(state,iy,ix)
 			this.swap(state,this.indexX,this.indexY,ix,iy);
 			if (AGLBlocks.checkLevel(state.level))
 			  state.levelComplete();
-			state.tiles[state.indexY][state.indexX].getChildAt(1).visible = false;
-			state.tiles[iy][ix].getChildAt(1).visible = false;
+			state.tiles[state.indexY][state.indexX].getChildAt(0).visible = false;
+			state.tiles[iy][ix].getChildAt(0).visible = false;
 			state.indexX = -1;
 			state.indexY = -1;
 		}
