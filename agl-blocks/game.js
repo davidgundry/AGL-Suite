@@ -40,7 +40,7 @@
 		
 		this.addGameStates();
 		this.game.state.start('load');
-}
+};
 
 AGLBlocks.title = "blocks";
 AGLBlocks.showLoadingScreen = false;
@@ -51,7 +51,7 @@ AGLBlocks.levelList = [
 	locked:[[true,true,true,true,true,false,false,true,true,true]]},
 	{level:[[5,4,1,0,3,0,2,1,0,4]],
 	locked:[[true,true,true,true,false,false,false,true,true,true]]},
-]
+];
 AGLBlocks.totalLevels = AGLBlocks.levelList.length;
 AGLBlocks.minHeight = 200;
 AGLBlocks.minWidth = 200;
@@ -72,37 +72,36 @@ AGLBlocks.fillArray = function(width,height,fill)
 		}
 	}
 	return array;
-}
+};
 
 AGLBlocks.recordEvent = function(description)
 {
+	var events = [];
 	if (sessionStorage.events)
-		var events = JSON.parse(sessionStorage.events); 
-	else
-		var events = []
-		
+		events = JSON.parse(sessionStorage.events); 
+
 	var time = Date.now();
 	events.push({t:time,d:description});//,level:this.gameLevel});
-	sessionStorage.events = JSON.stringify(events)
+	sessionStorage.events = JSON.stringify(events);
 	AGLBlocks.log(time + ": " + description);
-}
+};
 
 AGLBlocks.log = function(message)
 {
 	console.log(message);
-}
+};
 
 AGLBlocks.shuffleArray = function(array)
 {
 	for (var i=array.length;i>=0;i--)
 	{
-		var r = Math.round(Math.random()*i)
+		var r = Math.round(Math.random()*i);
 		var c = array[r];
 		array.splice(r,1);
 		array.push(c);
 	}
 	return array;
-}
+};
 
 AGLBlocks.randomLevel = function(height,width,length)
 {
@@ -114,7 +113,7 @@ AGLBlocks.randomLevel = function(height,width,length)
 			level[i].push(Math.floor(Math.random()*length));
 	}
 	return level;
-}
+};
 
 AGLBlocks.roundRect = function(ctx, x, y, width, height, radius, fill, stroke)
 {
@@ -135,7 +134,7 @@ AGLBlocks.roundRect = function(ctx, x, y, width, height, radius, fill, stroke)
 		ctx.stroke();
 	if (fill)
 		ctx.fill();
-}
+};
 
 AGLBlocks.pointToGridIndex = function(x,y,tiles)
 {
@@ -147,7 +146,7 @@ AGLBlocks.pointToGridIndex = function(x,y,tiles)
 				return {x:j,y:i};
 		}
 	return null;
-}
+};
 
 /**
  * Currently only shuffles within rows.
@@ -156,7 +155,7 @@ AGLBlocks.shuffleLevel = function(level)
 {
 	for (var i=level.length*level[0].length;i>=0;i--)
 	{
-		var r = Math.floor(Math.random()*i)
+		var r = Math.floor(Math.random()*i);
 		var c = level[Math.floor(r/level[0].length)][r%level[0].length];
 				level[Math.floor(r/level[0].length)].push(c);
 		level[Math.floor(r/level[0].length)].splice(r%level[0].length,1);
@@ -165,7 +164,7 @@ AGLBlocks.shuffleLevel = function(level)
 		return level;
 	else
 		return AGLBlocks.shuffleLevel(level);
-}
+};
 
 AGLBlocks.checkLevel = function(level)
 {
@@ -245,17 +244,17 @@ AGLBlocks.checkLevel = function(level)
 	}
 
   return !falsified;
-}
+};
 
 AGLBlocks.createLevel = function(level)
 {
 	return AGLBlocks.levelList[level-1].level;
-}
+};
 
 AGLBlocks.getLockedTiles = function(level)
 {
 	return AGLBlocks.levelList[level-1].locked;
-}
+};
 
 /*
 AGLBlocks.tileToGridIndex = function(tile)
@@ -292,41 +291,40 @@ AGLBlocks.prototype.pretty = function(tiles,tileAlpha,time,menu)
 		tween.onComplete.add(function() {this.depretty(y,x,tiles,tileAlpha,time);}, this);
 		tween.start();
 	}
-	time.events.add(Math.random()*2000+500,function() {this.pretty(tiles,tileAlpha,time,menu);},this)
-}
+	time.events.add(Math.random()*2000+500,function() {this.pretty(tiles,tileAlpha,time,menu);},this);
+};
 
 AGLBlocks.prototype.depretty = function(y,x,tiles,tileAlpha)
 {
 	var tween = this.game.add.tween(tiles[y][x]);
 	tween.to({alpha: tileAlpha},200);
 	tween.start();
-}
+};
 
 AGLBlocks.prototype.tileToGridPosition = function(tile)
 {
 	return this.pointToGridPosition(tile.x,tile.y);
-}
+};
 
 AGLBlocks.prototype.pointToGridPosition = function(x,y)
 {
-	var tilepadding = this.size/10;
 	x -= this.originX;
 	x /= this.size;
 	y -= this.originY;
 	y /= this.size;
 
 	return {x:Math.floor(x),y:Math.floor(y)};
-}
+};
 
 AGLBlocks.prototype.boxCenterX = function()
 {
-    return ((this.game.world.width-this.boxMarginRight)+this.boxMarginLeft)/2
-}
+    return ((this.game.world.width-this.boxMarginRight)+this.boxMarginLeft)/2;
+};
 
 AGLBlocks.prototype.boxCenterY = function()
 {
-    return ((this.game.world.height-this.boxMarginBottom)+this.boxMarginTop)/2
-}
+    return ((this.game.world.height-this.boxMarginBottom)+this.boxMarginTop)/2;
+};
 
 AGLBlocks.prototype.drawBackground = function()
 {
@@ -335,7 +333,7 @@ AGLBlocks.prototype.drawBackground = function()
 	graphics.beginFill(0xffffe7);
 	graphics.lineStyle(10, 0xFFEEAA, 1);
 	graphics.drawRect(this.boxMarginLeft, this.boxMarginTop, this.game.width-this.boxMarginLeft-this.boxMarginRight, this.game.height-this.boxMarginTop-this.boxMarginBottom);
-}
+};
 
 AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,contentsIndex,locked,state)
 {
@@ -371,8 +369,8 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 		this.scope.tileUp(iy,ix,this.sprite,this.state);
 	}, {ix:ix,iy:iy,sprite:mainTile, state:state, scope:this});
 
-	var bmd = this.game.add.bitmapData(width+width/5, height+height/5);
-	var ctx=bmd.context;
+	bmd = this.game.add.bitmapData(width+width/5, height+height/5);
+	ctx = bmd.context;
 	ctx.strokeStyle='blue';
 	ctx.lineWidth=height/10;
 	AGLBlocks.roundRect(ctx,ctx.lineWidth/2,ctx.lineWidth/2,width,height,width/8,false,true);
@@ -380,17 +378,18 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	outline.visible = false;
 
 	mainTile.addChild(outline);
+	var symbol = null;
 	if (this.contentsType=="sprite")
 	{
 		if (locked)
 		{
-			var symbol = this.game.add.sprite(width/6,height/6,"symbols");
+			symbol = this.game.add.sprite(width/6,height/6,"symbols");
 			symbol.width = width*(2/3);
 			symbol.height = height*(2/3);
 		}
 		else
 		{
-			var symbol = this.game.add.sprite(0,0,"symbols");
+			symbol = this.game.add.sprite(0,0,"symbols");
 			symbol.width = width;
 			symbol.height = height;
 		}
@@ -405,7 +404,7 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	mainTile.gridY = iy;
 
 	return mainTile;
-}
+};
 
 
 AGLBlocks.prototype.tileDown = function(iy,ix,group,state)
@@ -424,7 +423,7 @@ AGLBlocks.prototype.tileDown = function(iy,ix,group,state)
 				this.selected(state,iy,ix);
 		}
 	}
-}
+};
 
 AGLBlocks.prototype.tileUp = function(iy,ix,group,state)
 {
@@ -432,7 +431,7 @@ AGLBlocks.prototype.tileUp = function(iy,ix,group,state)
 	{
 		if (this.dragging)
 		{
-			p = this.tileToGridPosition(state.tiles[iy][ix]);
+			var p = this.tileToGridPosition(state.tiles[iy][ix]);
 			AGLBlocks.recordEvent("drop x:"+p.x+","+p.y);
 		}
 		this.dragging = false;
@@ -441,14 +440,14 @@ AGLBlocks.prototype.tileUp = function(iy,ix,group,state)
 		if (typeof state != 'undefined')
 			this.selected(state,iy,ix);
 	}
-}
+};
 
 AGLBlocks.prototype.resetTilePosition = function(tile,tiles)
 {
-	tilePadding = this.size/10;
+	var tilePadding = this.size/10;
 	tile.x = this.originX+tile.gridX*(this.size)+tilePadding/2;
 	tile.y = this.originY+tile.gridY*(this.size)+tilePadding/2;
-}
+};
 
 AGLBlocks.prototype.getMinDimension = function()
 {
@@ -459,26 +458,27 @@ AGLBlocks.prototype.getMinDimension = function()
 		return maxHeight;
 	else
 		return maxWidth;
-}
+};
 
 AGLBlocks.prototype.getTileSize = function(tiles)
 {
     var maxWidth = Math.floor(this.game.world.width-this.paddingLeft-this.paddingRight);
     var maxHeight = Math.floor(this.game.world.height-this.paddingTop-this.paddingBottom);
-    
+    var tileSize = 0;
+	
     if (maxWidth/tiles[0].length > maxHeight/tiles.length)
     {
-		  var minDimension = maxHeight;
-		  var tileSize = maxHeight/tiles.length;
+		  //var minDimension = maxHeight;
+		   tileSize = maxHeight/tiles.length;
     }
     else
     {
-		  var minDimension = maxWidth;
-		  var tileSize = maxWidth/tiles[0].length;
+		  //var minDimension = maxWidth;
+		  tileSize = maxWidth/tiles[0].length;
     }
     
     return Math.min(this.maxBlockSize,tileSize);
-}
+};
 
 AGLBlocks.prototype.setOrigin = function(tiles)
 {
@@ -487,7 +487,7 @@ AGLBlocks.prototype.setOrigin = function(tiles)
 		this.originY = Math.round(this.boxCenterY()-(this.size*tiles.length)/2);
 		this.originX = Math.round(this.boxCenterX()-(this.size*tiles[0].length)/2);
 	}
-}
+};
 
 AGLBlocks.prototype.makeLevel = function(tiles,lockedTiles,xOffset,state)
 {
@@ -508,7 +508,7 @@ AGLBlocks.prototype.makeLevel = function(tiles,lockedTiles,xOffset,state)
 		}
     }
     return tileSprites;
-}
+};
 
 AGLBlocks.prototype.drawProgressBar = function(fadeIn)
 {
@@ -535,30 +535,30 @@ AGLBlocks.prototype.drawProgressBar = function(fadeIn)
 	if (this.progress == 0)
 		sprite.visible = false;
 	return sprite;
-}
+};
 
 AGLBlocks.prototype.getProgressHeight = function(p)
 {
 	return Math.max(1,p*(this.game.height-this.boxMarginTop-this.boxMarginBottom));
-}
+};
 
 AGLBlocks.prototype.updateProgress = function()
 {
 	this.progress = ((this.gameLevel-1)/AGLBlocks.totalLevels);
 	this.progress = Math.max(this.progress,0);
 	this.progress = Math.min(this.progress,1);
-}
+};
 
 AGLBlocks.prototype.swap = function(state,indexX,indexY,ix,iy)
 {
 	if ((state.indexX != ix) || (state.indexY != iy))
 	{
 		
-		p = this.tileToGridPosition(state.tiles[iy][ix]);
+		var p = this.tileToGridPosition(state.tiles[iy][ix]);
 		AGLBlocks.recordEvent("swapto x:"+p.x+","+p.y);
 		var tilePadding = this.size/10;
 		
-		var depth = state.tiles[iy][ix].height*AGLBlocks.dropDepth;
+		//var depth = state.tiles[iy][ix].height*AGLBlocks.dropDepth;
 		var newX = state.tiles[state.indexY][state.indexX].x;
 		var newY = state.tiles[state.indexY][state.indexX].y;
 	
@@ -588,7 +588,7 @@ AGLBlocks.prototype.swap = function(state,indexX,indexY,ix,iy)
 		tween.onComplete.add(function() {this.inputBlock = false; this.swapping = false;},this);
 		tween.start();
 		
-		var tween = this.game.add.tween(state.tiles[iy][ix]);
+		tween = this.game.add.tween(state.tiles[iy][ix]);
 		tween.to({x:this.originX+this.size*x2+tilePadding/2,
 		y:this.originY+this.size*y2+tilePadding/2},80);
 		tween.onComplete.add(function() {this.inputBlock = false;},this);
@@ -599,7 +599,7 @@ AGLBlocks.prototype.swap = function(state,indexX,indexY,ix,iy)
 		if (this.audio)
 			this.game.sound.play('swap');
 	}
-}
+};
 
 AGLBlocks.prototype.selected = function(state,iy,ix)
 {
@@ -609,7 +609,7 @@ AGLBlocks.prototype.selected = function(state,iy,ix)
 		{
 			state.indexX = ix;
 			state.indexY = iy;
-			p = this.tileToGridPosition(state.tiles[iy][ix]);
+			var p = this.tileToGridPosition(state.tiles[iy][ix]);
 			AGLBlocks.recordEvent("selected x:"+p.x+","+p.y);
 		}
 		else
@@ -623,7 +623,7 @@ AGLBlocks.prototype.selected = function(state,iy,ix)
 			state.indexY = -1;
 		}
 	}
-}
+};
 
 AGLBlocks.prototype.addGameStates = function()
 {
@@ -636,4 +636,4 @@ AGLBlocks.prototype.addGameStates = function()
 	this.game.state.add('main', this.mainState);
 	this.game.state.add('level', this.levelState);
 	this.game.state.add('menu', this.menuState);
-}
+};

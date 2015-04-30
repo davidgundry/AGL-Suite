@@ -6,7 +6,7 @@
 AGLBlocks.LoadState = function(AGL)
 {
 	this.AGL = AGL;
-}
+};
 
 AGLBlocks.LoadState.prototype.preload = function()
 {
@@ -35,12 +35,12 @@ AGLBlocks.LoadState.prototype.preload = function()
 		AGLBlocks.log("Loading Sprites");
 		this.AGL.game.load.spritesheet('symbols', 'assets/symbols.png', 256, 256);
 	}
-}
+};
 
 AGLBlocks.LoadState.prototype.create = function()
 {
 	this.AGL.game.state.start('menu');
-}
+};
 
 /**
 *
@@ -50,7 +50,7 @@ AGLBlocks.LoadState.prototype.create = function()
 AGLBlocks.MenuState = function(AGL)
 {
 	this.AGL = AGL;
-}
+};
 
 AGLBlocks.MenuState.tileAlpha = 0.3;
 AGLBlocks.MenuState.prototype.indexX = -1;
@@ -65,11 +65,11 @@ AGLBlocks.MenuState.prototype.preload = function()
 	this.AGL.drawBackground();
 	this.AGL.playable = true;
 	this.AGL.tileContents = AGLBlocks.staticTileContents;
-}
+};
 
 AGLBlocks.MenuState.prototype.create = function ()
 {
-	AGLBlocks.recordEvent("startedmenu")
+	AGLBlocks.recordEvent("startedmenu");
 
 	this.AGL.tileContents = AGLBlocks.staticTileContents;
 	this.level = AGLBlocks.randomLevel(5,7,AGLBlocks.staticTileContents.length);
@@ -82,7 +82,7 @@ AGLBlocks.MenuState.prototype.create = function ()
 	
 	this.time.events.add(Math.random()*1000+500,function() {this.AGL.pretty(this.tiles,AGLBlocks.MenuState.tileAlpha,this.time,true);},this);
 	this.time.events.add(Math.random()*2000+500,function() {this.AGL.pretty(this.tiles,AGLBlocks.MenuState.tileAlpha,this.time,true);},this);
-}
+};
 
 AGLBlocks.MenuState.prototype.createTiles = function()
 {
@@ -124,7 +124,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 	
 	this.titleText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px '+AGLBlocks.titleFont, fill: '#000000' });
 	this.titleText.anchor.setTo(0.5, 0.5);
-}
+};
 
 
 AGLBlocks.MenuState.prototype.createIntroTweens = function()
@@ -139,7 +139,7 @@ AGLBlocks.MenuState.prototype.createIntroTweens = function()
 	var texttween = this.AGL.game.add.tween(this.titleText);
 	texttween.to({alpha: 1},700);
 	texttween.start();
-}
+};
 	
 AGLBlocks.MenuState.prototype.createOutroTweens =function()
 {
@@ -151,18 +151,18 @@ AGLBlocks.MenuState.prototype.createOutroTweens =function()
 	var texttween = this.AGL.game.add.tween(this.titleText);
 	texttween.to({alpha: 0},700);
 	texttween.start();
-}
+};
     
 AGLBlocks.MenuState.prototype.quit = function()
 {
 	this.AGL.playable = false;
 	this.createOutroTweens();
-	this.time.events.add(1000,function() {this.AGL.game.state.start('load')},this);
-}
+	this.time.events.add(1000,function() {this.AGL.game.state.start('load');},this);
+};
     
 AGLBlocks.MenuState.prototype.play = function()
 {
-	AGLBlocks.recordEvent("play")
+	AGLBlocks.recordEvent("play");
 	this.AGL.playable = false;
 	this.createOutroTweens();
 	this.AGL.gameLevel = 1;
@@ -170,14 +170,14 @@ AGLBlocks.MenuState.prototype.play = function()
 	
 	this.AGL.tileContents = AGLBlocks.shuffleArray(this.AGL.tileContents);
 	this.time.events.add(1000,function() {this.AGL.game.state.start('level');},this);
-}
+};
     
 AGLBlocks.MenuState.prototype.info = function()
 {
 	this.AGL.playable = false;
 	this.createOutroTweens();
-	this.time.events.add(1000,function() {this.AGL.game.state.start('load')},this);
-}
+	this.time.events.add(1000,function() {this.AGL.game.state.start('load');},this);
+};
 
 
 /**
@@ -188,7 +188,7 @@ AGLBlocks.MenuState.prototype.info = function()
 AGLBlocks.LevelState = function(AGL)
 {
 	this.AGL = AGL;
-}
+};
 
 AGLBlocks.LevelState.prototype.preload = function()
 {
@@ -198,7 +198,7 @@ AGLBlocks.LevelState.prototype.preload = function()
 	else
 		this.AGL.drawProgressBar(false);
 	this.AGL.playable = false;
-}
+};
 
 AGLBlocks.LevelState.prototype.create = function()
 {
@@ -207,18 +207,18 @@ AGLBlocks.LevelState.prototype.create = function()
 	{
 		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Level ' + this.AGL.gameLevel, { font: this.AGL.getMinDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 		this.lText.anchor.setTo(0.5, 0.5);
-		this.time.events.add(800, function () { this.AGL.game.state.start('main') }, this);
+		this.time.events.add(800, function () { this.AGL.game.state.start('main'); }, this);
 	}
 	else
 	{
 		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Well Done!', { font: this.AGL.getMinDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 		this.lText.anchor.setTo(0.5, 0.5);
-		this.time.events.add(1800, function () { this.AGL.game.state.start('menu') }, this);
+		this.time.events.add(1800, function () { this.AGL.game.state.start('menu'); }, this);
 		textTime = 1000;
 	}
 	this.tweenIn();
 	this.time.events.add(textTime+400,function() {this.tweenOut();},this);
-}
+};
 	
 AGLBlocks.LevelState.prototype.tweenIn = function()
 {
@@ -226,22 +226,22 @@ AGLBlocks.LevelState.prototype.tweenIn = function()
 	var tween = this.AGL.game.add.tween(this.lText);
 	tween.to({alpha: 0.7}, 400);
 	tween.start();
-}
+};
 	
 AGLBlocks.LevelState.prototype.tweenOut = function()
 {
 	var tween = this.AGL.game.add.tween(this.lText);
 	tween.to({alpha: 0}, 400);
 	tween.start();
-}
+};
 	
 AGLBlocks.LevelState.prototype.progressBarIntro = function()
 {
 	this.progressBar.alpha = 0;
 	var tween = this.AGL.game.add.tween(this.progressBar);
-	tween.to({alpha:1}, 800)
+	tween.to({alpha:1}, 800);
 	tween.start();
-}
+};
 
 
 /**
@@ -252,14 +252,14 @@ AGLBlocks.LevelState.prototype.progressBarIntro = function()
 AGLBlocks.MainState = function(AGL)
 {
 	this.AGL = AGL;
-}
+};
 
 AGLBlocks.MainState.prototype.preload = function ()
 {
 	this.AGL.drawBackground();
 	this.progressBar = this.AGL.drawProgressBar();
 	this.AGL.playable = false;
-},
+};
 	
 AGLBlocks.MainState.prototype.create =function ()
 {
@@ -279,13 +279,13 @@ AGLBlocks.MainState.prototype.create =function ()
 			this.tilesGroup.add(this.tiles[i][j]);
 	this.tilesGroup.x +=xOffset;
 	this.introTween();
-}
+};
 	
 AGLBlocks.MainState.prototype.startPlay = function()
 {
 	this.AGL.playable = true;
 	AGLBlocks.recordEvent("started");
-}
+};
 	
 AGLBlocks.MainState.prototype.levelComplete = function()
 {
@@ -295,7 +295,7 @@ AGLBlocks.MainState.prototype.levelComplete = function()
 	this.progressBarTween();
 	this.time.events.add(1000, this.clickToContinueTween,this);
 	this.time.events.add(1000, function(){this.AGL.game.input.onDown.add(this.levelExitTween, this);}, this);
-}
+};
 	
 AGLBlocks.MainState.prototype.progressBarTween = function()
 {
@@ -310,7 +310,7 @@ AGLBlocks.MainState.prototype.progressBarTween = function()
 	}, 800);
 	this.progressBar.visible = true;
 	tween.start();
-}
+};
 	
 AGLBlocks.MainState.prototype.clickToContinueTween = function()
 {
@@ -322,7 +322,7 @@ AGLBlocks.MainState.prototype.clickToContinueTween = function()
 		alpha:1},800);
 	tween.onComplete.add(this.continueTweenFlash,this);
 	tween.start();
-}
+};
 	
 AGLBlocks.MainState.prototype.continueTweenFlash = function()
 {
@@ -333,7 +333,7 @@ AGLBlocks.MainState.prototype.continueTweenFlash = function()
 		tween.to({alpha:0.5},800);
 	tween.onComplete.add(this.continueTweenFlash,this);
 	tween.start();
-}
+};
 	
 AGLBlocks.MainState.prototype.introTween = function()
 {
@@ -342,7 +342,7 @@ AGLBlocks.MainState.prototype.introTween = function()
 	tween.to({x: 0},400);
 	tween.onComplete.add(this.startPlay, this);
 	tween.start();
-}
+};
 	
 AGLBlocks.MainState.prototype.levelExitTween = function()
 {
@@ -354,17 +354,17 @@ AGLBlocks.MainState.prototype.levelExitTween = function()
 	tween.onComplete.add(this.changeLevel,this);
 	tween.start();
 	
-	var tween = this.AGL.game.add.tween(this.continueText);
+	tween = this.AGL.game.add.tween(this.continueText);
 	tween.to({x:0,
 		alpha:-1},400);
 	tween.start();
-}
+};
 	
 AGLBlocks.MainState.prototype.changeLevel = function()
 {
 	AGLBlocks.recordEvent("changelevel");
 	this.AGL.game.state.start('level');
-}
+};
 
 /**
 *
@@ -408,6 +408,6 @@ AGLBlocks.stateUpdate = function()
 			}
 		}
 	}
-}
+};
 AGLBlocks.MenuState.prototype.update = AGLBlocks.stateUpdate;
 AGLBlocks.MainState.prototype.update  = AGLBlocks.stateUpdate;
