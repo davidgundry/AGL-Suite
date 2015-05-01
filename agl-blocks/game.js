@@ -1,4 +1,4 @@
-﻿function AGLBlocks(targetDiv,greyLocked,contentsType,audio)
+﻿function AGLBlocks(full,targetDiv,greyLocked,contentsType,audio)
 {
 	if (typeof greyLocked !== "undefined")
 		this.lockedTilesAreGrey = greyLocked;
@@ -10,15 +10,16 @@
 	else
 		this.contentsType = contentsType;
 	this.audio = typeof audio !== 'undefined' ? audio : true;
+	this.spriteFrameRotation = Math.round(Math.random()*100);
 	
-	if (typeof targetDiv !== "undefined")
+	if (!full)
 	{
 		var container = document.getElementById(targetDiv);
 		if (container != null)
 			this.game = new Phaser.Game(container.clientWidth, container.clientHeight, Phaser.AUTO, container);
 		else
 		{
-			console.log("Invalid target container");
+			AGLBlocks.log("Invalid target container");
 			return;
 		}
 	}
@@ -45,12 +46,99 @@
 AGLBlocks.title = "blocks";
 AGLBlocks.showLoadingScreen = false;
 AGLBlocks.levelList = [
-	{level:[[5,4,0,1,3,2,1,0,0,4]],
-	locked:[[true,true,false,false,true,true,true,true,true,true]]},
-	{level:[[5,4,1,0,3,1,2,0,0,4]],
-	locked:[[true,true,true,true,true,false,false,true,true,true]]},
-	{level:[[5,4,1,0,3,0,2,1,0,4]],
-	locked:[[true,true,true,true,false,false,false,true,true,true]]},
+	// starts
+	{level: 		["2124"],
+		locked: 	["0011"],
+		solution: 	["1224"]},
+		
+	{level: 	 	["32454"],
+		locked: 	["00111"],
+		solution: 	["23454"]},
+		
+	{level: 		["2124"],
+		locked: 	["0001"],
+		solution: 	["1224"]},
+		
+	{level: 		["2234"],
+		locked: 	["0001"],
+		solution: 	["2324"]},
+		
+	{level: 		["41253"],
+		locked: 	["00011"],
+		solution: 	["12453"]},
+		
+	{level: 		["432535"],
+		locked: 	["000111"],
+		solution: 	["234535"]},
+		
+	//ends	
+	{level: 		["1242"],
+		locked: 	["1100"],
+		solution: 	["1224"]},
+				
+	{level: 		["423"],
+		locked: 	["000"],
+		solution: 	["234"]},
+		
+	{level: 		["23435"],
+		locked: 	["11000"],
+		solution: 	["23453"]},
+				
+	{level: 		["212455"],
+		locked: 	["001100"],
+		solution: 	["122455"]},
+		
+	{level: 		["53255"],
+		locked: 	["00000"],
+		solution: 	["23555"]},
+		
+	{level: 		["233554"],
+		locked: 	["110000"],
+		solution: 	["234535"]},
+		
+	{level: 		["5212543"],
+		locked: 	["0000000"],
+		solution: 	["1224535"]},	
+		
+	//mids
+	
+	{level: 		["2324253"],
+		locked: 	["1100011"],
+		solution: 	["2322453"]},
+				
+	{level: 		["253435"],
+		locked: 	["100001"],
+		solution: 	["234535"]},	
+		
+	{level: 		["22342253"],
+		locked: 	["10000011"],
+		solution: 	["23222453"]},	
+		
+	// full
+
+	{level: 		["52155324"],
+		locked: 	["00000000"],
+		solution: 	["12245355"]},	
+		
+	{level: 		["3435522"],
+		locked: 	["0000000"],
+		solution: 	["2324535"]},	
+		
+	//reloop
+	
+	{level: 		["443532"],
+		locked: 	["000000"],
+		solution: 	["234534"]},	
+
+	{level: 		["4515334"],
+		locked: 	["0000000"],
+		solution: 	["1453453"]},
+		
+	
+	{level: 		["2512435242355435"],
+		locked: 	["0000010000100000"],
+		solution: 	["1224532245345355"]},	
+
 ];
 AGLBlocks.totalLevels = AGLBlocks.levelList.length;
 AGLBlocks.minHeight = 200;
@@ -74,15 +162,15 @@ AGLBlocks.fillArray = function(width,height,fill)
 	return array;
 };
 
-AGLBlocks.recordEvent = function(description)
+AGLBlocks.recordEvent = function(description,level)
 {
 	var events = [];
-	if (sessionStorage.events)
-		events = JSON.parse(sessionStorage.events); 
+	if (localStorage.events)
+		events = JSON.parse(localStorage.events); 
 
 	var time = Date.now();
-	events.push({t:time,d:description});//,level:this.gameLevel});
-	sessionStorage.events = JSON.stringify(events);
+	events.push({t:time,d:description,level:level});
+	localStorage.events = JSON.stringify(events);
 	AGLBlocks.log(time + ": " + description);
 };
 
@@ -151,7 +239,7 @@ AGLBlocks.pointToGridIndex = function(x,y,tiles)
 /**
  * Currently only shuffles within rows.
  */
-AGLBlocks.shuffleLevel = function(level)
+AGLBlocks.shuffleLevel = function(level,gameLevel)
 {
 	for (var i=level.length*level[0].length;i>=0;i--)
 	{
@@ -160,100 +248,70 @@ AGLBlocks.shuffleLevel = function(level)
 				level[Math.floor(r/level[0].length)].push(c);
 		level[Math.floor(r/level[0].length)].splice(r%level[0].length,1);
 	}
-	if (!AGLBlocks.checkLevel(level))
+	if (!AGLBlocks.checkLevel(level,gameLevel))
 		return level;
 	else
 		return AGLBlocks.shuffleLevel(level);
 };
 
-AGLBlocks.checkLevel = function(level)
-{
-	var falsified = false;
-	var i=0;
-	var j=0;
-	while ((i<level.length) && (!falsified))
-	{
-		j = 0;
-		while ((j<level[i].length) && (!falsified))
-		{
-			switch (level[i][j])
-			{
-				case 0:
-					switch (level[i][j+1])
-					{
-						case 1:
-						case 2:
-						case 5:
-						falsified = true;
-					}
-					break;
-				case 1:
-					switch (level[i][j+1])
-					{
-						case 1:
-						case 2:
-						case 5:
-						falsified = true;
-					}
-					break;
-				case 2:
-					switch (level[i][j+1])
-					{
-						case 0:
-						case 2:
-						case 3:
-						case 4:
-						case 5:
-						falsified = true;
-					}
-					break;
-				case 3:
-					switch (level[i][j+1])
-					{
-						case 0:
-						case 3:
-						case 4:
-						falsified = true;
-					}
-					break;
-				case 4:
-					switch (level[i][j+1])
-					{
-						case 0:
-						case 3:
-						case 4:
-						case 5:
-						falsified = true;
-					}
-					break;
-				case 5:
-					switch (level[i][j+1])
-					{
-						case 0:
-						case 1:
-						case 2:
-						case 3:
-						case 5:
-						falsified = true;
-					}
-					break;
-			}
-			j++;
-		}
-		i++;
-	}
+Array.prototype.equals = function (array) {
+    // if the other array is a falsy value, return
+    if (!array)
+        return false;
 
-  return !falsified;
+    // compare lengths - can save a lot of time 
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l=this.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;       
+        }           
+        else if (this[i] != array[i]) { 
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;   
+        }           
+    }       
+    return true;
+}   
+
+AGLBlocks.checkLevel = function(level,gameLevel)
+{
+	var a = AGLBlocks.levelList[gameLevel-1].solution;
+	var r = [];
+	for (var i=0;i<level.length;i++)
+		r.push(level[i].join(''));
+	
+	return (a.equals(r));
 };
 
 AGLBlocks.createLevel = function(level)
 {
-	return AGLBlocks.levelList[level-1].level;
+	var a = AGLBlocks.levelList[level-1].level;
+	var r = [];
+	for (var i=0;i<a.length;i++)
+	{
+		r.push(a[i].split(''));
+		for (var j=0;j<r[i].length;j++)
+			r[i][j] = parseInt(r[i][j]);
+	}
+	return r;
 };
 
 AGLBlocks.getLockedTiles = function(level)
 {
-	return AGLBlocks.levelList[level-1].locked;
+	var a = AGLBlocks.levelList[level-1].locked;
+	var r = [];
+	for (var i=0;i<a.length;i++)
+	{
+		r.push([]);
+		for (var j=0;j<a[i].length;j++)
+			r[i].push(a[i][j]==1);
+	}
+	return r;
 };
 
 /*
@@ -349,7 +407,10 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	if ((locked) && (this.lockedTilesAreGrey))
 		ctx.fillStyle = "lightgrey";
 	else if (this.contentsType!="colour")
-		ctx.globalAlpha = 0;
+	{
+		//	ctx.globalAlpha = 0;
+		ctx.fillStyle = "#ddc53d";
+	}
 		
 	if (locked)
 		AGLBlocks.roundRect(ctx,width/6,height/6,width*(2/3),height*(2/3),width/8,true,false);
@@ -393,7 +454,7 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 			symbol.width = width;
 			symbol.height = height;
 		}
-		symbol.frame = contentsIndex;
+		symbol.frame = contentsIndex+this.spriteFrameRotation%20;//symbol.animations.frameData.total;
 		if ((locked) && (this.lockedTilesAreGrey))
 			symbol.alpha=0;
 		mainTile.addChild(symbol);
@@ -432,7 +493,7 @@ AGLBlocks.prototype.tileUp = function(iy,ix,group,state)
 		if (this.dragging)
 		{
 			var p = this.tileToGridPosition(state.tiles[iy][ix]);
-			AGLBlocks.recordEvent("drop x:"+p.x+","+p.y);
+			AGLBlocks.recordEvent("drop x:"+p.x+","+p.y,this.gameLevel);
 		}
 		this.dragging = false;
 		group.getChildAt(0).visible = false;
@@ -555,7 +616,9 @@ AGLBlocks.prototype.swap = function(state,indexX,indexY,ix,iy)
 	{
 		
 		var p = this.tileToGridPosition(state.tiles[iy][ix]);
-		AGLBlocks.recordEvent("swapto x:"+p.x+","+p.y);
+		AGLBlocks.recordEvent("swapto x:"+p.x+","+p.y,this.gameLevel);
+		if (state.swaps !== 'undefined')
+			state.swaps++;
 		var tilePadding = this.size/10;
 		
 		//var depth = state.tiles[iy][ix].height*AGLBlocks.dropDepth;
@@ -610,13 +673,14 @@ AGLBlocks.prototype.selected = function(state,iy,ix)
 			state.indexX = ix;
 			state.indexY = iy;
 			var p = this.tileToGridPosition(state.tiles[iy][ix]);
-			AGLBlocks.recordEvent("selected x:"+p.x+","+p.y);
+			AGLBlocks.recordEvent("selected x:"+p.x+","+p.y,this.gameLevel);
 		}
 		else
 		{
 			this.swap(state,this.indexX,this.indexY,ix,iy);
-			if (AGLBlocks.checkLevel(state.level))
-			  state.levelComplete();
+			if (this.gameLevel>=1)
+				if (AGLBlocks.checkLevel(state.level,this.gameLevel))
+				  state.levelComplete();
 			state.tiles[state.indexY][state.indexX].getChildAt(0).visible = false;
 			state.tiles[iy][ix].getChildAt(0).visible = false;
 			state.indexX = -1;

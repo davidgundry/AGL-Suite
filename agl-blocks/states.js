@@ -69,7 +69,7 @@ AGLBlocks.MenuState.prototype.preload = function()
 
 AGLBlocks.MenuState.prototype.create = function ()
 {
-	AGLBlocks.recordEvent("startedmenu");
+	AGLBlocks.recordEvent("startedmenu",this.AGL.gameLevel);
 
 	this.AGL.tileContents = AGLBlocks.staticTileContents;
 	this.level = AGLBlocks.randomLevel(5,7,AGLBlocks.staticTileContents.length);
@@ -162,7 +162,7 @@ AGLBlocks.MenuState.prototype.quit = function()
     
 AGLBlocks.MenuState.prototype.play = function()
 {
-	AGLBlocks.recordEvent("play");
+	AGLBlocks.recordEvent("play",this.AGL.gameLevel);
 	this.AGL.playable = false;
 	this.createOutroTweens();
 	this.AGL.gameLevel = 1;
@@ -254,6 +254,8 @@ AGLBlocks.MainState = function(AGL)
 	this.AGL = AGL;
 };
 
+AGLBlocks.MainState.prototype.swaps = 0;
+
 AGLBlocks.MainState.prototype.preload = function ()
 {
 	this.AGL.drawBackground();
@@ -263,7 +265,7 @@ AGLBlocks.MainState.prototype.preload = function ()
 	
 AGLBlocks.MainState.prototype.create =function ()
 {
-	AGLBlocks.recordEvent("createdlevel");
+	AGLBlocks.recordEvent("createdlevel",this.AGL.gameLevel);
 	var xOffset = -this.AGL.game.width;
 	this.level = AGLBlocks.createLevel(this.AGL.gameLevel);
 	this.lockedTiles = AGLBlocks.getLockedTiles(this.AGL.gameLevel);
@@ -284,13 +286,13 @@ AGLBlocks.MainState.prototype.create =function ()
 AGLBlocks.MainState.prototype.startPlay = function()
 {
 	this.AGL.playable = true;
-	AGLBlocks.recordEvent("started");
+	AGLBlocks.recordEvent("started",this.AGL.gameLevel);
 };
 	
 AGLBlocks.MainState.prototype.levelComplete = function()
 {
 	this.AGL.playable = false;
-	AGLBlocks.recordEvent("complete");
+	AGLBlocks.recordEvent("complete swaps:"+this.swaps,this.AGL.gameLevel);
 	
 	this.progressBarTween();
 	this.time.events.add(1000, this.clickToContinueTween,this);
@@ -347,7 +349,7 @@ AGLBlocks.MainState.prototype.introTween = function()
 AGLBlocks.MainState.prototype.levelExitTween = function()
 {
 	this.AGL.game.input.onDown.removeAll();
-	AGLBlocks.recordEvent("moveon");
+	AGLBlocks.recordEvent("moveon",this.AGL.gameLevel);
 	this.AGL.game.tweens.removeAll();
 	var tween = this.AGL.game.add.tween(this.tilesGroup);
 	tween.to({x: 2*this.AGL.game.width}, 400);
@@ -362,7 +364,7 @@ AGLBlocks.MainState.prototype.levelExitTween = function()
 	
 AGLBlocks.MainState.prototype.changeLevel = function()
 {
-	AGLBlocks.recordEvent("changelevel");
+	AGLBlocks.recordEvent("changelevel",this.AGL.gameLevel);
 	this.AGL.game.state.start('level');
 };
 
