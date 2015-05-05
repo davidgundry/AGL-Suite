@@ -9,11 +9,15 @@ AGLSuite.log.Log = function(target)
 	if(localStorage)
 		if (localStorage.events)
 			events = JSON.parse(localStorage.events); 
-	var html = "";
+	var html = "Total records: "+events.length;
 	for (var i=0;i<events.length;i++)
 	{
 		html += "<div class='record'>";
 		var keys = Object.keys(events[i]);
+		
+		keys = keys.splice(keys.indexOf("time"),1);
+		keys = keys.splice(keys.indexOf("description"),1);
+		keys = ["time","description"].concat(keys);
 		for (var j=0;j<keys.length;j++)
 		{
 			var value = events[i][keys[j]];
