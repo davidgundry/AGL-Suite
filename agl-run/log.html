@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
-		<title>Play Blocks - Game Log</title>
+		<title>AGL Suite Game Log</title>
 		<script type="text/javascript" src="phaser.js"></script>
-		<script type="text/javascript" src="game.js"></script>
-		<script type="text/javascript" src="states.js"></script>
-		<link rel="icon" type="image/png" href="favicon.png?v=2" />
+		<script type="text/javascript" src="../log.js"></script>
 	</head>
 	<body>
-		<h1>Blocks Game Log</h1>
+		<h1>AGL Suite Game Log</h1>
 		<div id="output"></div>
 	</body>
 	
@@ -17,23 +15,11 @@
 		.time{color:#999;margin-right:2em;}
 		.level{color:#000;margin-right:2em;}
 		.desc{color:#333;}
+		.value{margin:0 2em;}
 	</style>
 	
 	<script type="text/javascript">
-		var events = [];
-		if(localStorage)
-			if (localStorage.events)
-				events = JSON.parse(localStorage.events); 
-		var html = "";
-		for (var i=0;i<events.length;i++)
-		{
-			var date = new Date(events[i].t);
-			html+="<div class='record'><span class='time'>"+date.toString()+"</span>";
-			html+="<span class='level'>"+events[i].level+"</span>";
-			html+="<span class='desc'>"+events[i].d+"</span></div>";
-		}
-		
-		document.getElementById("output").innerHTML = html;
+		new AGLSuite.log.Log("output");
 	</script>
 
 </html>

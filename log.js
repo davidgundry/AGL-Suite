@@ -3,10 +3,34 @@ if (typeof AGLSuite === 'undefined')
 
 AGLSuite.log = function(){};
 
+AGLSuite.log.Log = function(target)
+{
+	var events = [];
+	if(localStorage)
+		if (localStorage.events)
+			events = JSON.parse(localStorage.events); 
+	var html = "";
+	for (var i=0;i<events.length;i++)
+	{
+		html += "<div class='record'>";
+		var keys = Object.keys(events[i]);
+		for (var j=0;j<keys.length;j++)
+		{
+			var value = events[i][keys[j]];
+			if (typeof value === 'date')
+				value = new Date(value).toString();
+			html += "<span class='value' class='" + keys[j] + "'>"+value+"</span>";
+		}
+		html += "</div>";
+	}
+	
+	document.getElementById(target).innerHTML = html;
+};
+
 AGLSuite.log.log = function(message)
 {
 	console.log(message);	
-}
+};
 
 AGLSuite.log.recordEvent = function(description,logObject)
 {
@@ -18,8 +42,8 @@ AGLSuite.log.recordEvent = function(description,logObject)
 		logObject = {};
 	
 	var time = Date.now();
-	logObject.t = time;
-	logObject.d = description;
+	logObject.time = time;
+	logObject.description = description;
 	events.push(logObject);
 	localStorage.events = JSON.stringify(events);
 	AGLSuite.log.log(time + ": " + description);

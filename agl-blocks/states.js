@@ -349,7 +349,7 @@ AGLBlocks.MainState.prototype.introTween = function()
 AGLBlocks.MainState.prototype.levelExitTween = function()
 {
 	this.AGL.game.input.onDown.removeAll();
-	AGLSuite.log.recordEvent("moveon",{level:this.AGL.gameLevel});
+	AGLSuite.log.recordEvent("moveon",{level:this.AGL.gameLevel});	
 	this.AGL.game.tweens.removeAll();
 	var tween = this.AGL.game.add.tween(this.tilesGroup);
 	tween.to({x: 2*this.AGL.game.width}, 400);
