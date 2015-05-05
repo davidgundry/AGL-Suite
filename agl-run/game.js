@@ -1,4 +1,11 @@
-﻿var preloadState = {
+﻿function AGLRun()
+{
+	
+}
+
+AGLRun.states()
+
+var preloadState = {
 	preload: function () {
 		game.stage.backgroundColor = "#000000";
 		game.load.image('loadingBar', 'images/loadingBar.png');
