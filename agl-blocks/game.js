@@ -1,6 +1,7 @@
 /**
  * AGLBlocks is a game that involves sliding blocks. Create a new instance of AGLBlocks to create and start the game.
  * 
+ * @param 	full			whether to play fullscreen
  * @param 	targetDiv		the HTML element in which to put the game
  * @param 	greyLocked		if true, locked tiles are greyed out
  * @param 	contentsType	defines tile type, options: "sprite" or "colour"
