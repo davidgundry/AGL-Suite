@@ -21,21 +21,12 @@ function AGLRun(full, targetDiv)
 	{	
 		this.game = new Phaser.Game(Math.max(AGLRun.minWidth,window.innerWidth), Math.max(AGLRun.minHeight,window.innerHeight), Phaser.AUTO);
 	}
+       
+    this.moveDistance = this.game.width/3;
     
-	this.gameLevel = 0;
-	this.levels = [];
-	this.scores = [];
-	this.grammars = [];
-    
-    this.moveDistance = this.game.width/10;
-    
-	this.game.state.add('load', new AGLRun.states.Load(this));
-	this.game.state.add('main', new AGLRun.states.Level(this));
-	this.game.state.add('level', new AGLRun.states.Main(this));
-    
-	this.game.state.start('load');
+    AGLRun.states.load(this);
+    AGLRun.states.start(this.game);
 };
-
 
 AGLRun.minWidth = 200;
 AGLRun.minHeight = 200;
@@ -44,42 +35,34 @@ AGLRun.backgroundColour = "#aaccaa";
 AGLRun.defaultColour = "#ffffff";
 AGLRun.playerForce = 10;
 AGLRun.coinVelocity = 750;
-
-AGLRun.log = function(message)
-{
-    console.log(message);
-}
+AGLRun.alphabet = ["a","b"," "];
 
 AGLRun.createPlayer = function(game)
 {
-	var player = game.add.sprite(game.world.centerX, game.world.height*(9/10), 'player');
+	var player = game.add.sprite(game.world.centerX, game.world.height*(8/9), 'player');
 	player.anchor.setTo(0.5, 0.5);
-    player.height = game.world.height/12;
+    player.height = game.world.height/5;
     game.physics.arcade.enable(player);
+    player.body.immovable = true;
     
     return player;
 };
 
-AGLRun.interpret = function (symbol)
+AGLRun.prototype.interpret = function (symbol)
 {
-	switch (symbol) {
+	switch (symbol)
+    {
 		case "a":
 			return -this.moveDistance;
 		case "b":
 		    return this.moveDistance;
     }
-	/*    case "M":
-	        return this.player.x - 150;
-	    case "V":
-	        return this.player.x - 100;
-	    case "X":
-	        return this.player.x + 0;
-	    case "R":
-	        return this.player.x + 100;
-	    case "S":
-	        return this.player.x + 150;
-	}*/
 };
+
+AGLRun.prototype.gameLevel = 0;
+AGLRun.prototype.levels = [];
+AGLRun.prototype.scores = [];
+AGLRun.prototype.grammars = [];
 
 AGLRun.prototype.output = function ()
 {
@@ -97,26 +80,42 @@ AGLRun.prototype.output = function ()
 	document.getElementById("gameOutput").innerHTML = html;
 };
 
-
-
+AGLRun.loadAssets = function(game)
+{
+    game.load.image('player', 'images/player.png');
+	game.load.image('coin', 'images/coin.png');
+}
 
 AGLRun.states = function()
 {};
+
+AGLRun.states.load = function(AGL)
+{
+	AGL.game.state.add('load', new AGLRun.states.Load(AGL));
+	AGL.game.state.add('main', new AGLRun.states.Main(AGL));
+	AGL.game.state.add('level', new AGLRun.states.Level(AGL));
+}
+
+AGLRun.states.start = function(game)
+{
+   game.state.start('load');
+}
 
 AGLRun.states.Load = function(AGL)
 {
     this.AGL = AGL;
 };
 
+AGLRun.states.Load.loadingText = "Loading";
+
 AGLRun.states.Load.prototype.preload = function()
 {
 	this.AGL.game.stage.backgroundColor = AGLRun.backgroundColour;
 
-	var loadingLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.game.height*(1/2), 'loading...', { font: this.game.height/10 + 'px '+AGLRun.defaultFont, fill: '#ffffff' });
+	var loadingLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.game.height*(1/2),AGLRun.states.Load.loadingText, { font: this.game.height/10 + 'px '+AGLRun.defaultFont, fill: AGLRun.defaultColour });
 	loadingLabel.anchor.setTo(0.5, 0.5);
-
-	this.AGL.game.load.image('player', 'images/player.png');
-	this.AGL.game.load.image('coin', 'images/coin.png');
+    
+    AGLRun.loadAssets(this.AGL.game);
 };
 
 AGLRun.states.Load.prototype.create = function()
@@ -129,6 +128,9 @@ AGLRun.states.Level = function(AGL)
     this.AGL = AGL;
 };
 
+AGLRun.states.Level.wait = 1000;
+AGLRun.states.Level.levelText = "Level";
+
 AGLRun.states.Level.prototype.preload = function()
 {
 	this.AGL.game.stage.backgroundColor = AGLRun.backgroundColour;
@@ -136,9 +138,10 @@ AGLRun.states.Level.prototype.preload = function()
 
 AGLRun.states.Level.prototype.create = function()
 {
-    var lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Level ' + this.AGL.gameLevel, { font: this.AGL.game.height/10 + 'px ' + AGLRun.defaultFont, fill: AGLRun.defaultColour });
+    var lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLRun.states.Level.levelText + ' ' + this.AGL.gameLevel, { font: this.AGL.game.height/10 + 'px ' + AGLRun.defaultFont, fill: AGLRun.defaultColour });
     lText.anchor.setTo(0.5, 0.5);
-    this.time.events.add(2000, function () { this.AGL.game.state.start('main'); }, this);
+    this.time.events.add(AGLRun.states.Level.wait, function (){ this.AGL.game.state.start('main');
+     }, this);
 };
 
 AGLRun.states.Main = function(AGL)
@@ -160,7 +163,7 @@ AGLRun.states.Main.prototype.preload = function ()
 
 AGLRun.states.Main.prototype.create = function ()
 {
-    this.started = false;
+    AGLSuite.log.recordEvent("started");
     this.grammar = this.setGrammar();
     
     this.AGL.grammars.push(this.grammar.name);
@@ -174,29 +177,29 @@ AGLRun.states.Main.prototype.create = function ()
 
     this.createUI();
 
-	this.game.time.events.loop(Phaser.Timer.SECOND, this.createCoin, this);
-
-	/*this.time.events.add(this.startTime, function ()
+	this.time.events.add(this.startTime, function ()
     {
-        this.coin.body.velocity.y = AGLRun.coinVelocity;
-	}, this);*/
+        this.game.time.events.loop(Phaser.Timer.SECOND, this.createCoin, this);
+	}, this);
 };
 
 AGLRun.states.Main.prototype.setGrammar = function()
 {
     var g;
     
-    if (this.AGL.gameLevel == 0) {
+    if (this.AGL.gameLevel == 0)
+    {
         if (Math.round(Math.random()) == 1)
-            g = new AGLSuite.grammar.RandomGrammar();
+            g = new AGLSuite.grammar.RG(AGLRun.alphabet);
         else
-            g = new AGLSuite.grammar.FiniteStateGrammar(0, fsg1);
+            g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, fsg1);
     }
-    else {
+    else if (typeof this.grammar !== 'undefined')
+    {
         if (this.grammar.name == "Random")
-            g = new AGLSuite.grammar.FiniteStateGrammar(0, fsg1);
+            g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, fsg1);
         else
-            g = new AGLSuite.grammar.RandomGrammar();
+            g = new AGLSuite.grammar.RG(AGLRun.alphabet);
     }
     return g;
 }
@@ -249,14 +252,14 @@ AGLRun.states.Main.prototype.checkCollision = function()
         return;
         
     this.AGL.game.physics.arcade.collide(this.player, this.coin, this.coinCollision, null, this);
+    
     if (this.coin.exists)
-    {
         if (this.coin.y > this.AGL.game.world.height)
         {
             this.AGL.scores[this.AGL.gameLevel].push(this.coin.x-this.AGL.game.world.centerX);
             this.coin.kill();
+            AGLSuite.log.recordEvent("missed",{distance:this.coin.x-this.AGL.game.world.centerX});
         }
-    }
 };
 
 AGLRun.states.Main.prototype.coinCollision = function (player, coin)
@@ -265,6 +268,7 @@ AGLRun.states.Main.prototype.coinCollision = function (player, coin)
 	this.scoreText.text = this.score;
 	this.AGL.scores[this.AGL.gameLevel].push(0);
 	coin.kill();
+    AGLSuite.log.recordEvent("collected",{distance:this.coin.x-this.AGL.game.world.centerX});
 };
 
 AGLRun.states.Main.prototype.move = function(force)
@@ -273,12 +277,9 @@ AGLRun.states.Main.prototype.move = function(force)
      return;
      
     this.xOffset += force;
-    if (this.xOffset > 150)
-        this.xOffset = 150;
-    else if (this.xOffset < -150)
-        this.xOffset = -150;
-        
-    this.coin.body.x = this.xOffset + this.coinOriginX;
+    
+    if (typeof this.coin !== 'undefined')
+        this.coin.x = this.coinOriginX + this.xOffset;
 };
 
 AGLRun.states.Main.prototype.updateCounter = function()
@@ -293,8 +294,8 @@ AGLRun.states.Main.prototype.resetCoin = function (coin)
     if (symbol !== " ")
     {
         this.AGL.levels[this.AGL.gameLevel].push(symbol);
-        coin.reset(this.player.x + AGLRun.interpret(symbol), -16, 10);
+        coin.reset(this.player.x + this.AGL.interpret(symbol), -16, 10);
         coin.body.velocity.y = AGLRun.coinVelocity;
-        this.coinOriginX = this.player.x + AGLRun.interpret(symbol);
+        this.coinOriginX = this.player.x + this.AGL.interpret(symbol) - this.xOffset;
     }
 };

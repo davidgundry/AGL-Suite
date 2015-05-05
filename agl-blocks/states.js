@@ -23,7 +23,7 @@ AGLBlocks.LoadState.prototype.preload = function()
 	
 	if (this.AGL.audio)
 	{
-		AGLBlocks.log("Loading Audio");
+		AGLSuite.log.log("Loading Audio");
 		this.AGL.game.load.audio('pick', 'assets/pick.wav');
 		this.AGL.game.load.audio('drop', 'assets/drop.wav');
 		this.AGL.game.load.audio('swap', 'assets/swap.wav');
@@ -32,7 +32,7 @@ AGLBlocks.LoadState.prototype.preload = function()
 	
 	if (this.AGL.contentsType=="sprite")
 	{
-		AGLBlocks.log("Loading Sprites");
+		AGLSuite.log.log("Loading Sprites");
 		this.AGL.game.load.spritesheet('symbols', 'assets/symbols.png', 256, 256);
 	}
 };
@@ -69,7 +69,7 @@ AGLBlocks.MenuState.prototype.preload = function()
 
 AGLBlocks.MenuState.prototype.create = function ()
 {
-	AGLBlocks.recordEvent("startedmenu",this.AGL.gameLevel);
+	AGLSuite.log.recordEvent("startedmenu",{level:this.AGL.gameLevel});
 
 	this.AGL.tileContents = AGLBlocks.staticTileContents;
 	this.level = AGLBlocks.randomLevel(5,7,AGLBlocks.staticTileContents.length);
@@ -162,7 +162,7 @@ AGLBlocks.MenuState.prototype.quit = function()
     
 AGLBlocks.MenuState.prototype.play = function()
 {
-	AGLBlocks.recordEvent("play",this.AGL.gameLevel);
+	AGLSuite.log.recordEvent("play",{level:this.AGL.gameLevel});
 	this.AGL.playable = false;
 	this.createOutroTweens();
 	this.AGL.gameLevel = 1;
@@ -265,7 +265,7 @@ AGLBlocks.MainState.prototype.preload = function ()
 	
 AGLBlocks.MainState.prototype.create =function ()
 {
-	AGLBlocks.recordEvent("createdlevel",this.AGL.gameLevel);
+	AGLSuite.log.recordEvent("createdlevel",{level:this.AGL.gameLevel});
 	var xOffset = -this.AGL.game.width;
 	this.level = AGLBlocks.createLevel(this.AGL.gameLevel);
 	this.lockedTiles = AGLBlocks.getLockedTiles(this.AGL.gameLevel);
@@ -286,13 +286,13 @@ AGLBlocks.MainState.prototype.create =function ()
 AGLBlocks.MainState.prototype.startPlay = function()
 {
 	this.AGL.playable = true;
-	AGLBlocks.recordEvent("started",this.AGL.gameLevel);
+	AGLSuite.log.recordEvent("started",{level:this.AGL.gameLevel});
 };
 	
 AGLBlocks.MainState.prototype.levelComplete = function()
 {
 	this.AGL.playable = false;
-	AGLBlocks.recordEvent("complete swaps:"+this.swaps,this.AGL.gameLevel);
+	AGLSuite.log.recordEvent("complete",{swaps:this.swaps,level:this.AGL.gameLevel});
 	
 	this.progressBarTween();
 	this.time.events.add(1000, this.clickToContinueTween,this);
@@ -349,7 +349,7 @@ AGLBlocks.MainState.prototype.introTween = function()
 AGLBlocks.MainState.prototype.levelExitTween = function()
 {
 	this.AGL.game.input.onDown.removeAll();
-	AGLBlocks.recordEvent("moveon",this.AGL.gameLevel);
+	AGLSuite.log.recordEvent("moveon",{level:this.AGL.gameLevel});
 	this.AGL.game.tweens.removeAll();
 	var tween = this.AGL.game.add.tween(this.tilesGroup);
 	tween.to({x: 2*this.AGL.game.width}, 400);
@@ -364,7 +364,7 @@ AGLBlocks.MainState.prototype.levelExitTween = function()
 	
 AGLBlocks.MainState.prototype.changeLevel = function()
 {
-	AGLBlocks.recordEvent("changelevel",this.AGL.gameLevel);
+	AGLSuite.log.recordEvent("changelevel",{level:this.AGL.gameLevel});
 	this.AGL.game.state.start('level');
 };
 
@@ -391,7 +391,7 @@ AGLBlocks.stateUpdate = function()
 				}
 				if ((tileCoord.x != this.indexX) || (tileCoord.y != this.indexY))
 				{
-					//AGLBlocks.log("swap "+this.swapX+","+this.swapY+" index "+this.indexX+","+this.indexY+" tilecoord "+tileCoord.x+","+tileCoord.y+" tileposition "+tilePosition.x+","+tilePosition.y);
+					//AGLSuite.log.log("swap "+this.swapX+","+this.swapY+" index "+this.indexX+","+this.indexY+" tilecoord "+tileCoord.x+","+tileCoord.y+" tileposition "+tilePosition.x+","+tilePosition.y);
 					var xDiff = Math.abs(this.swapX-tilePosition.x);
 					var yDiff = Math.abs(this.swapY-tilePosition.y);
 					

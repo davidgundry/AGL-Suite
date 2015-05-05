@@ -1,47 +1,43 @@
 if (typeof AGLSuite === 'undefined')
-	function AGLSuite(){}
+	function AGLSuite(){};
 
-AGLSuite.grammar = function(){}
+AGLSuite.grammar = function(){};
 
-AGLSuite.grammar.RandomGrammar = function() {
-    this.name = "Random";
+AGLSuite.grammar.Grammar = function(name,alphabet)
+{
+    this.name = name;
+    this.alphabet = alphabet
 };
 
-/**
- * Returns a random character fromn the alphabet M, V, X, R, S
- */
-AGLSuite.grammar.RandomGrammar.prototype.next = function()
+AGLSuite.grammar.Grammar.prototype.next = function(){};
+
+AGLSuite.grammar.RG = function(alphabet)
 {
-    /*var p = Math.round(Math.random()*5);
-    if (p == 0)
-        return "M";
-    else if (p == 1)
-        return "V";
-    else if (p == 2)
-        return "X";
-    else if (p == 3)
-        return "R";
-    else
-        return "S";*/
-
-    if (Math.round(Math.random() * 5) == 1)
-        return " ";
-
-    var p = Math.round(Math.random());
-    if (p == 0)
-        return "a";
-    else
-        return "b";
+    AGLSuite.grammar.Grammar.call(this,"RG",alphabet);
 };
 
-AGLSuite.grammar.FiniteStateGrammar = function(start,transition)
+AGLSuite.grammar.RG.prototype = new AGLSuite.grammar.Grammar();
+AGLSuite.grammar.RG.prototype.constructor = AGLSuite.grammar.RG;
+
+AGLSuite.grammar.RG.prototype.next = function()
 {
+    var r = Math.floor(Math.random()*this.alphabet.length);
+    if (r == this.alphabet.length)
+        r--;
+    return this.alphabet[r];
+};
+
+AGLSuite.grammar.FSG = function(alphabet,start,transition)
+{
+    AGLSuite.grammar.Grammar.call(this,"FSG",alphabet);
 	this.current = start;
 	this.transition = transition;
-	this.name = "FSG";
 };
 
-AGLSuite.grammar.FiniteStateGrammar.prototype.next = function()
+AGLSuite.grammar.FSG.prototype = new AGLSuite.grammar.Grammar();
+AGLSuite.grammar.FSG.prototype.constructor = AGLSuite.grammar.FSG;
+
+AGLSuite.grammar.FSG.prototype.next = function()
 {
 	var n = this.transition(this.current);
 	this.current = n.s;

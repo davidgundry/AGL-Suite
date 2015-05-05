@@ -28,7 +28,7 @@ function AGLBlocks(full,targetDiv,greyLocked,contentsType,audio)
 			this.game = new Phaser.Game(container.clientWidth, container.clientHeight, Phaser.AUTO, container);
 		else
 		{
-			AGLBlocks.log("Invalid target container");
+			AGLSuite.log.log("Invalid target container");
 			return;
 		}
 	}
@@ -169,23 +169,6 @@ AGLBlocks.fillArray = function(width,height,fill)
 		}
 	}
 	return array;
-};
-
-AGLBlocks.recordEvent = function(description,level)
-{
-	var events = [];
-	if (localStorage.events)
-		events = JSON.parse(localStorage.events); 
-
-	var time = Date.now();
-	events.push({t:time,d:description,level:level});
-	localStorage.events = JSON.stringify(events);
-	AGLBlocks.log(time + ": " + description);
-};
-
-AGLBlocks.log = function(message)
-{
-	console.log(message);
 };
 
 AGLBlocks.shuffleArray = function(array)
@@ -502,7 +485,7 @@ AGLBlocks.prototype.tileUp = function(iy,ix,group,state)
 		if (this.dragging)
 		{
 			var p = this.tileToGridPosition(state.tiles[iy][ix]);
-			AGLBlocks.recordEvent("drop x:"+p.x+","+p.y,this.gameLevel);
+			AGLSuite.log.recordEvent("drop",{x:p.x,y:p.y,level:this.gameLevel});
 		}
 		this.dragging = false;
 		group.getChildAt(0).visible = false;
@@ -625,7 +608,7 @@ AGLBlocks.prototype.swap = function(state,indexX,indexY,ix,iy)
 	{
 		
 		var p = this.tileToGridPosition(state.tiles[iy][ix]);
-		AGLBlocks.recordEvent("swapto x:"+p.x+","+p.y,this.gameLevel);
+		AGLSuite.log.recordEvent("swapto",{x:p.x,y:p.y,level:this.gameLevel});
 		if (state.swaps !== 'undefined')
 			state.swaps++;
 		var tilePadding = this.size/10;
@@ -682,7 +665,7 @@ AGLBlocks.prototype.selected = function(state,iy,ix)
 			state.indexX = ix;
 			state.indexY = iy;
 			var p = this.tileToGridPosition(state.tiles[iy][ix]);
-			AGLBlocks.recordEvent("selected x:"+p.x+","+p.y,this.gameLevel);
+			AGLSuite.log.recordEvent("selected",{x:p.x,y:p.y,level:this.gameLevel});
 		}
 		else
 		{
