@@ -60,44 +60,17 @@ AGLRun.createPlayer = function(game)
     return player;
 };
 
-AGLRun.prototype.interpret = function (symbol)
-{
-	switch (symbol)
-    {
-		case "a":
-			return -this.moveDistance;
-		case "b":
-		    return this.moveDistance;
-    }
-};
-
 AGLRun.prototype.gameLevel = 0;
 AGLRun.prototype.levels = [];
 AGLRun.prototype.scores = [];
 AGLRun.prototype.grammars = [];
 
-AGLRun.prototype.output = function ()
-{
-    var html = "<p>Grammar";
-    for (var i = 0; i < this.levels[0].length; i++)
-        html += "," + i;
-    html += "<br />";
-    for (var l = 0; l < this.scores.length; l++) {
-        html += this.grammars[l];
-        for (var i = 0; i < this.scores[l].length; i++)
-            html += "," + this.scores[l][i];
-        html += "<br />";
-    }
-    html += "</p>";
-	document.getElementById("gameOutput").innerHTML = html;
-};
-
 AGLRun.loadAssets = function(game)
 {
-    game.load.image('player', 'images/player.png');
+    //game.load.image('player', 'images/player.png');
     game.load.spritesheet('squirrel', 'images/squirrel-t.png', 84, 84);
 	game.load.image('acorn', 'images/acorn.png');
-}
+};
 
 AGLRun.setupPhysics = function(physics)
 {
@@ -106,6 +79,26 @@ AGLRun.setupPhysics = function(physics)
     physics.arcade.checkCollision.left = false;
     physics.arcade.checkCollision.right = false;
     physics.arcade.checkCollision.up = false;
+};
+
+AGLRun.movePlayer = function(player,force)
+{
+    if (force == 0)
+    {
+        player.animations.play("wait");
+        return;
+    }
+    
+    player.animations.play("run");
+    if (force > 0)
+        player.scale.x = player.originalScalex;
+    else if (force < 0)
+        player.scale.x= -player.originalScalex;
+        
+    if (player.body.velocity.y > 0)
+        player.animations.play("jump");
+    else if (player.body.velocity.y < 0)
+        player.animations.play("fall");
 };
 
 AGLRun.states = function()
@@ -317,30 +310,17 @@ AGLRun.states.Main.prototype.floorColision = function (coin, floor)
      console.log("colide");
 };
 
-
 AGLRun.states.Main.prototype.move = function(force)
 {
+    AGLRun.movePlayer(this.player,force); 
+    
     if (force == 0)
-    {
-        this.player.animations.play("wait");
         return;
-    }
-     
+        
     this.xOffset += force;
     
     if (this.coin != null)
         this.coin.x = this.coinOriginX + this.xOffset;
-        
-    this.player.animations.play("run");
-    if (force > 0)
-        this.player.scale.x = this.player.originalScalex;
-    else if (force < 0)
-        this.player.scale.x= -this.player.originalScalex;
-        
-    if (this.player.body.velocity.y > 0)
-        this.player.animations.play("jump");
-    else if (this.player.body.velocity.y < 0)
-        this.player.animations.play("fall");
 };
 
 AGLRun.states.Main.prototype.updateCounter = function()
@@ -360,4 +340,31 @@ AGLRun.states.Main.prototype.resetCoin = function (coin)
         coin.body.velocity.y = this.AGL.coinVelocity;
         this.coinOriginX = this.player.x + this.AGL.interpret(symbol) - this.xOffset;
     }
+};
+
+AGLRun.prototype.interpret = function (symbol)
+{
+	switch (symbol)
+    {
+		case "a":
+			return -this.moveDistance;
+		case "b":
+		    return this.moveDistance;
+    }
+};
+
+AGLRun.prototype.output = function ()
+{
+    var html = "<p>Grammar";
+    for (var i = 0; i < this.levels[0].length; i++)
+        html += "," + i;
+    html += "<br />";
+    for (var l = 0; l < this.scores.length; l++) {
+        html += this.grammars[l];
+        for (var i = 0; i < this.scores[l].length; i++)
+            html += "," + this.scores[l][i];
+        html += "<br />";
+    }
+    html += "</p>";
+	document.getElementById("gameOutput").innerHTML = html;
 };
