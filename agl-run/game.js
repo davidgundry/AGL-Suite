@@ -22,8 +22,8 @@ function AGLRun(full, targetDiv)
 		this.game = new Phaser.Game(Math.max(AGLRun.minWidth,window.innerWidth), Math.max(AGLRun.minHeight,window.innerHeight), Phaser.AUTO);
 	}
        
-    this.moveDistance = this.game.width/3;
-    this.coinVelocity = this.game.height*1.6;
+    this.moveDistance = this.game.width*(3/9);
+    this.coinVelocity = this.game.height*1.2;
     
     AGLRun.states.load(this);
     AGLRun.states.start(this.game);
@@ -42,6 +42,8 @@ AGLRun.createPlayer = function(game)
 	var player = game.add.sprite(game.world.centerX, game.world.height*(8/9), 'squirrel');
     player.animations.add('run', [9,10,11,12], 10, true);
     player.animations.add('wait', [0,1,2], 10, true); 
+    player.animations.add('jump', [12], 10, true); 
+    player.animations.add('fall', [13], 10, true); 
     
 	player.anchor.setTo(0.5, 0.5);
     player.height = game.world.height/5;
@@ -49,7 +51,8 @@ AGLRun.createPlayer = function(game)
     player.originalScalex = player.scale.x;
     
     game.physics.arcade.enable(player);
-    player.body.immovable = true;
+    //player.body.immovable = true;
+    player.body.collideWorldBounds = true;
     
     player.animations.play('wait');
     
@@ -162,7 +165,7 @@ AGLRun.states.Main.prototype.timer = 0;
 AGLRun.states.Main.prototype.score = 0;
 AGLRun.states.Main.prototype.xOffset = 0;
 AGLRun.states.Main.prototype.coinOriginX = 0;
-AGLRun.states.Main.prototype.levelLength = 2;
+AGLRun.states.Main.prototype.levelLength = 20;
 AGLRun.states.Main.prototype.startTime = 0;
 AGLRun.states.Main.prototype.coin = null;
 
@@ -186,11 +189,13 @@ AGLRun.states.Main.prototype.create = function ()
     this.player = AGLRun.createPlayer(this.AGL.game);
 
     this.createUI();
+    
+    this.game.physics.arcade.gravity.y = 500;
 
 	this.time.events.add(this.startTime, function ()
     {
         this.createCoin();
-        this.game.time.events.loop(Phaser.Timer.SECOND, this.createCoin, this);
+        this.game.time.events.loop(Phaser.Timer.SECOND*2, this.createCoin, this);
 	}, this);
 };
 
@@ -219,14 +224,17 @@ AGLRun.states.Main.prototype.createCoin = function()
 {
     if (this.coin == null)
     {
-        this.coin = this.AGL.game.add.sprite(this.grammar.next(), -16, 'acorn');
+        this.coin = this.AGL.game.add.sprite(this.grammar.next(), 26, 'acorn');
         this.coin.anchor.setTo(0.5, 0.5);
         this.coin.height = this.AGL.game.world.height/20;
         this.coin.width = this.AGL.game.world.height/20;
         this.AGL.game.physics.arcade.enable(this.coin);
-        this.coin.body.velocity.y = this.AGL.coinVelocity;
+        this.coin.body.collideWorldBounds = true;
+        this.coin.body.bounce.set(0.2);
+        
     }
     this.resetCoin(this.coin);
+    this.coin.body.velocity.y = this.AGL.coinVelocity;
 };
 
 AGLRun.states.Main.prototype.createUI = function()
@@ -236,7 +244,7 @@ AGLRun.states.Main.prototype.createUI = function()
 	this.game.time.events.loop(Phaser.Timer.SECOND, this.updateCounter, this);
 };
 
-AGLRun.states.Main.prototype.update = function ()
+AGLRun.states.Main.prototype.update = function()
 {
     this.checkCollision();
     
@@ -254,8 +262,9 @@ AGLRun.states.Main.prototype.update = function ()
         force = AGLRun.playerForce;
     else if (this.keys.right.isDown)
         force = -AGLRun.playerForce;
-    else if (this.keys.up.isDown)
-        this.AGL.output();
+    if ((this.keys.up.isDown) && (this.player.body.onFloor()))
+        this.player.body.velocity.y = -180;
+        //this.AGL.output();
     
     this.move(force);
 };
@@ -303,6 +312,11 @@ AGLRun.states.Main.prototype.move = function(force)
         this.player.scale.x = this.player.originalScalex;
     else if (force < 0)
         this.player.scale.x= -this.player.originalScalex;
+        
+    if (this.player.body.velocity.y > 0)
+        this.player.animations.play("jump");
+    else if (this.player.body.velocity.y < 0)
+        this.player.animations.play("fall");
 };
 
 AGLRun.states.Main.prototype.updateCounter = function()
@@ -317,7 +331,7 @@ AGLRun.states.Main.prototype.resetCoin = function (coin)
     if (symbol !== " ")
     {
         this.AGL.levels[this.AGL.gameLevel].push(symbol);
-        coin.reset(this.player.x + this.AGL.interpret(symbol), -16, 10);
+        coin.reset(this.player.x + this.AGL.interpret(symbol), 26, 10);
         coin.body.velocity.y = this.AGL.coinVelocity;
         this.coinOriginX = this.player.x + this.AGL.interpret(symbol) - this.xOffset;
     }
