@@ -36,6 +36,7 @@ AGLRun.backgroundColour = "#aaccaa";
 AGLRun.defaultColour = "#ffffff";
 AGLRun.playerForce = 10;
 AGLRun.alphabet = ["a","b"," "];
+AGLRun.jumpForce = 150;
 
 AGLRun.createPlayer = function(game)
 {
@@ -97,6 +98,15 @@ AGLRun.loadAssets = function(game)
     game.load.spritesheet('squirrel', 'images/squirrel-t.png', 84, 84);
 	game.load.image('acorn', 'images/acorn.png');
 }
+
+AGLRun.setupPhysics = function(physics)
+{
+    physics.startSystem(Phaser.Physics.ARCADE);
+    physics.arcade.gravity.y = 500;
+    physics.arcade.checkCollision.left = false;
+    physics.arcade.checkCollision.right = false;
+    physics.arcade.checkCollision.up = false;
+};
 
 AGLRun.states = function()
 {};
@@ -185,12 +195,17 @@ AGLRun.states.Main.prototype.create = function ()
 
 	this.keys = this.game.input.keyboard.createCursorKeys();
 
-	this.AGL.game.physics.startSystem(Phaser.Physics.ARCADE);
+	AGLRun.setupPhysics(this.AGL.game.physics);
+    
     this.player = AGLRun.createPlayer(this.AGL.game);
+    /*this.floor = this.AGL.game.add.sprite(0,this.AGL.game.height-10);
+    this.floor.width = this.AGL.game.width;
+    this.floor.height = 10;
+    this.AGL.game.physics.arcade.enable(this.floor);
+    this.floor.body.immovable = true;
+    this.floor.body.gravity = 0;*/
 
     this.createUI();
-    
-    this.game.physics.arcade.gravity.y = 500;
 
 	this.time.events.add(this.startTime, function ()
     {
@@ -229,12 +244,10 @@ AGLRun.states.Main.prototype.createCoin = function()
         this.coin.height = this.AGL.game.world.height/20;
         this.coin.width = this.AGL.game.world.height/20;
         this.AGL.game.physics.arcade.enable(this.coin);
-        this.coin.body.collideWorldBounds = true;
         this.coin.body.bounce.set(0.2);
-        
+        this.coin.body.collideWorldBounds = true;
     }
     this.resetCoin(this.coin);
-    this.coin.body.velocity.y = this.AGL.coinVelocity;
 };
 
 AGLRun.states.Main.prototype.createUI = function()
@@ -263,7 +276,7 @@ AGLRun.states.Main.prototype.update = function()
     else if (this.keys.right.isDown)
         force = -AGLRun.playerForce;
     if ((this.keys.up.isDown) && (this.player.body.onFloor()))
-        this.player.body.velocity.y = -180;
+        this.player.body.velocity.y = -AGLRun.jumpForce;
         //this.AGL.output();
     
     this.move(force);
@@ -276,13 +289,17 @@ AGLRun.states.Main.prototype.checkCollision = function()
         
     this.AGL.game.physics.arcade.overlap(this.player, this.coin, this.coinCollision, null, this);
     
-    if (this.coin.exists)
-        if (this.coin.y > this.AGL.game.world.height)
+    //this.AGL.game.physics.arcade.collide(this.coin, this.floor, this.floorCollision, null, this);
+    
+   /* if (this.coin.exists)
+        if (this.coin.body.y >= this.AGL.game.world.height)
         {
-            this.AGL.scores[this.AGL.gameLevel].push(this.coin.x-this.AGL.game.world.centerX);
-            this.coin.kill();
-            AGLSuite.log.recordEvent("missed",{distance:this.coin.x-this.AGL.game.world.centerX});
-        }
+            this.coin.body.y = this.AGL.game.world.height-1;
+            this.coin.body.velocity.y *= -0.2;
+            //this.AGL.scores[this.AGL.gameLevel].push(this.coin.x-this.AGL.game.world.centerX);
+            //this.coin.kill();
+            //AGLSuite.log.recordEvent("missed",{distance:this.coin.x-this.AGL.game.world.centerX});
+        }*/
 };
 
 AGLRun.states.Main.prototype.coinCollision = function (player, coin)
@@ -293,6 +310,13 @@ AGLRun.states.Main.prototype.coinCollision = function (player, coin)
 	coin.kill();
     AGLSuite.log.recordEvent("collected",{distance:this.coin.x-this.AGL.game.world.centerX});
 };
+
+AGLRun.states.Main.prototype.floorColision = function (coin, floor)
+{
+     coin.body.velocity.y *= -0.2;
+     console.log("colide");
+};
+
 
 AGLRun.states.Main.prototype.move = function(force)
 {
@@ -327,6 +351,7 @@ AGLRun.states.Main.prototype.updateCounter = function()
 
 AGLRun.states.Main.prototype.resetCoin = function (coin)
 {
+    this.coin.kill();
     var symbol = this.grammar.next();
     if (symbol !== " ")
     {
