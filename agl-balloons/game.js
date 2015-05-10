@@ -77,7 +77,7 @@ AGLBalloons.Balloon = function(game)
 };
 
 AGLBalloons.Balloon.maxBalloons = 3;
-AGLBalloons.Balloon.defaultSpeed = 10;
+AGLBalloons.Balloon.defaultSpeed = 30;
 AGLBalloons.Balloon.prototype.emitter = null;
 AGLBalloons.Balloon.prototype.emitter = false;
 AGLBalloons.Balloon.prototype.contentsGood = false;
@@ -100,7 +100,7 @@ AGLBalloons.Balloon.spawnSweets = function(game,sprite)
 {
     var emitter = game.add.emitter(0, 0, 10);
     emitter.makeParticles('sweets',0,10,true,true);
-    emitter.setScale(0.5, 1, 0.5, 1, 0);
+    emitter.setScale(1, 0.5, 1, 0.5, 0);
     
     emitter.gravity = 300;
     emitter.emitX = sprite.body.x;
@@ -110,6 +110,8 @@ AGLBalloons.Balloon.spawnSweets = function(game,sprite)
     emitter.maxParticleSpeed = new Phaser.Point(0,200);
     emitter.minParticleSpeed = new Phaser.Point(0,0);
     emitter.particleDrag = new Phaser.Point(100,0);
+    emitter.angularDrag = 80;
+    emitter.bounce =1 ;
     emitter.start(false,0,100,10);
     
     return emitter;
@@ -119,7 +121,7 @@ AGLBalloons.Balloon.spawnCabbages = function(game,sprite)
 {
     var emitter = game.add.emitter(0, 0, 10);
     emitter.makeParticles('cabbages',0,10,true,true);
-    emitter.setScale(0.5, 1, 0.5, 1, 0);
+    emitter.setScale(1, 0.5, 1, 0.5, 0);
 
     emitter.gravity = 300;
     emitter.emitX = sprite.body.x;
@@ -129,6 +131,8 @@ AGLBalloons.Balloon.spawnCabbages = function(game,sprite)
     emitter.maxParticleSpeed = new Phaser.Point(0,200);
     emitter.minParticleSpeed = new Phaser.Point(0,0);
     emitter.particleDrag = new Phaser.Point(100,0);
+    emitter.angularDrag = 80;
+    emitter.bounce = 1;
     emitter.start(false,0,100,10);
     
     return emitter;
@@ -275,8 +279,8 @@ AGLBalloons.states.Main  = function(AGL)
 };
 
 AGLBalloons.states.Main.prototype.windX = 30;
-AGLBalloons.states.Main.prototype.maxWindX = 700;
-AGLBalloons.states.Main.prototype.minWindX = 100;
+AGLBalloons.states.Main.prototype.maxWindX = 50;
+AGLBalloons.states.Main.prototype.minWindX = 10;
 AGLBalloons.states.Main.prototype.windY = 0;
 
 AGLBalloons.states.Main.prototype.preload = function ()
@@ -287,20 +291,22 @@ AGLBalloons.states.Main.prototype.preload = function ()
 AGLBalloons.states.Main.prototype.create = function ()
 {
     AGLSuite.log.recordEvent("started");
-
-    this.balloons = [];
-    this.clouds = [];
- 
     this.AGL.game.physics.startSystem(Phaser.Physics.ARCADE);
-    this.AGL.game.time.events.loop(Phaser.Timer.SECOND*1, this.newBalloon, this);
-    this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.newCloud, this);
-    this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.updateWind, this);
 
     var background = this.AGL.game.add.sprite(0,0,'landscape');
     var width = this.AGL.game.width;
     background.scale.x = width/background.width;
     background.scale.y = background.scale.x;
     background.y = this.game.height-background.height;
+    
+    this.balloons = [];
+    this.clouds = [];
+    this.startClouds();
+    this.startBalloons();
+    
+    this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.newBalloon, this);
+    this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.newCloud, this);
+    this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.updateWind, this);
 };
 
 AGLBalloons.states.Main.prototype.newBalloon = function()
@@ -334,6 +340,25 @@ AGLBalloons.states.Main.prototype.newBalloon = function()
             }
         };
     }
+    return balloon;
+};
+
+AGLBalloons.states.Main.prototype.startClouds = function()
+{
+    for (var i=0;i<AGLBalloons.Cloud.maxClouds;i++)
+    {
+        var cloud = this.newCloud();
+        cloud.sprite.x = Math.random()*this.AGL.game.width;
+    }
+};
+
+AGLBalloons.states.Main.prototype.startBalloons = function()
+{
+    for (var i=0;i<AGLBalloons.Balloon.maxBalloons;i++)
+    {
+        var balloon = this.newBalloon();
+        balloon.sprite.x = Math.random()*this.AGL.game.width/2;
+    }
 };
 
 AGLBalloons.states.Main.prototype.newCloud = function()
@@ -358,6 +383,7 @@ AGLBalloons.states.Main.prototype.newCloud = function()
             }
         };
     }
+    return cloud;
 };
 
 AGLBalloons.states.Main.prototype.updateWind = function()
