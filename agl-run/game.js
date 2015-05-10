@@ -6,22 +6,10 @@
  */
 function AGLRun(full, targetDiv)
 {
-    if (!full)
-	{
-		var container = document.getElementById(targetDiv);
-		if (container != null)
-			this.game = new Phaser.Game(container.clientWidth, container.clientHeight, Phaser.AUTO, container);
-		else
-		{
-			AGLRun.log("Invalid target container");
-			return;
-		}
-	}
-	else
-	{	
-		this.game = new Phaser.Game(Math.max(AGLRun.minWidth,window.innerWidth), Math.max(AGLRun.minHeight,window.innerHeight), Phaser.AUTO);
-	}
-       
+    this.game = AGLSuite.createGame(full,targetDiv,AGLRun.minWidth,AGLRun.minHeight);
+    if (this.game == null)
+        return;
+    
     this.moveDistance = this.game.width*(3/9);
     this.coinVelocity = this.game.height*1.2;
     

@@ -9,6 +9,10 @@
  */
 function AGLBlocks(full,targetDiv,greyLocked,contentsType,audio)
 {
+	this.game = AGLSuite.createGame(full,targetDiv,AGLBlocks.minWidth,AGLBlocks.minHeight);
+    if (this.game == null)
+        return;
+	
 	if (typeof greyLocked !== "undefined")
 		this.lockedTilesAreGrey = greyLocked;
 	else
@@ -19,37 +23,22 @@ function AGLBlocks(full,targetDiv,greyLocked,contentsType,audio)
 	else
 		this.contentsType = contentsType;
 	this.audio = typeof audio !== 'undefined' ? audio : true;
-	this.spriteFrameRotation = Math.round(Math.random()*100);
+	this.spriteFrameRotation = Math.round(Math.random()*100);	
 	
-	if (!full)
-	{
-		var container = document.getElementById(targetDiv);
-		if (container != null)
-			this.game = new Phaser.Game(container.clientWidth, container.clientHeight, Phaser.AUTO, container);
-		else
-		{
-			AGLSuite.log.log("Invalid target container");
-			return;
-		}
-	}
-	else
-	{	
-		this.game = new Phaser.Game(Math.max(AGLBlocks.minWidth,window.innerWidth), Math.max(AGLBlocks.minHeight,window.innerHeight), Phaser.AUTO);
-	}
-		this.paddingLeft = Math.round(this.game.width/8);
-		this.paddingRight = Math.round(this.game.width/8);
-		this.paddingTop  = Math.round(this.game.height/8);
-		this.paddingBottom = Math.round(this.game.height/8);
+	this.paddingLeft = Math.round(this.game.width/8);
+	this.paddingRight = Math.round(this.game.width/8);
+	this.paddingTop  = Math.round(this.game.height/8);
+	this.paddingBottom = Math.round(this.game.height/8);
 
-		this.boxMarginLeft = Math.round(this.game.width/10);
-		this.boxMarginRight = Math.round(this.game.width/10);
-		this.boxMarginTop = Math.round(this.game.height/10);
-		this.boxMarginBottom = Math.round(this.game.height/10);
+	this.boxMarginLeft = Math.round(this.game.width/10);
+	this.boxMarginRight = Math.round(this.game.width/10);
+	this.boxMarginTop = Math.round(this.game.height/10);
+	this.boxMarginBottom = Math.round(this.game.height/10);
 
-		this.maxBlockSize = Math.min(Math.round(this.game.width/3),Math.round(this.game.height/3));
+	this.maxBlockSize = Math.min(Math.round(this.game.width/3),Math.round(this.game.height/3));
 		
-		this.addGameStates();
-		this.game.state.start('load');
+	this.addGameStates();
+	this.game.state.start('load');
 };
 
 AGLBlocks.title = "blocks";
