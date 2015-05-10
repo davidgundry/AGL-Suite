@@ -40,13 +40,17 @@ AGLBalloons.Cloud.prototype.updateWind = function(x)
 	tween.start();
 };
 
-AGLBalloons.Cloud.prototype.reset = function(x,y)
+AGLBalloons.Cloud.prototype.reset = function()
 {
+    var min = 20;
+    var max = this.game.height-100;
+    var y = min+(Math.random()*(max-min))/2;
+    
     var width = 200 + Math.random()*100;
     this.sprite.scale.x = width/this.sprite.width;
     this.sprite.scale.y = this.sprite.scale.x;
     
-    this.sprite.reset(-this.sprite.width,(Math.random()*this.game.height)/2,1);
+    this.sprite.reset(-this.sprite.width,y,1);
     this.speed = AGLBalloons.Cloud.defaultSpeed/2+Math.random()*AGLBalloons.Cloud.defaultSpeed;
     
     this.sprite.body.velocity.x = this.speed;
@@ -55,8 +59,6 @@ AGLBalloons.Cloud.prototype.reset = function(x,y)
 AGLBalloons.Balloon = function(game)
 {
     this.game = game;
-    this.contentsGood = true;
-    this.empty = false;
     
     var width = game.width/7;
     var height = game.width/7;
@@ -77,6 +79,8 @@ AGLBalloons.Balloon = function(game)
 AGLBalloons.Balloon.maxBalloons = 3;
 AGLBalloons.Balloon.defaultSpeed = 10;
 AGLBalloons.Balloon.prototype.emitter = null;
+AGLBalloons.Balloon.prototype.emitter = false;
+AGLBalloons.Balloon.prototype.contentsGood = false;
 
 AGLBalloons.Balloon.createSprite = function(x,y,width,height,game)
 {   
@@ -106,7 +110,7 @@ AGLBalloons.Balloon.spawnSweets = function(game,sprite)
     emitter.maxParticleSpeed = new Phaser.Point(0,200);
     emitter.minParticleSpeed = new Phaser.Point(0,0);
     emitter.particleDrag = new Phaser.Point(100,0);
-    emitter.start(false,1000,100,10);
+    emitter.start(false,0,100,10);
     
     return emitter;
 };
@@ -125,14 +129,16 @@ AGLBalloons.Balloon.spawnCabbages = function(game,sprite)
     emitter.maxParticleSpeed = new Phaser.Point(0,200);
     emitter.minParticleSpeed = new Phaser.Point(0,0);
     emitter.particleDrag = new Phaser.Point(100,0);
-    emitter.start(false,1000,100,10);
+    emitter.start(false,0,100,10);
     
     return emitter;
 };
 
-AGLBalloons.Balloon.prototype.reset = function(x,y)
+AGLBalloons.Balloon.prototype.reset = function()
 {
-    var y = (Math.random()*this.game.height)/2;
+    var min = 100;
+    var max = this.game.height-100;
+    var y = min+(Math.random()*(max-min))/2;
     this.sprite.reset(-this.sprite.width,y,1);
     
     this.contentsGood = Math.round(Math.random()) == 1;
@@ -295,8 +301,6 @@ AGLBalloons.states.Main.prototype.create = function ()
     background.scale.x = width/background.width;
     background.scale.y = background.scale.x;
     background.y = this.game.height-background.height;
-
-    this.createUI();
 };
 
 AGLBalloons.states.Main.prototype.newBalloon = function()
@@ -322,7 +326,7 @@ AGLBalloons.states.Main.prototype.newBalloon = function()
             {
                 if (this.balloons[i].emitter != null)
                 {
-                    //TODO: get all emitted things out of the emitter and into something more perminant
+                    //TODO: get a reference to all emitted things
                 }
                 this.balloons[i].reset();
                 this.balloons[i].updateWind(this.windX);
@@ -369,13 +373,6 @@ AGLBalloons.states.Main.prototype.updateWind = function()
         
     for (var i=0;i<this.clouds.length;i++)
         this.clouds[i].updateWind(this.windX);
-};
-
-AGLBalloons.states.Main.prototype.createUI = function()
-{
-	//this.timerText = this.game.add.text(15, 20, "Time: 0", { font: this.AGL.game.height/15 + "px " +AGLBalloons.defaultFont, fill: AGLBalloons.defaultColour });
-	//this.scoreText = this.game.add.text(this.AGL.game.world.width - 50, 20, "0", { font: this.AGL.game.height/15 + "px "+AGLBalloons.defaultFont, fill: AGLBalloons.defaultColour });
-	//this.game.time.events.loop(Phaser.Timer.SECOND, this.updateCounter, this);
 };
 
 AGLBalloons.states.Main.prototype.update = function()
