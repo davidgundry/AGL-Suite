@@ -242,6 +242,7 @@ AGLRun.states.Main.prototype.createCoin = function()
         this.AGL.game.physics.arcade.enable(this.coin);
         this.coin.body.bounce.set(0.2);
         this.coin.body.collideWorldBounds = true;
+        this.coin.kill();
     }
     this.resetCoin(this.coin);
 };
@@ -336,7 +337,12 @@ AGLRun.states.Main.prototype.updateCounter = function()
 
 AGLRun.states.Main.prototype.resetCoin = function (coin)
 {
-    this.coin.kill();
+    if (coin.exists)
+    {
+        var time = Date.now();
+    	this.AGL.scores[this.AGL.gameLevel].push(time - coin.startTime);
+        coin.kill();   
+    }
     var symbol = this.grammar.next();
     if (symbol !== " ")
     {
