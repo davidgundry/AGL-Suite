@@ -3,8 +3,9 @@
  * 
  * @param   full        whether to play fullscreen
  * @param   targetDiv   the HTML element in which to put the game
+ * @param   outputDiv   the HTML element in which to put game output
  */
-function AGLRun(full, targetDiv)
+function AGLRun(full, targetDiv, outputDiv)
 {
     if (!full)
 	{
@@ -24,6 +25,7 @@ function AGLRun(full, targetDiv)
        
     this.moveDistance = this.game.width*(3/9);
     this.coinVelocity = this.game.height*1.2;
+    this.outputDiv = outputDiv;
     
     AGLRun.states.load(this);
     AGLRun.states.start(this.game);
@@ -187,6 +189,7 @@ AGLRun.states.Main.prototype.create = function ()
     this.AGL.scores.push([]);
 
 	this.keys = this.game.input.keyboard.createCursorKeys();
+    this.keys.output = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
 	AGLRun.setupPhysics(this.AGL.game.physics);
     
@@ -200,7 +203,7 @@ AGLRun.states.Main.prototype.create = function ()
 
     this.createUI();
 
-	this.time.events.add(this.startTime, function ()
+	this.time.events.add(this.startTime, function()
     {
         this.createCoin();
         this.game.time.events.loop(Phaser.Timer.SECOND*2, this.createCoin, this);
@@ -245,8 +248,8 @@ AGLRun.states.Main.prototype.createCoin = function()
 
 AGLRun.states.Main.prototype.createUI = function()
 {
-	this.timerText = this.game.add.text(15, 20, "Time: 0", { font: this.AGL.game.height/15 + "px " +AGLRun.defaultFont, fill: AGLRun.defaultColour });
-	this.scoreText = this.game.add.text(this.AGL.game.world.width - 50, 20, "0", { font: this.AGL.game.height/15 + "px "+AGLRun.defaultFont, fill: AGLRun.defaultColour });
+	this.timerText = this.game.add.text(15, 20, "Time: 0", { font: this.AGL.game.height/16 + "px " +AGLRun.defaultFont, fill: AGLRun.defaultColour });
+	this.scoreText = this.game.add.text(this.AGL.game.world.width - 50, 20, "0", { font: this.AGL.game.height/16 + "px "+AGLRun.defaultFont, fill: AGLRun.defaultColour });
 	this.game.time.events.loop(Phaser.Timer.SECOND, this.updateCounter, this);
 };
 
@@ -270,7 +273,8 @@ AGLRun.states.Main.prototype.update = function()
         force = -AGLRun.playerForce;
     if ((this.keys.up.isDown) && (this.player.body.onFloor()))
         this.player.body.velocity.y = -AGLRun.jumpForce;
-        //this.AGL.output();
+    if (this.keys.output.isDown)
+        this.AGL.output();
     
     this.move(force);
 };
@@ -299,7 +303,8 @@ AGLRun.states.Main.prototype.coinCollision = function (player, coin)
 {
 	this.score++;
 	this.scoreText.text = this.score;
-	this.AGL.scores[this.AGL.gameLevel].push(0);
+    var time = Date.now();
+	this.AGL.scores[this.AGL.gameLevel].push(time - coin.startTime);
 	coin.kill();
     AGLSuite.log.recordEvent("collected",{distance:this.coin.x-this.AGL.game.world.centerX});
 };
@@ -339,6 +344,7 @@ AGLRun.states.Main.prototype.resetCoin = function (coin)
         coin.reset(this.player.x + this.AGL.interpret(symbol), 26, 10);
         coin.body.velocity.y = this.AGL.coinVelocity;
         this.coinOriginX = this.player.x + this.AGL.interpret(symbol) - this.xOffset;
+        this.coin.startTime = Date.now();
     }
 };
 
@@ -366,5 +372,5 @@ AGLRun.prototype.output = function ()
         html += "<br />";
     }
     html += "</p>";
-	document.getElementById("gameOutput").innerHTML = html;
+	document.getElementById(this.outputDiv).innerHTML = html;
 };
