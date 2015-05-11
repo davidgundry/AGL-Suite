@@ -42,8 +42,8 @@ AGLBalloons.Cloud.prototype.updateWind = function(x)
 
 AGLBalloons.Cloud.prototype.reset = function()
 {
-    var min = 20;
-    var max = this.game.height-100;
+    var min = this.game.height/5;
+    var max = this.game.height*(4/5);
     var y = min+(Math.random()*(max-min))/2;
     
     var width = 200 + Math.random()*100;
@@ -60,9 +60,8 @@ AGLBalloons.Balloon = function(game)
 {
     this.game = game;
     
-    var width = game.width/7;
-    var height = game.width/7;
-    this.sprite = AGLBalloons.Balloon.createSprite(0,0,width,height,game);
+    var radius = game.height/9;
+    this.sprite = AGLBalloons.graphics.createBalloon(0,0,radius,game);
     game.physics.arcade.enable(this.sprite);
     this.reset();
     
@@ -82,24 +81,10 @@ AGLBalloons.Balloon.prototype.emitter = null;
 AGLBalloons.Balloon.prototype.emitter = false;
 AGLBalloons.Balloon.prototype.contentsGood = false;
 
-AGLBalloons.Balloon.createSprite = function(x,y,width,height,game)
-{   
-    var bmd = game.add.bitmapData(width, height);
-	var ctx = bmd.context;
-    ctx.fillStyle = '#ccff44';
-    ctx.beginPath();
-    ctx.arc(width/2, height/2, width/2, 0, 2*Math.PI, true); 
-    ctx.fill();
-    
-    var balloon = game.add.sprite(x,y,bmd);
-    balloon.anchor.setTo(0.5,0.5);
-    return balloon;
-};
-
-AGLBalloons.Balloon.spawnSweets = function(game,sprite)
+AGLBalloons.Balloon.spawnDropable = function(game,sprite,dropable)
 {
     var emitter = game.add.emitter(0, 0, 10);
-    emitter.makeParticles('sweets',0,10,true,true);
+    emitter.makeParticles(dropable,0,10,true,true);
     emitter.setScale(1, 0.5, 1, 0.5, 0);
     
     emitter.gravity = 300;
@@ -117,31 +102,10 @@ AGLBalloons.Balloon.spawnSweets = function(game,sprite)
     return emitter;
 };
 
-AGLBalloons.Balloon.spawnCabbages = function(game,sprite)
-{
-    var emitter = game.add.emitter(0, 0, 10);
-    emitter.makeParticles('cabbages',0,10,true,true);
-    emitter.setScale(1, 0.5, 1, 0.5, 0);
-
-    emitter.gravity = 300;
-    emitter.emitX = sprite.body.x;
-    emitter.emitY = sprite.body.y+sprite.height/2;
-    
-    emitter.lifespan = 100;
-    emitter.maxParticleSpeed = new Phaser.Point(0,200);
-    emitter.minParticleSpeed = new Phaser.Point(0,0);
-    emitter.particleDrag = new Phaser.Point(100,0);
-    emitter.angularDrag = 80;
-    emitter.bounce = 1;
-    emitter.start(false,0,100,10);
-    
-    return emitter;
-};
-
 AGLBalloons.Balloon.prototype.reset = function()
 {
-    var min = 100;
-    var max = this.game.height-100;
+    var min = this.game.height/4;
+    var max = this.game.height*(3/4);
     var y = min+(Math.random()*(max-min))/2;
     this.sprite.reset(-this.sprite.width,y,1);
     
@@ -163,12 +127,12 @@ AGLBalloons.Balloon.prototype.onInputDown = function()
         return;
     if (this.contentsGood)
     {
-        this.emitter = AGLBalloons.Balloon.spawnSweets(this.game,this.sprite);
+        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'sweets');
         AGLSuite.log.recordEvent("success");
     }
     else
     {
-        this.emitter = AGLBalloons.Balloon.spawnCabbages(this.game,this.sprite);
+        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'cabbages');
         AGLSuite.log.recordEvent("failure");
     }
     
@@ -293,11 +257,14 @@ AGLBalloons.states.Main.prototype.create = function ()
     AGLSuite.log.recordEvent("started");
     this.AGL.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    var background = this.AGL.game.add.sprite(0,0,'landscape');
+    //var background = this.AGL.game.add.sprite(0,0,'landscape');
+   /* var background = 
     var width = this.AGL.game.width;
     background.scale.x = width/background.width;
     background.scale.y = background.scale.x;
-    background.y = this.game.height-background.height;
+    background.y = this.game.height-background.height;*/
+    
+    AGLBalloons.graphics.createLandscape(this.AGL.game.width,this.AGL.game.height,this.AGL.game);
     
     this.balloons = [];
     this.clouds = [];
