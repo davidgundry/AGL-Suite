@@ -20,6 +20,7 @@ AGLBalloons.defaultFont = "Sans-Serif";
 AGLBalloons.backgroundColour = "#5588ff";
 AGLBalloons.defaultColour = "#ffffff";
 AGLBalloons.prototype.gameLevel = 0;
+AGLBalloons.balloonFont = "Sans-Serif";
 
 AGLBalloons.Cloud = function(game)
 {
@@ -112,6 +113,19 @@ AGLBalloons.Balloon.prototype.reset = function()
     this.contentsGood = Math.round(Math.random()) == 1;
     this.empty = false;
     this.emitter = null;
+    
+    this.sprite.scale.x = 0.8+Math.random()/5;
+    this.sprite.scale.y = this.sprite.scale.x;  
+    this.sprite.angle = 12;
+    
+    //note: will create far to many texts with respawns
+    this.text = this.game.add.text(0,0,"4+3",{font:(this.game.height/12)*this.sprite.scale.x+"px "+ AGLBalloons.balloonFont});
+    this.text.anchor.setTo(0.5,0.5);
+    this.sprite.addChild(this.text);
+    
+    var tween = this.game.add.tween(this.sprite);
+    tween.to({angle:-12},5000+1000*Math.random(),Phaser.Easing.Back.InOut,true,0,Number.MAX_VALUE,true);
+	tween.start();
 };
 
 AGLBalloons.Balloon.prototype.updateWind = function(x)

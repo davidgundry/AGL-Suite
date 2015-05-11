@@ -54,7 +54,7 @@ AGLBalloons.graphics.createBalloon = function(x,y,radius,game)
     
     
     var balloon = game.add.sprite(x,y,bmd);
-    balloon.anchor.setTo(0.5,0.3);
+    balloon.anchor.setTo(0.5,0.2);
     return balloon;
 };
 
