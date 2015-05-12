@@ -90,17 +90,24 @@ AGLBalloons.Balloon.SweetParticle = function(game, x, y)
 AGLBalloons.Balloon.SweetParticle.prototype = Object.create(Phaser.Particle.prototype);
 AGLBalloons.Balloon.SweetParticle.prototype.constructor = AGLBalloons.Balloon.SweetParticle;
 
+AGLBalloons.Balloon.CabbageParticle = function(game, x, y)
+{
+    Phaser.Particle.call(this, game, x, y, game.cache.getBitmapData('cabbageParticle'));
+};
+AGLBalloons.Balloon.CabbageParticle.prototype = Object.create(Phaser.Particle.prototype);
+AGLBalloons.Balloon.CabbageParticle.prototype.constructor = AGLBalloons.Balloon.CabbageParticle;
+
 AGLBalloons.Balloon.spawnDropable = function(game,sprite,dropable)
 {
     var emitter = game.add.emitter(0, 0, 10);
-    emitter.particleClass = AGLBalloons.Balloon.SweetParticle;
-    //emitter.makeParticles(game.cache.getBitmapData(dropable),0,10,true,true);
-    emitter.makeParticles();
+    emitter.particleClass = dropable;
+    emitter.makeParticles(null,0,10,true,true);
+    emitter.width=sprite.width/4;
     emitter.setScale(1, 0.5, 1, 0.5, 0);
     
     emitter.gravity = 300;
-    emitter.emitX = sprite.body.x+sprite.width*2;
-    emitter.emitY = sprite.body.y+sprite.height/2;
+    //emitter.emitX = sprite.body.x+sprite.width*2;
+   // emitter.emitY = sprite.body.y+sprite.height/2;
     
     emitter.lifespan = 100;
     emitter.maxParticleSpeed = new Phaser.Point(0,200);
@@ -108,7 +115,7 @@ AGLBalloons.Balloon.spawnDropable = function(game,sprite,dropable)
     emitter.particleDrag = new Phaser.Point(100,0);
     emitter.angularDrag = 80;
     emitter.bounce = 1;
-    emitter.start(false,0,100,10);
+    emitter.start(false,0,100);//,10);
     
     return emitter;
 };
@@ -155,12 +162,12 @@ AGLBalloons.Balloon.prototype.onInputDown = function()
         return;
     if (this.contentsGood)
     {
-        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'sweetParticle');
+        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,AGLBalloons.Balloon.SweetParticle);
         AGLSuite.log.recordEvent("success");
     }
     else
     {
-        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'cabbageParticle');
+        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,AGLBalloons.Balloon.CabbageParticle);
         AGLSuite.log.recordEvent("failure");
     }
     
@@ -201,8 +208,11 @@ AGLBalloons.Balloon.prototype.update = function()
 
 AGLBalloons.loadAssets = function(game)
 {
-    game.load.image('sweets', 'images/sweet-sm.png');
-    game.load.image('cabbages', 'images/cabbage-sm.png');
+    //game.load.image('sweets', 'images/sweet-sm.png');
+    //game.load.image('cabbages', 'images/cabbage-sm.png');
+     var sweetSize = game.height/20;
+    game.cache.addBitmapData('sweetParticle', AGLBalloons.graphics.Sweet(sweetSize,sweetSize,game));
+    game.cache.addBitmapData('cabbageParticle', AGLBalloons.graphics.Cabbage(sweetSize,sweetSize,game));
 };
 
 AGLBalloons.states = function()
@@ -282,19 +292,10 @@ AGLBalloons.states.Main.prototype.create = function ()
 {
     AGLSuite.log.recordEvent("started");
     this.AGL.game.physics.startSystem(Phaser.Physics.ARCADE);
-
-    //var background = this.AGL.game.add.sprite(0,0,'landscape');
-   /* var background = 
-    var width = this.AGL.game.width;
-    background.scale.x = width/background.width;
-    background.scale.y = background.scale.x;
-    background.y = this.game.height-background.height;*/
     
     AGLBalloons.graphics.Landscape(this.AGL.game.width,this.AGL.game.height,this.AGL.game);
     
-    var sweetSize = this.AGL.game.height/20;
-    this.AGL.game.cache.addBitmapData('sweetParticle', AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
-    this.AGL.game.cache.addBitmapData('cabbageParticle', AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
+    //this.AGL.game.add.sprite(10,10, AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
  
     this.balloons = [];
     this.clouds = [];
