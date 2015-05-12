@@ -1,5 +1,7 @@
 if (typeof AGLBalloons === 'undefined')
-	function AGLBalloons(){};
+	console.log("AGLBalloons is not defined. Load game.js first");
+else
+{
 
 AGLBalloons.graphics = function(){};
 
@@ -194,4 +196,6 @@ AGLBalloons.graphics.Cloud._countNeighbours = function(laticeArray,x,y)
                         count++; 
         }
     return count;
+};
+
 };

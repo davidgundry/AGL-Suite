@@ -91,7 +91,7 @@ AGLBalloons.Balloon.spawnDropable = function(game,sprite,dropable)
     emitter.setScale(1, 0.5, 1, 0.5, 0);
     
     emitter.gravity = 300;
-    emitter.emitX = sprite.body.x;
+    emitter.emitX = sprite.body.x+sprite.width*2;
     emitter.emitY = sprite.body.y+sprite.height/2;
     
     emitter.lifespan = 100;
