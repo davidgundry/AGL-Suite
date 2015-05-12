@@ -53,7 +53,7 @@ AGLBalloons.Cloud.prototype.reset = function()
     var max = this.game.height*(2/3);
     var y = min+(Math.random()*(max-min))/2;
     
-    this.sprite.reset(-this.sprite.width,y,1);
+    this.sprite.reset(-this.sprite.width-this.sprite.height,y,1);
     this.speed = AGLBalloons.Cloud.defaultSpeed/2+Math.random()*AGLBalloons.Cloud.defaultSpeed;
     
     this.sprite.body.velocity.x = this.speed;
