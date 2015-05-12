@@ -33,7 +33,7 @@ AGLBalloons.Cloud = function(game)
 };
 
 AGLBalloons.Cloud.defaultSpeed = 0;
-AGLBalloons.Cloud.maxClouds = 8;
+AGLBalloons.Cloud.maxClouds = 12;
 
 AGLBalloons.Cloud.prototype.updateWind = function(x)
 {
@@ -53,7 +53,7 @@ AGLBalloons.Cloud.prototype.reset = function()
     var max = this.game.height*(2/3);
     var y = min+(Math.random()*(max-min))/2;
     
-    this.sprite.reset(this.game.width-this.sprite.width-this.sprite.height,y,1);
+    this.sprite.reset(-this.sprite.width-this.sprite.height,y,1);
     this.speed = AGLBalloons.Cloud.defaultSpeed/2+Math.random()*AGLBalloons.Cloud.defaultSpeed;
     
     this.sprite.body.velocity.x = this.speed;
@@ -164,6 +164,7 @@ AGLBalloons.Balloon.prototype.onInputDown = function()
     {
         this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,AGLBalloons.Balloon.SweetParticle);
         AGLSuite.log.recordEvent("success");
+        this.game.state.getCurrentState().sweetDrop();
     }
     else
     {
@@ -280,6 +281,8 @@ AGLBalloons.states.Main.prototype.windX = 30;
 AGLBalloons.states.Main.prototype.maxWindX = 50;
 AGLBalloons.states.Main.prototype.minWindX = 10;
 AGLBalloons.states.Main.prototype.windY = 0;
+AGLBalloons.states.Main.prototype.score = 0;
+AGLBalloons.states.Main.prototype.complete = false;
 
 AGLBalloons.states.Main.prototype.preload = function ()
 {
@@ -293,6 +296,12 @@ AGLBalloons.states.Main.prototype.create = function ()
     
     AGLBalloons.graphics.Landscape(this.AGL.game.width*3,this.AGL.game.height,this.AGL.game);
     
+    this.AGL.game.world.resize(this.AGL.game.width*3,this.AGL.game.height);
+    this.AGL.game.camera.x += this.AGL.game.width*2;
+    var tween = this.game.add.tween(this.AGL.game.camera);
+	tween.to({x:this.AGL.game.width},2000);
+	tween.start();
+    
     //this.AGL.game.add.sprite(10,10, AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
  
     this.balloons = [];
@@ -304,16 +313,13 @@ AGLBalloons.states.Main.prototype.create = function ()
     this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.newCloud, this);
     this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.updateWind, this);
     
-    this.AGL.game.world.resize(this.AGL.game.width*3,this.AGL.game.height);
-    this.AGL.game.camera.x += this.AGL.game.width*2;
-    var tween = this.game.add.tween(this.AGL.game.camera);
-	tween.to({x:this.AGL.game.width},2000);
-	tween.start();
+
     
 };
 
 AGLBalloons.states.Main.prototype.newBalloon = function()
 {
+    if (!this.complete)
     if (this.balloons.length < AGLBalloons.Balloon.maxBalloons)
     {
         var balloon = new AGLBalloons.Balloon(this.AGL.game);
@@ -351,7 +357,8 @@ AGLBalloons.states.Main.prototype.startClouds = function()
     for (var i=0;i<AGLBalloons.Cloud.maxClouds;i++)
     {
         var cloud = this.newCloud();
-        cloud.sprite.x = Math.random()*this.AGL.game.width;
+        cloud.sprite.x = Math.random()*this.AGL.game.world.width;
+        console.log(cloud.sprite.x);
     }
 };
 
@@ -365,7 +372,7 @@ AGLBalloons.states.Main.prototype.startBalloons = function()
 };
 
 AGLBalloons.states.Main.prototype.newCloud = function()
-{
+{    
     if (this.clouds.length < AGLBalloons.Cloud.maxClouds)
     {
         var cloud = new AGLBalloons.Cloud(this.AGL.game);
@@ -376,7 +383,7 @@ AGLBalloons.states.Main.prototype.newCloud = function()
     {
         for (var i=0;i<this.clouds.length;i++)
         {
-            if (this.clouds[i].sprite.x > this.AGL.game.width+this.AGL.game.width+this.clouds[i].sprite.width/2)
+            if (this.clouds[i].sprite.x > this.AGL.game.world.width+this.clouds[i].sprite.width/2)
                 this.clouds[i].sprite.kill();
             if (!this.clouds[i].sprite.alive)
             {
@@ -409,3 +416,25 @@ AGLBalloons.states.Main.prototype.update = function()
    for (var i=0;i<this.balloons.length;i++)
         this.balloons[i].update();
 };
+
+AGLBalloons.states.Main.prototype.sweetDrop = function()
+{
+    console.log("sweet");
+    this.score++;
+    
+    if ((this.score == 1) && (!this.complete))
+        this.levelComplete();
+};
+
+AGLBalloons.states.Main.prototype.levelComplete = function()
+{
+    this.complete = true;
+    this.AGL.game.time.events.add(1000,this.levelExit,this);
+};
+
+AGLBalloons.states.Main.prototype.levelExit = function()
+{
+    var tween = this.game.add.tween(this.AGL.game.camera);
+	tween.to({x:0},2000);
+	tween.start();
+}
