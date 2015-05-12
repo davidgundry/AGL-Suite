@@ -125,7 +125,7 @@ AGLBalloons.graphics.Landscape = function(width, height, game)
     var landscape = game.add.group();
     for (var i=0;i<layers;i++)
     {
-       var layer = game.add.sprite(0,0,AGLBalloons.graphics.Landscape._createLayer(width,height,game,100-i*10,layerColours[i]));  
+       var layer = game.add.sprite(0,0,AGLBalloons.graphics.Landscape._createLayer(width,height,game,200-i*50,layerColours[i]));  
        landscape.add(layer);
     }
     

@@ -33,7 +33,7 @@ AGLBalloons.Cloud = function(game)
 };
 
 AGLBalloons.Cloud.defaultSpeed = 0;
-AGLBalloons.Cloud.maxClouds = 5;
+AGLBalloons.Cloud.maxClouds = 8;
 
 AGLBalloons.Cloud.prototype.updateWind = function(x)
 {
@@ -44,7 +44,7 @@ AGLBalloons.Cloud.prototype.updateWind = function(x)
 
 AGLBalloons.Cloud.prototype.reset = function()
 {
-    var bmd = AGLBalloons.graphics.Cloud(10 + Math.random()*20,this.game);
+    var bmd = AGLBalloons.graphics.Cloud(20 + Math.random()*30,this.game);
     this.sprite.loadTexture(bmd);
     this.sprite.width = bmd.width;
     this.sprite.height = bmd.height;
