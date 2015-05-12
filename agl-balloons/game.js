@@ -53,7 +53,7 @@ AGLBalloons.Cloud.prototype.reset = function()
     var max = this.game.height*(2/3);
     var y = min+(Math.random()*(max-min))/2;
     
-    this.sprite.reset(-this.sprite.width-this.sprite.height,y,1);
+    this.sprite.reset(this.game.width-this.sprite.width-this.sprite.height,y,1);
     this.speed = AGLBalloons.Cloud.defaultSpeed/2+Math.random()*AGLBalloons.Cloud.defaultSpeed;
     
     this.sprite.body.velocity.x = this.speed;
@@ -125,7 +125,7 @@ AGLBalloons.Balloon.prototype.reset = function()
     var min = this.game.height/4;
     var max = this.game.height*(3/4);
     var y = min+(Math.random()*(max-min))/2;
-    this.sprite.reset(-this.sprite.width,y,1);
+    this.sprite.reset(this.game.width-this.sprite.width,y,1);
     
     this.contentsGood = Math.round(Math.random()) == 1;
     this.empty = false;
@@ -204,7 +204,6 @@ AGLBalloons.Balloon.prototype.update = function()
         this.emitter.emitY = this.sprite.body.y+this.sprite.height/2;
     }
 };
-
 
 
 AGLBalloons.createAssets = function(game)
@@ -292,7 +291,7 @@ AGLBalloons.states.Main.prototype.create = function ()
     AGLSuite.log.recordEvent("started");
     this.AGL.game.physics.startSystem(Phaser.Physics.ARCADE);
     
-    AGLBalloons.graphics.Landscape(this.AGL.game.width,this.AGL.game.height,this.AGL.game);
+    AGLBalloons.graphics.Landscape(this.AGL.game.width*3,this.AGL.game.height,this.AGL.game);
     
     //this.AGL.game.add.sprite(10,10, AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
  
@@ -304,6 +303,13 @@ AGLBalloons.states.Main.prototype.create = function ()
     this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.newBalloon, this);
     this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.newCloud, this);
     this.AGL.game.time.events.loop(Phaser.Timer.SECOND*3, this.updateWind, this);
+    
+    this.AGL.game.world.resize(this.AGL.game.width*3,this.AGL.game.height);
+    this.AGL.game.camera.x += this.AGL.game.width*2;
+    var tween = this.game.add.tween(this.AGL.game.camera);
+	tween.to({x:this.AGL.game.width},2000);
+	tween.start();
+    
 };
 
 AGLBalloons.states.Main.prototype.newBalloon = function()
@@ -318,7 +324,7 @@ AGLBalloons.states.Main.prototype.newBalloon = function()
     {
         for (var i=0;i<this.balloons.length;i++)
         {
-            if (this.balloons[i].sprite.x > this.AGL.game.width+this.balloons[i].sprite.width/2)
+            if (this.balloons[i].sprite.x > this.AGL.game.width+this.AGL.game.width+this.balloons[i].sprite.width/2)
                 this.balloons[i].survived();
             if (this.balloons[i].sprite.y < -this.balloons[i].sprite.width/2)
                 this.balloons[i].exit();
@@ -354,7 +360,7 @@ AGLBalloons.states.Main.prototype.startBalloons = function()
     for (var i=0;i<AGLBalloons.Balloon.maxBalloons;i++)
     {
         var balloon = this.newBalloon();
-        balloon.sprite.x = Math.random()*this.AGL.game.width/2;
+        balloon.sprite.x = this.AGL.game.width+Math.random()*this.AGL.game.width/2;
     }
 };
 
@@ -370,7 +376,7 @@ AGLBalloons.states.Main.prototype.newCloud = function()
     {
         for (var i=0;i<this.clouds.length;i++)
         {
-            if (this.clouds[i].sprite.x > this.AGL.game.width+this.clouds[i].sprite.width/2)
+            if (this.clouds[i].sprite.x > this.AGL.game.width+this.AGL.game.width+this.clouds[i].sprite.width/2)
                 this.clouds[i].sprite.kill();
             if (!this.clouds[i].sprite.alive)
             {
