@@ -206,10 +206,8 @@ AGLBalloons.Balloon.prototype.update = function()
 
 
 
-AGLBalloons.loadAssets = function(game)
+AGLBalloons.createAssets = function(game)
 {
-    //game.load.image('sweets', 'images/sweet-sm.png');
-    //game.load.image('cabbages', 'images/cabbage-sm.png');
      var sweetSize = game.height/20;
     game.cache.addBitmapData('sweetParticle', AGLBalloons.graphics.Sweet(sweetSize,game));
     game.cache.addBitmapData('cabbageParticle', AGLBalloons.graphics.Cabbage(sweetSize,sweetSize,game));
@@ -244,7 +242,7 @@ AGLBalloons.states.Load.prototype.preload = function()
 	var loadingLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.game.height*(1/2),AGLBalloons.states.Load.loadingText, { font: this.game.height/6 + 'px '+AGLBalloons.defaultFont, fill: AGLBalloons.defaultColour });
 	loadingLabel.anchor.setTo(0.5, 0.5);
     
-    AGLBalloons.loadAssets(this.AGL.game);
+    AGLBalloons.createAssets(this.AGL.game);
 };
 
 AGLBalloons.states.Load.prototype.create = function()
