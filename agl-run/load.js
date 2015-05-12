@@ -24,11 +24,11 @@
 		"phaser.js",
 	    "../log.js",
 	    "../game.js",
+		"../grammar.js",
 	    "game.js",
-	    "graphics.js"
 	], 
  	function ()
 	{
-		new AGLBalloons(true,"gameDiv");
+		new AGLRun(false,"gameDiv","gameOutput");
 	}
  );

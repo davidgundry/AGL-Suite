@@ -25,10 +25,10 @@
 	    "../log.js",
 	    "../game.js",
 	    "game.js",
-	    "graphics.js"
+	    "states.js"
 	], 
  	function ()
 	{
-		new AGLBalloons(true,"gameDiv");
+		new AGLBlocks(true,"gameTarget",false,"sprite",false);
 	}
  );
