@@ -21,7 +21,7 @@
 )
 (
 	[
-		"phaser.js",
+		"../phaser.js",
 	    "../log.js",
 	    "../game.js",
 		"../grammar.js",
