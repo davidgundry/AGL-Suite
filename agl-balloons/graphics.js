@@ -58,14 +58,44 @@ AGLBalloons.graphics.Balloon = function(x,y,radius,game)
     return balloon;
 };
 
-AGLBalloons.graphics.Sweet = function(width,height,game)
+AGLBalloons.graphics.Sweet = function(height,game)
 {   
+    var width = height*2;
     var bmd = game.add.bitmapData(width, height);
 	var ctx = bmd.context;
-    ctx.fillStyle = '#ff3344';
+        
     ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.fillStyle = '#dd1122';
+    ctx.lineStyle = '#aa9933';
+    var triangle = [{x:0,y:0},
+                 {x:width/2,y:height/2},
+                 {x:0,y:height}];
+    AGLBalloons.graphics.drawPolygon(triangle,ctx);
+    ctx.fill();
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.fillStyle = '#dd1122';
+    ctx.lineStyle = '#aa9933';
+    var rightTri = [{x:width,y:0},
+                 {x:width/2,y:height/2},
+                 {x:width,y:height}];
+    AGLBalloons.graphics.drawPolygon(rightTri,ctx);
+    ctx.fill();
+    ctx.stroke();
+    
+     var radgrad = bmd.ctx.createRadialGradient(32, 32, 4, 32, 32, 32);
+    radgrad.addColorStop(0, 'rgba(150, 30, 40, 1)');
+    radgrad.addColorStop(1, 'rgba(240, 50, 70, 1)');
+    ctx.fillStyle = radgrad;
+    
+    ctx.beginPath();
+    //ctx.fillStyle = '#ff3344';
     ctx.arc(width/2, height/2, height/2, 0, 2*Math.PI, true); 
     ctx.fill();
+    ctx.stroke();
     
     return bmd;
 };
@@ -74,7 +104,13 @@ AGLBalloons.graphics.Cabbage = function(width,height,game)
 {   
     var bmd = game.add.bitmapData(width, height);
 	var ctx = bmd.context;
-    ctx.fillStyle = '#33ff44';
+    
+    var radgrad = bmd.ctx.createRadialGradient(32, 32, 4, 32, 32, 32);
+    radgrad.addColorStop(0, 'rgba(33, 255, 40, 1)');
+    radgrad.addColorStop(1, 'rgba(33, 180, 140, 1)');
+    ctx.fillStyle = radgrad;
+    
+    //ctx.fillStyle = '#33ff44';
     ctx.beginPath();
     ctx.arc(width/2, height/2, height/2, 0, 2*Math.PI, true); 
     ctx.fill();

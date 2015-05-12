@@ -78,7 +78,7 @@ AGLBalloons.Balloon = function(game)
     AGLSuite.log.recordEvent("newballoon");
 };
 
-AGLBalloons.Balloon.maxBalloons = 3;
+AGLBalloons.Balloon.maxBalloons = 4;
 AGLBalloons.Balloon.defaultSpeed = 30;
 AGLBalloons.Balloon.prototype.emitter = null;
 AGLBalloons.Balloon.prototype.contentsGood = false;
@@ -103,7 +103,7 @@ AGLBalloons.Balloon.spawnDropable = function(game,sprite,dropable)
     emitter.particleClass = dropable;
     emitter.makeParticles(null,0,10,true,true);
     emitter.width=sprite.width/4;
-    emitter.setScale(1, 0.5, 1, 0.5, 0);
+    emitter.setScale(1, 0.5, 1, 0.5, 500);
     
     emitter.gravity = 300;
     //emitter.emitX = sprite.body.x+sprite.width*2;
@@ -211,7 +211,7 @@ AGLBalloons.loadAssets = function(game)
     //game.load.image('sweets', 'images/sweet-sm.png');
     //game.load.image('cabbages', 'images/cabbage-sm.png');
      var sweetSize = game.height/20;
-    game.cache.addBitmapData('sweetParticle', AGLBalloons.graphics.Sweet(sweetSize,sweetSize,game));
+    game.cache.addBitmapData('sweetParticle', AGLBalloons.graphics.Sweet(sweetSize,game));
     game.cache.addBitmapData('cabbageParticle', AGLBalloons.graphics.Cabbage(sweetSize,sweetSize,game));
 };
 
