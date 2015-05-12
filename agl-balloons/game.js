@@ -179,14 +179,15 @@ AGLBalloons.Balloon.prototype.onInputDown = function()
 
 AGLBalloons.Balloon.prototype.survived = function()
 {
-    if (!this.contentsGood)
-    {
-         AGLSuite.log.recordEvent("avoided");
-    }
-    else
-    {
-         AGLSuite.log.recordEvent("missed");
-    }
+    if (!this.empty)
+        if (!this.contentsGood)
+        {
+             AGLSuite.log.recordEvent("avoided");
+        }
+        else
+        {
+             AGLSuite.log.recordEvent("missed");
+        }
     this.sprite.kill();
 };
 
