@@ -81,13 +81,21 @@ AGLBalloons.Balloon = function(game)
 AGLBalloons.Balloon.maxBalloons = 3;
 AGLBalloons.Balloon.defaultSpeed = 30;
 AGLBalloons.Balloon.prototype.emitter = null;
-AGLBalloons.Balloon.prototype.emitter = false;
 AGLBalloons.Balloon.prototype.contentsGood = false;
+
+AGLBalloons.Balloon.SweetParticle = function(game, x, y)
+{
+    Phaser.Particle.call(this, game, x, y, game.cache.getBitmapData('sweetParticle'));
+};
+AGLBalloons.Balloon.SweetParticle.prototype = Object.create(Phaser.Particle.prototype);
+AGLBalloons.Balloon.SweetParticle.prototype.constructor = AGLBalloons.Balloon.SweetParticle;
 
 AGLBalloons.Balloon.spawnDropable = function(game,sprite,dropable)
 {
     var emitter = game.add.emitter(0, 0, 10);
-    emitter.makeParticles(dropable,0,10,true,true);
+    emitter.particleClass = AGLBalloons.Balloon.SweetParticle;
+    //emitter.makeParticles(game.cache.getBitmapData(dropable),0,10,true,true);
+    emitter.makeParticles();
     emitter.setScale(1, 0.5, 1, 0.5, 0);
     
     emitter.gravity = 300;
@@ -147,12 +155,12 @@ AGLBalloons.Balloon.prototype.onInputDown = function()
         return;
     if (this.contentsGood)
     {
-        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'sweets');
+        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'sweetParticle');
         AGLSuite.log.recordEvent("success");
     }
     else
     {
-        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'cabbages');
+        this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,'cabbageParticle');
         AGLSuite.log.recordEvent("failure");
     }
     
@@ -284,6 +292,10 @@ AGLBalloons.states.Main.prototype.create = function ()
     
     AGLBalloons.graphics.Landscape(this.AGL.game.width,this.AGL.game.height,this.AGL.game);
     
+    var sweetSize = this.AGL.game.height/20;
+    this.AGL.game.cache.addBitmapData('sweetParticle', AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
+    this.AGL.game.cache.addBitmapData('cabbageParticle', AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
+ 
     this.balloons = [];
     this.clouds = [];
     this.startClouds();

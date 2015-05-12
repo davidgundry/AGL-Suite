@@ -58,6 +58,18 @@ AGLBalloons.graphics.Balloon = function(x,y,radius,game)
     return balloon;
 };
 
+AGLBalloons.graphics.Sweet = function(width,height,game)
+{   
+    var bmd = game.add.bitmapData(width, height);
+	var ctx = bmd.context;
+    ctx.fillStyle = '#ff3344';
+    ctx.beginPath();
+    ctx.arc(width/2, height/2, height/2, 0, 2*Math.PI, true); 
+    ctx.fill();
+    
+    return bmd;
+};
+
 AGLBalloons.graphics.Landscape = function(width, height, game)
 {
     var layers = 3;
