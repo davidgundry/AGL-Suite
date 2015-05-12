@@ -2,21 +2,24 @@
     function (filenames,callback)
     {
         var numloaded = 0;
+        var loader = function()
+        {
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.async = true;
+            s.src = filenames[numloaded];
+            s.addEventListener('load', load, false);
+            document.getElementsByTagName("head")[0].appendChild(s);
+        };
         var load = function()
         {
             numloaded++;
             if (numloaded == filenames.length)
                 callback();
+            else
+                loader();
         };
-        for (var i=0;i<filenames.length;i++)
-        {
-            var s = document.createElement('script');
-            s.type = 'text/javascript';
-            s.async = true;
-            s.src = filenames[i];
-            s.addEventListener('load', load, false);
-            document.getElementsByTagName("head")[0].appendChild(s);
-        }
+        loader();
     }
 )
 (
