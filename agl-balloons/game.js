@@ -163,13 +163,12 @@ AGLBalloons.Balloon.prototype.onInputDown = function()
     if (this.contentsGood)
     {
         this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,AGLBalloons.Balloon.SweetParticle);
-        AGLSuite.log.recordEvent("success");
         this.game.state.getCurrentState().sweetDrop();
     }
     else
     {
         this.emitter = AGLBalloons.Balloon.spawnDropable(this.game,this.sprite,AGLBalloons.Balloon.CabbageParticle);
-        AGLSuite.log.recordEvent("failure");
+        this.game.state.getCurrentState().cabbageDrop();
     }
     
     this.empty = true;
@@ -300,6 +299,7 @@ AGLBalloons.states.Main.prototype.create = function ()
     this.AGL.game.camera.x += this.AGL.game.width*2;
     var tween = this.game.add.tween(this.AGL.game.camera);
 	tween.to({x:this.AGL.game.width},2000);
+    tween.onComplete.add(this.levelStarted,this);
 	tween.start();
     
     //this.AGL.game.add.sprite(10,10, AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
@@ -358,7 +358,6 @@ AGLBalloons.states.Main.prototype.startClouds = function()
     {
         var cloud = this.newCloud();
         cloud.sprite.x = Math.random()*this.AGL.game.world.width;
-        console.log(cloud.sprite.x);
     }
 };
 
@@ -419,11 +418,21 @@ AGLBalloons.states.Main.prototype.update = function()
 
 AGLBalloons.states.Main.prototype.sweetDrop = function()
 {
-    console.log("sweet");
+    AGLSuite.log.recordEvent("success");
     this.score++;
     
     if ((this.score == 1) && (!this.complete))
         this.levelComplete();
+};
+
+AGLBalloons.states.Main.prototype.cabbageDrop = function()
+{
+    AGLSuite.log.recordEvent("failure");
+};
+
+AGLBalloons.states.Main.prototype.levelStarted = function()
+{
+    console.log("level started!");
 };
 
 AGLBalloons.states.Main.prototype.levelComplete = function()
