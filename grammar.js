@@ -27,6 +27,44 @@ AGLSuite.grammar.RG.prototype.next = function()
     return this.alphabet[r];
 };
 
+AGLSuite.grammar.Node = function()
+{
+    this.directedEdges = [];
+    this.transitionSymbols = [];
+};
+
+AGLSuite.grammar.FiniteState = function(alphabet,numNodes)
+{
+    this.nodes = Array(numNodes);
+    this.transitionSymbols = Array(numNodes);
+    for (var i=0;i<numNodes;i++)
+        this.nodes[i] = new AGLSuite.grammar.Node();
+    for (var i=0;i<numNodes;i++)
+        this.transitionSymbols[i] = null;
+    this.setPosition(0);
+};
+
+AGLSuite.grammar.FiniteState.prototype.addEdge = function(start,end,symbol)
+{
+    this.directedEdges[start].edges.push(end);
+    this.transitionSymbols[start].edges.push(symbol);
+};
+
+AGLSuite.grammar.FiniteState.prototype.setPosition = function(position)
+{
+    this.currentNode = position;
+};
+
+AGLSuite.grammar.FiniteState.prototype.step = function()
+{
+    var edgeNumber = Math.round(Math.random()*this.nodes[this.currentNode].edges.length);
+    var symbol = this.nodes[this.currentNode].transitionSymbols[edgeNumber];
+    this.currentNode = this.nodes[this.currentNode].edges[edgeNumber];
+    return symbol;
+};
+
+
+
 AGLSuite.grammar.FSG = function(alphabet,start,transition)
 {
     AGLSuite.grammar.Grammar.call(this,"FSG",alphabet);
