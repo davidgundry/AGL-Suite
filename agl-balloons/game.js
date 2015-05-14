@@ -282,6 +282,7 @@ AGLBalloons.states.Main.prototype.minWindX = 10;
 AGLBalloons.states.Main.prototype.windY = 0;
 AGLBalloons.states.Main.prototype.score = 0;
 AGLBalloons.states.Main.prototype.complete = false;
+AGLBalloons.states.Main.prototype.targetScore = 5;
 
 AGLBalloons.states.Main.prototype.preload = function ()
 {
@@ -421,7 +422,7 @@ AGLBalloons.states.Main.prototype.sweetDrop = function()
     AGLSuite.log.recordEvent("success");
     this.score++;
     
-    if ((this.score == 1) && (!this.complete))
+    if ((this.score == this.targetScore) && (!this.complete))
         this.levelComplete();
 };
 
