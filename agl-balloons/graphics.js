@@ -125,7 +125,7 @@ AGLBalloons.graphics.Landscape = function(width, height, game)
     var landscape = game.add.group();
     for (var i=0;i<layers;i++)
     {
-       var layer = game.add.sprite(0,0,AGLBalloons.graphics.Landscape._createLayer(width,height,game,200-i*50,layerColours[i]));  
+       var layer = game.add.sprite(0,0,AGLBalloons.graphics.Landscape._createLayer(width,height,game,game.height/4-i*(game.height/16),layerColours[i]));  
        landscape.add(layer);
     }
     
@@ -258,4 +258,42 @@ AGLBalloons.graphics.Cloud._countNeighbours = function(laticeArray,x,y)
     return count;
 };
 
+};
+
+AGLBalloons.graphics.CloudText = function(text, radius,game)
+{   
+    var latice = [];
+    if (text == "level")
+        latice = [
+            [1,0,0,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,0],
+            [1,0,0,0,1,1,0,0,1,0,1,0,1,1,0,0,1,0,0],
+            [1,1,1,0,1,1,1,0,0,1,0,0,1,1,1,0,1,1,1]
+        ];
+        
+    if (text == "welldone")
+        latice = [
+            [1,0,1,0,1,0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,0,1,0,1,0,1,1,1],
+            [1,0,1,0,1,0,1,1,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1,1,1,0,1,1,0],
+            [0,1,0,1,0,0,1,1,1,0,1,1,1,0,1,1,1,0,0,1,1,0,0,0,1,0,0,1,0,1,0,1,1,1]
+        ];
+    
+    var width = latice[0].length;
+    var height = latice.length;
+    
+    var bmd = game.add.bitmapData((width+1)*radius, (height+1)*radius);
+	var ctx = bmd.context;
+    
+    for (var i=0;i<latice.length;i++)
+        for (var j=0;j<latice[0].length;j++)
+        {
+            if (latice[i][j])
+            {
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(radius+j*radius, radius+i*radius, radius, 0, 2*Math.PI, true); 
+                ctx.fill();
+            }
+        }
+    
+    return bmd;
 };
