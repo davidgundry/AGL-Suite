@@ -59,14 +59,14 @@ AGLBalloons.Cloud.prototype.reset = function()
     this.sprite.body.velocity.x = this.speed;
 };
 
-AGLBalloons.Balloon = function(game)
+AGLBalloons.Balloon = function(game,targetNumber)
 {
     this.game = game;
     
     var radius = game.height/13 + Math.random()*(game.height/13);
     this.sprite = AGLBalloons.graphics.Balloon(0,0,radius,game);
     game.physics.arcade.enable(this.sprite);
-    this.reset();
+    this.reset(targetNumber);
     
     this.speed = AGLBalloons.Balloon.defaultSpeed/2+Math.random()*AGLBalloons.Balloon.defaultSpeed;
     
@@ -120,7 +120,7 @@ AGLBalloons.Balloon.spawnDropable = function(game,sprite,dropable)
     return emitter;
 };
 
-AGLBalloons.Balloon.prototype.reset = function()
+AGLBalloons.Balloon.prototype.reset = function(targetNumber)
 {
     var min = this.game.height/4;
     var max = this.game.height*(3/4);
@@ -133,7 +133,7 @@ AGLBalloons.Balloon.prototype.reset = function()
     
     //this.sprite.scale.x = 0.8+Math.random()/5;
     //this.sprite.scale.y = this.sprite.scale.x;  
-    this.sprite.angle = 12;
+    this.sprite.angle = 6;
     
     if (this.text == null)
     {
@@ -141,12 +141,35 @@ AGLBalloons.Balloon.prototype.reset = function()
         this.text.anchor.setTo(0.5,0.5);
         this.sprite.addChild(this.text);
     }
-    this.text.text = "5+6";
+    this.text.text = AGLBalloons.Balloon.expression(targetNumber,this.contentsGood);
     this.text.setStyle({font:this.sprite.height/7 + "px "+ AGLBalloons.balloonFont});
+    this.text.fill = "white";
+    this.text.setShadow(1,2,"grey",2);
+    //this.text.stroke = "grey";
+    //this.text.strokeThickness = 1;
     
     var tween = this.game.add.tween(this.sprite);
-    tween.to({angle:-12},5000+1000*Math.random(),Phaser.Easing.Back.InOut,true,0,Number.MAX_VALUE,true);
+    tween.to({angle:-6},3000+3000*Math.random(),Phaser.Easing.Back.InOut,true,0,Number.MAX_VALUE,true);
 	tween.start();
+};
+
+AGLBalloons.Balloon.expression = function(targetNumber,correct)
+{
+    var a = Math.round(Math.random()*targetNumber-1);
+    var b = targetNumber -a;
+    var wrong = targetNumber;
+    while (wrong == targetNumber)
+        wrong =  Math.round(Math.random()*targetNumber-1)+1;
+    
+    if (correct)
+    {
+        if (b>=0)
+            return a+"+"+b;
+        else
+            return a+""+b;
+    }
+    else
+        return a+"+"+wrong;
 };
 
 AGLBalloons.Balloon.prototype.updateWind = function(x)
@@ -265,8 +288,8 @@ AGLBalloons.states.Level.prototype.preload = function()
 
 AGLBalloons.states.Level.prototype.create = function()
 {
-    var lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBalloons.states.Level.levelText + ' ' + this.AGL.gameLevel, { font: this.AGL.game.height/10 + 'px ' + AGLBalloons.defaultFont, fill: AGLBalloons.defaultColour });
-    lText.anchor.setTo(0.5, 0.5);
+    /*var lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBalloons.states.Level.levelText + ' ' + this.AGL.gameLevel, { font: this.AGL.game.height/10 + 'px ' + AGLBalloons.defaultFont, fill: AGLBalloons.defaultColour });
+    lText.anchor.setTo(0.5, 0.5);*/
     this.time.events.add(AGLBalloons.states.Level.wait, function (){ this.AGL.game.state.start('main');
      }, this);
 };
@@ -282,7 +305,7 @@ AGLBalloons.states.Main.prototype.minWindX = 10;
 AGLBalloons.states.Main.prototype.windY = 0;
 AGLBalloons.states.Main.prototype.score = 0;
 AGLBalloons.states.Main.prototype.complete = false;
-AGLBalloons.states.Main.prototype.targetScore = 5;
+AGLBalloons.states.Main.prototype.targetScore = 2;
 
 AGLBalloons.states.Main.prototype.preload = function ()
 {
@@ -293,7 +316,11 @@ AGLBalloons.states.Main.prototype.create = function ()
 {
     AGLSuite.log.recordEvent("started");
     this.AGL.game.physics.startSystem(Phaser.Physics.ARCADE);
+    this.complete = AGLBalloons.states.Main.prototype.complete;
+    this.score = AGLBalloons.states.Main.prototype.score;
     
+    this.targetNumber = Math.round(Math.random()*10)+3;
+         
     AGLBalloons.graphics.Landscape(this.AGL.game.width*3,this.AGL.game.height,this.AGL.game);
     
     this.AGL.game.world.resize(this.AGL.game.width*3,this.AGL.game.height);
@@ -302,9 +329,7 @@ AGLBalloons.states.Main.prototype.create = function ()
 	tween.to({x:this.AGL.game.width},2000);
     tween.onComplete.add(this.levelStarted,this);
 	tween.start();
-    
-    //this.AGL.game.add.sprite(10,10, AGLBalloons.graphics.Sweet(sweetSize,sweetSize,this.AGL.game));
- 
+
     this.balloons = [];
     this.clouds = [];
     this.startClouds();
@@ -316,14 +341,36 @@ AGLBalloons.states.Main.prototype.create = function ()
     
 
     
+    var targetText = this.game.add.text(this.game.world.width*(1/3)+ this.game.width*(5/6),this.game.height*(5/6));
+    targetText.anchor.setTo(0.5,0.5);
+    targetText.text = this.targetNumber;
+    targetText.setStyle({font:this.game.height/5 + "px "+ AGLBalloons.balloonFont});
+    targetText.fill = "white";
+    targetText.setShadow(1,2,"grey",2);
+    
+    this.createStartEndText();
 };
+
+AGLBalloons.states.Main.prototype.createStartEndText = function()
+{
+    var cloudRadius = this.AGL.game.width/40;
+        
+    var startTextSprite =this.AGL.game.add.sprite(this.AGL.game.world.width*(4/6),this.AGL.game.world.height/2,new AGLBalloons.graphics.CloudText("level",cloudRadius,this.AGL.game));
+    startTextSprite.anchor.setTo(0.5,0.5);
+    this.AGL.game.physics.arcade.enable(startTextSprite);
+    startTextSprite.body.velocity.x = this.game.width/7;
+    
+    var endTextSprite =this.AGL.game.add.sprite(this.game.world.width/6,this.AGL.game.world.height/2,new AGLBalloons.graphics.CloudText("welldone",cloudRadius,this.AGL.game));
+
+    endTextSprite.anchor.setTo(0.5,0.5);
+}
 
 AGLBalloons.states.Main.prototype.newBalloon = function()
 {
     if (!this.complete)
     if (this.balloons.length < AGLBalloons.Balloon.maxBalloons)
     {
-        var balloon = new AGLBalloons.Balloon(this.AGL.game);
+        var balloon = new AGLBalloons.Balloon(this.AGL.game,this.targetNumber);
         balloon.updateWind(this.windX,this.windY);
         this.balloons.push(balloon);
     }
@@ -344,7 +391,7 @@ AGLBalloons.states.Main.prototype.newBalloon = function()
                 {
                     //TODO: get a reference to all emitted things
                 }
-                this.balloons[i].reset();
+                this.balloons[i].reset(this.targetNumber);
                 this.balloons[i].updateWind(this.windX);
                 break;
             }
@@ -447,4 +494,11 @@ AGLBalloons.states.Main.prototype.levelExit = function()
     var tween = this.game.add.tween(this.AGL.game.camera);
 	tween.to({x:0},2000);
 	tween.start();
+    
+    this.time.events.add(4000, function ()
+    {
+        this.AGL.game.tweens.removeAll();
+        this.complete = false;
+        this.AGL.game.state.start('level');
+    }, this);
 }
