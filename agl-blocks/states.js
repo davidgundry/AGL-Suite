@@ -99,7 +99,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			{
 				var qText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				qText.stroke = "#222222";
-				qText.strokeThickness = 5;
+				qText.strokeThickness = this.AGL.getMinDimension()/150;;
 				qText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -109,7 +109,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			{
 				var pText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'play', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				pText.stroke = "#222222";
-				pText.strokeThickness = 5;
+				pText.strokeThickness = this.AGL.getMinDimension()/150;;
 				this.tiles[i][j].alpha = 1;
 				pText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -119,7 +119,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			{
 				var iText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'info', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				iText.stroke = "#222222";
-				iText.strokeThickness = 5;
+				iText.strokeThickness = this.AGL.getMinDimension()/150;
 				iText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -129,6 +129,8 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 		}
 	
 	this.titleText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px '+AGLBlocks.titleFont, fill: '#000000' });
+	this.titleText.stroke = "#ffffe7";
+	this.titleText.strokeThickness = this.AGL.getMinDimension()/75;
 	this.titleText.anchor.setTo(0.5, 0.5);
 };
 
