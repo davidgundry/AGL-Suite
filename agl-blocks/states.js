@@ -33,7 +33,7 @@ AGLBlocks.LoadState.prototype.preload = function()
 	if (this.AGL.contentsType=="sprite")
 	{
 		AGLSuite.log.log("Loading Sprites");
-		this.AGL.game.load.spritesheet('symbols', 'assets/symbols.png', 256, 256);
+		this.AGL.game.load.spritesheet('symbols', 'assets/symbols.png', 256, 241);
 	}
 };
 
@@ -97,7 +97,9 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 		  
 			if ((j==0) && (i==0))
 			{
-				var qText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#222222' }));
+				var qText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
+				qText.stroke = "#222222";
+				qText.strokeThickness = 5;
 				qText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -105,7 +107,9 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			}
 			else if  ((j==5) && (i==4))
 			{
-				var pText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'play', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#222222' }));
+				var pText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'play', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
+				pText.stroke = "#222222";
+				pText.strokeThickness = 5;
 				this.tiles[i][j].alpha = 1;
 				pText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -113,7 +117,9 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			}
 			else if ((j==6) && (i==4))
 			{
-				var iText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'info', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#222222' }));
+				var iText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'info', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
+				iText.stroke = "#222222";
+				iText.strokeThickness = 5;
 				iText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();

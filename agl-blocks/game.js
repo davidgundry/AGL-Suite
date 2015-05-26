@@ -390,7 +390,7 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	else if (this.contentsType!="colour")
 	{
 		//	ctx.globalAlpha = 0;
-		ctx.fillStyle = "#ddc53d";
+		ctx.fillStyle = "#ffee88";
 	}
 		
 	if (locked)
@@ -423,19 +423,21 @@ AGLBlocks.prototype.makeTile = function(x,y,iy,ix,width,height,tileContents,cont
 	var symbol = null;
 	if (this.contentsType=="sprite")
 	{
+		symbol = this.game.add.sprite(width/2,height/2,"symbols");
 		if (locked)
 		{
-			symbol = this.game.add.sprite(width/6,height/6,"symbols");
 			symbol.width = width*(2/3);
 			symbol.height = height*(2/3);
 		}
 		else
 		{
-			symbol = this.game.add.sprite(0,0,"symbols");
 			symbol.width = width;
 			symbol.height = height;
 		}
-		symbol.frame = contentsIndex+this.spriteFrameRotation%20;//symbol.animations.frameData.total;
+		
+		symbol.anchor.setTo(0.5,0.5);
+		symbol.frame = (contentsIndex+this.spriteFrameRotation)%20;
+		//symbol.animations.frameData.total;
 		if ((locked) && (this.lockedTilesAreGrey))
 			symbol.alpha=0;
 		mainTile.addChild(symbol);
