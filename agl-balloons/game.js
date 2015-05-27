@@ -9,6 +9,8 @@ function AGLBalloons(full, targetDiv)
     this.game = AGLSuite.createGame(full,targetDiv,AGLBalloons.minWidth,AGLBalloons.minHeight);
     if (this.game == null)
         return;
+       
+	this.portfolio = true;    
         
     AGLBalloons.states.load(this);
     AGLBalloons.states.start(this.game);
@@ -21,6 +23,24 @@ AGLBalloons.backgroundColour = "#5588ff";
 AGLBalloons.defaultColour = "#ffffff";
 AGLBalloons.prototype.gameLevel = 0;
 AGLBalloons.balloonFont = "Sans-Serif";
+AGLBalloons.rightProportion = 0.4;
+
+AGLBalloons.prototype.getMinDimension = function()
+{
+	var maxWidth = Math.floor(this.game.width);
+	var maxHeight = Math.floor(this.game.height);
+	
+	if (maxWidth > maxHeight)
+		return maxHeight;
+	else
+		return maxWidth;
+};
+
+AGLBalloons.prototype.stateCreated = function()
+{
+	if (this.portfolio)
+		this.createGameLinks();
+};
 
 AGLBalloons.Cloud = function(game)
 {
@@ -78,7 +98,7 @@ AGLBalloons.Balloon = function(game,targetNumber)
     AGLSuite.log.recordEvent("newballoon");
 };
 
-AGLBalloons.Balloon.maxBalloons = 4;
+AGLBalloons.Balloon.maxBalloons = 5;
 AGLBalloons.Balloon.defaultSpeed = 30;
 AGLBalloons.Balloon.prototype.emitter = null;
 AGLBalloons.Balloon.prototype.contentsGood = false;
@@ -127,7 +147,7 @@ AGLBalloons.Balloon.prototype.reset = function(targetNumber)
     var y = min+(Math.random()*(max-min))/2;
     this.sprite.reset(this.game.width-this.sprite.width,y,1);
     
-    this.contentsGood = Math.round(Math.random()) == 1;
+    this.contentsGood = Math.random() < AGLBalloons.rightProportion;
     this.empty = false;
     this.emitter = null;
     
@@ -145,6 +165,13 @@ AGLBalloons.Balloon.prototype.reset = function(targetNumber)
     this.text.setStyle({font:this.sprite.height/7 + "px "+ AGLBalloons.balloonFont});
     this.text.fill = "white";
     this.text.setShadow(1,2,"grey",2);
+    
+    if (this.text.width > this.sprite.width)
+    {
+        this.text.width = this.sprite.width;
+        this.text.scale.y = this.text.scale.x;
+    }
+    
     //this.text.stroke = "grey";
     //this.text.strokeThickness = 1;
     
@@ -156,10 +183,8 @@ AGLBalloons.Balloon.prototype.reset = function(targetNumber)
 AGLBalloons.Balloon.expression = function(targetNumber,correct)
 {
     var a = Math.round(Math.random()*targetNumber-1);
-    var b = targetNumber -a;
-    var wrong = targetNumber;
-    while (wrong == targetNumber)
-        wrong =  Math.round(Math.random()*targetNumber-1)+1;
+    a = Math.max(a,1);
+    var b = targetNumber - a;
     
     if (correct)
     {
@@ -169,7 +194,16 @@ AGLBalloons.Balloon.expression = function(targetNumber,correct)
             return a+""+b;
     }
     else
+    {
+        var wrong = b;
+        while (wrong == b)
+        {
+            wrong = Math.round(Math.random()*targetNumber-1);
+            wrong = Math.max(wrong,1);
+        }
         return a+"+"+wrong;
+    }
+        
 };
 
 AGLBalloons.Balloon.prototype.updateWind = function(x)
@@ -266,6 +300,7 @@ AGLBalloons.states.Load.prototype.preload = function()
 	loadingLabel.anchor.setTo(0.5, 0.5);
     
     AGLBalloons.createAssets(this.AGL.game);
+    this.AGL.game.load.image('blocksLink','assets/blocks.png');
 };
 
 AGLBalloons.states.Load.prototype.create = function()
@@ -291,7 +326,8 @@ AGLBalloons.states.Level.prototype.create = function()
     /*var lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBalloons.states.Level.levelText + ' ' + this.AGL.gameLevel, { font: this.AGL.game.height/10 + 'px ' + AGLBalloons.defaultFont, fill: AGLBalloons.defaultColour });
     lText.anchor.setTo(0.5, 0.5);*/
     this.time.events.add(AGLBalloons.states.Level.wait, function (){ this.AGL.game.state.start('main');
-     }, this);
+    }, this);
+    this.AGL.stateCreated();
 };
 
 AGLBalloons.states.Main  = function(AGL)
@@ -349,7 +385,50 @@ AGLBalloons.states.Main.prototype.create = function ()
     targetText.setShadow(1,2,"grey",2);
     
     this.createStartEndText();
+    this.AGL.stateCreated();
 };
+
+
+/**
+ * Creates links to other games in the portfolio.
+ */
+AGLBalloons.prototype.createGameLinks = function()
+{
+    var uiGroup = this.game.add.group();
+	
+	var shadow = this.game.add.sprite(this.game.width*(1/10)-this.getMinDimension()/80,this.game.height*(4/5)+this.getMinDimension()/80, 'blocksLink');
+    shadow.anchor.set(0.5,0.5);
+    shadow.tint = 0x000000;
+    shadow.alpha = 0.6;
+	shadow.width = this.getMinDimension()/4;
+	shadow.scale.y = shadow.scale.x;
+		
+	uiGroup.add(shadow);
+    
+	var gameLink = this.game.add.sprite(this.game.width*(1/10),this.game.height*(4/5),'blocksLink');
+	gameLink.anchor.set(0.5,0.5);
+	gameLink.width = shadow.width
+	gameLink.scale.y = shadow.scale.x;
+	
+	var originalX = gameLink.x;
+	var originalY = gameLink.y;
+	
+	gameLink.inputEnabled = true;
+	gameLink.events.onInputDown.add(function() {
+		gameLink.x = shadow.x;
+		gameLink.y = shadow.y;
+		window.location = "../agl-blocks/index.html";
+	},this);
+	
+	gameLink.events.onInputUp.add(function() {
+		gameLink.x = originalX;
+		gameLink.y = originalY;
+	}, this);
+
+	uiGroup.add(gameLink);
+	uiGroup.fixedToCamera = true;
+};
+
 
 AGLBalloons.states.Main.prototype.createStartEndText = function()
 {
@@ -383,7 +462,7 @@ AGLBalloons.states.Main.prototype.newBalloon = function()
             if (this.balloons[i].sprite.y < -this.balloons[i].sprite.width/2)
                 this.balloons[i].exit();
         }
-         for (var i=0;i<this.balloons.length;i++)
+        for (var i=0;i<this.balloons.length;i++)
         {
             if (!this.balloons[i].sprite.alive)
             {
@@ -411,10 +490,12 @@ AGLBalloons.states.Main.prototype.startClouds = function()
 
 AGLBalloons.states.Main.prototype.startBalloons = function()
 {
+    var balloonDensity = AGLBalloons.Balloon.maxBalloons;
+    var balloonOffset = balloonDensity - AGLBalloons.Balloon.maxBalloons;
     for (var i=0;i<AGLBalloons.Balloon.maxBalloons;i++)
     {
         var balloon = this.newBalloon();
-        balloon.sprite.x = this.AGL.game.width+Math.random()*this.AGL.game.width/2;
+        balloon.sprite.x = this.AGL.game.width+(i+balloonOffset)*this.AGL.game.width/balloonDensity;
     }
 };
 

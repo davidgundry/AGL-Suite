@@ -13,6 +13,8 @@ function AGLBlocks(full,targetDiv,greyLocked,contentsType,audio)
     if (this.game == null)
         return;
 	
+	this.portfolio = true;
+	
 	if (typeof greyLocked !== "undefined")
 		this.lockedTilesAreGrey = greyLocked;
 	else
@@ -318,6 +320,56 @@ AGLBlocks.prototype.originY = 0;
 AGLBlocks.prototype.inputBlock = false;
 AGLBlocks.prototype.tileContents = AGLBlocks.staticTileContents;
 
+AGLBlocks.prototype.stateCreated = function()
+{
+	if (this.portfolio)
+		this.createGameLinks();
+};
+
+/**
+ * Creates links to other games in the portfolio.
+ * 
+ * This function should be called in the create method of most states if it is being 
+ * run in portfolio mode.
+ */
+AGLBlocks.prototype.createGameLinks = function()
+{
+	var uiGroup = this.game.add.group();
+	
+	var shadow = this.game.add.sprite(this.game.width*(1/10)-this.getMinDimension()/80,this.game.height*(4/5)+this.getMinDimension()/80, 'balloonsLink');
+    shadow.anchor.set(0.5,0.5);
+    shadow.tint = 0x000000;
+    shadow.alpha = 0.6;
+	shadow.width = this.getMinDimension()/4;
+	shadow.scale.y = shadow.scale.x;
+	
+	uiGroup.add(shadow);
+	
+	var gameLink = this.game.add.sprite(this.game.width*(1/10),this.game.height*(4/5),'balloonsLink');
+	gameLink.anchor.set(0.5,0.5);
+	gameLink.width = shadow.width
+	gameLink.scale.y = shadow.scale.x;
+	
+	var originalX = gameLink.x;
+	var originalY = gameLink.y;
+	
+	gameLink.inputEnabled = true;
+	gameLink.events.onInputDown.add(function() {
+		gameLink.x = shadow.x;
+		gameLink.y = shadow.y;
+		window.location = "../agl-balloons/index.html";
+	},this);
+	
+	gameLink.events.onInputUp.add(function() {
+		gameLink.x = originalX;
+		gameLink.y = originalY;
+	}, this);
+	
+	uiGroup.add(gameLink);
+	uiGroup.fixedToCamera = true;
+
+};
+
 AGLBlocks.prototype.pretty = function(tiles,tileAlpha,time,menu)
 {
 	var y = Math.round(Math.random()*(tiles.length-1));
@@ -493,12 +545,23 @@ AGLBlocks.prototype.resetTilePosition = function(tile,tiles)
 	tile.y = this.originY+tile.gridY*(this.size)+tilePadding/2;
 };
 
-AGLBlocks.prototype.getMinDimension = function()
+AGLBlocks.prototype.getMinInnerDimension = function()
 {
 	var maxWidth = Math.floor(this.game.world.width-this.paddingLeft-this.paddingRight);
 	var maxHeight = Math.floor(this.game.world.height-this.paddingTop-this.paddingBottom);
 	
 	if (maxWidth/7 > maxHeight/5)
+		return maxHeight;
+	else
+		return maxWidth;
+};
+
+AGLBlocks.prototype.getMinDimension = function()
+{
+	var maxWidth = Math.floor(this.game.world.width);
+	var maxHeight = Math.floor(this.game.world.height);
+	
+	if (maxWidth > maxHeight)
 		return maxHeight;
 	else
 		return maxWidth;

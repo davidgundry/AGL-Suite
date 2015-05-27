@@ -13,11 +13,11 @@ AGLBlocks.LoadState.prototype.preload = function()
 	this.AGL.drawBackground();
 	if (AGLBlocks.showLoadingScreen)
 	{
-		var titleLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px '+ AGLBlocks.titleFont, fill: '#999999' });
+		var titleLabel = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinInnerDimension()/4+'px '+ AGLBlocks.titleFont, fill: '#999999' });
 		titleLabel.anchor.setTo(0.5, 0.5);
 		
 		var loadingText = '   loading...';
-		var loadingLabel = this.AGL.game.add.text(this.AGL.boxCenterX(), this.AGL.boxCenterY()+this.AGL.getMinDimension()/4, loadingText, { font: this.AGL.getMinDimension()/12+'px '+AGLBlocks.defaultFont, fill: '#cccccc' });
+		var loadingLabel = this.AGL.game.add.text(this.AGL.boxCenterX(), this.AGL.boxCenterY()+this.AGL.getMinInnerDimension()/4, loadingText, { font: this.AGL.getMinInnerDimension()/12+'px '+AGLBlocks.defaultFont, fill: '#cccccc' });
 		loadingLabel.anchor.setTo(0.5, 0.5);
 	}
 	
@@ -35,11 +35,13 @@ AGLBlocks.LoadState.prototype.preload = function()
 		AGLSuite.log.log("Loading Sprites");
 		this.AGL.game.load.spritesheet('symbols', 'assets/symbols.png', 256, 241);
 	}
+	this.AGL.game.load.image('balloonsLink', 'assets/balloons.png');
 };
 
 AGLBlocks.LoadState.prototype.create = function()
 {
 	this.AGL.game.state.start('menu');
+	this.AGL.stateCreated();
 };
 
 /**
@@ -82,6 +84,8 @@ AGLBlocks.MenuState.prototype.create = function ()
 	
 	this.time.events.add(Math.random()*1000+500,function() {this.AGL.pretty(this.tiles,AGLBlocks.MenuState.tileAlpha,this.time,true);},this);
 	this.time.events.add(Math.random()*2000+500,function() {this.AGL.pretty(this.tiles,AGLBlocks.MenuState.tileAlpha,this.time,true);},this);
+	
+	this.AGL.stateCreated();
 };
 
 AGLBlocks.MenuState.prototype.createTiles = function()
@@ -99,7 +103,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			{
 				var qText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				qText.stroke = "#222222";
-				qText.strokeThickness = this.AGL.getMinDimension()/150;;
+				qText.strokeThickness = this.AGL.getMinInnerDimension()/150;;
 				qText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -109,7 +113,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			{
 				var pText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'play', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				pText.stroke = "#222222";
-				pText.strokeThickness = this.AGL.getMinDimension()/150;;
+				pText.strokeThickness = this.AGL.getMinInnerDimension()/150;;
 				this.tiles[i][j].alpha = 1;
 				pText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -119,7 +123,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			{
 				var iText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'info', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				iText.stroke = "#222222";
-				iText.strokeThickness = this.AGL.getMinDimension()/150;
+				iText.strokeThickness = this.AGL.getMinInnerDimension()/150;
 				iText.anchor.setTo(0.5, 0.5);
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();
@@ -128,9 +132,9 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 			this.tilesGroup.add(this.tiles[i][j]);
 		}
 	
-	this.titleText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinDimension()/4+'px '+AGLBlocks.titleFont, fill: '#000000' });
+	this.titleText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, AGLBlocks.title, { font: this.AGL.getMinInnerDimension()/4+'px '+AGLBlocks.titleFont, fill: '#000000' });
 	this.titleText.stroke = "#ffffe7";
-	this.titleText.strokeThickness = this.AGL.getMinDimension()/75;
+	this.titleText.strokeThickness = this.AGL.getMinInnerDimension()/75;
 	this.titleText.anchor.setTo(0.5, 0.5);
 };
 
@@ -213,19 +217,21 @@ AGLBlocks.LevelState.prototype.create = function()
 	var textTime = 0;
 	if (this.AGL.gameLevel-1 < AGLBlocks.totalLevels)
 	{
-		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Level ' + this.AGL.gameLevel, { font: this.AGL.getMinDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
+		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Level ' + this.AGL.gameLevel, { font: this.AGL.getMinInnerDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 		this.lText.anchor.setTo(0.5, 0.5);
 		this.time.events.add(800, function () { this.AGL.game.state.start('main'); }, this);
 	}
 	else
 	{
-		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Well Done!', { font: this.AGL.getMinDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
+		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Well Done!', { font: this.AGL.getMinInnerDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 		this.lText.anchor.setTo(0.5, 0.5);
 		this.time.events.add(1800, function () { this.AGL.game.state.start('menu'); }, this);
 		textTime = 1000;
 	}
 	this.tweenIn();
 	this.time.events.add(textTime+400,function() {this.tweenOut();},this);
+	
+	this.AGL.stateCreated();
 };
 	
 AGLBlocks.LevelState.prototype.tweenIn = function()
@@ -289,6 +295,9 @@ AGLBlocks.MainState.prototype.create =function ()
 			this.tilesGroup.add(this.tiles[i][j]);
 	this.tilesGroup.x +=xOffset;
 	this.introTween();
+	
+	if (this.AGL.portfolio)
+		this.AGL.createGameLinks();
 };
 	
 AGLBlocks.MainState.prototype.startPlay = function()
@@ -324,7 +333,7 @@ AGLBlocks.MainState.prototype.progressBarTween = function()
 	
 AGLBlocks.MainState.prototype.clickToContinueTween = function()
 {
-	this.continueText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY+this.AGL.game.world.centerY*(2/3), 'touch to continue', { font: this.AGL.getMinDimension()/13+'px '+AGLBlocks.defaultFont, fill: '#111111' });
+	this.continueText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY+this.AGL.game.world.centerY*(2/3), 'touch to continue', { font: this.AGL.getMinInnerDimension()/13+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 	this.continueText.anchor.setTo(0.5, 0.5);
 	this.continueText.alpha = 0;
 	var tween  = this.AGL.game.add.tween(this.continueText);
