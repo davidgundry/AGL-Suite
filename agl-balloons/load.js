@@ -28,6 +28,7 @@
 	    "../log.js",
 	    "../game.js",
 	    "game.js",
+        "states.js",
 	    "graphics.js"
 	], 
  	function ()
