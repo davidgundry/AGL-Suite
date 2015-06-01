@@ -216,7 +216,7 @@ AGLBalloons.Balloon.prototype.reset = function(targetNumber,level)
         this.text.text = AGLBalloons.Balloon.addition(targetNumber,this.contentsGood);
     else if (level == 2)
     {
-        if (Math.random() > 0.6)
+        if (Math.random() > 0.5)
             this.text.text = AGLBalloons.Balloon.addition(targetNumber,this.contentsGood);
         else
             this.text.text = AGLBalloons.Balloon.multiplication(targetNumber,this.contentsGood);
@@ -288,7 +288,7 @@ AGLBalloons.Balloon.multiplication = function(targetNumber,correct)
     }   
 
     if (correct)
-        return a+"*"+b;
+        return a+"x"+b;
     else
     {
         var first  = (a+Math.round(Math.random()*4)-2);
@@ -298,7 +298,7 @@ AGLBalloons.Balloon.multiplication = function(targetNumber,correct)
             first  = (a+Math.round(Math.random()*4)-2);
             second = (b+Math.round(Math.random()*4)-2);
         }
-        return first+"*"+second;
+        return first+"x"+second;
     }
 };
 
