@@ -94,6 +94,10 @@ AGLBalloons.states.Menu.prototype.create = function()
 	label.setShadow(1,2,"grey",2);
     label.fixedToCamera = true;
 	
+    	var instructions = this.AGL.game.add.text(this.AGL.game.width/2,this.AGL.game.height- this.AGL.getMinDimension()/17,"click on balloons", { font: this.AGL.getMinDimension()/17+'px '+AGLBalloons.defaultFont, fill: '#ffffff' });
+	instructions.anchor.setTo(0.5,0.5);
+    instructions.fixedToCamera = true;
+    
 	 this.AGL.stateCreated();
 };
 

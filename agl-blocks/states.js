@@ -82,6 +82,9 @@ AGLBlocks.MenuState.prototype.create = function ()
 	this.createTiles();
 	this.createIntroTweens();
 	
+	var instructions = this.AGL.game.add.text(this.AGL.game.width/2,this.AGL.game.height-this.AGL.paddingBottom/2,"click and drag the tiles, learn the pattern", { font: this.AGL.getMinInnerDimension()/20+'px '+AGLBlocks.defaultFont, fill: '#000000' });
+	instructions.anchor.setTo(0.5,0.5);
+	
 	this.time.events.add(Math.random()*1000+500,function() {this.AGL.pretty(this.tiles,AGLBlocks.MenuState.tileAlpha,this.time,true);},this);
 	this.time.events.add(Math.random()*2000+500,function() {this.AGL.pretty(this.tiles,AGLBlocks.MenuState.tileAlpha,this.time,true);},this);
 	
@@ -99,7 +102,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 		{
 			this.tiles[i][j].alpha = AGLBlocks.MenuState.tileAlpha;
 		  
-			if ((j==0) && (i==0))
+			/*if ((j==0) && (i==0))
 			{
 				var qText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'quit', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				qText.stroke = "#222222";
@@ -108,8 +111,8 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();
 				this.tiles[i][j].events.onInputDown.add(this.quit,this);
-			}
-			else if  ((j==5) && (i==4))
+			}*/
+			if  ((j==5) && (i==4))
 			{
 				var pText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'play', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				pText.stroke = "#222222";
@@ -119,7 +122,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 				this.tiles[i][j].events.onInputDown.removeAll();
 				this.tiles[i][j].events.onInputDown.add(this.play,this);
 			}
-			else if ((j==6) && (i==4))
+			/*else if ((j==6) && (i==4))
 			{
 				var iText = this.tiles[i][j].addChild(this.AGL.game.add.text(size/2,size/2, 'info', { font: size/3+'px '+AGLBlocks.defaultFont, fill: '#ffffff' }));
 				iText.stroke = "#222222";
@@ -128,7 +131,7 @@ AGLBlocks.MenuState.prototype.createTiles = function()
 				this.tiles[i][j].alpha = 1;
 				this.tiles[i][j].events.onInputDown.removeAll();
 				this.tiles[i][j].events.onInputDown.add(this.info,this);
-			}
+			}*/
 			this.tilesGroup.add(this.tiles[i][j]);
 		}
 	
@@ -175,6 +178,17 @@ AGLBlocks.MenuState.prototype.quit = function()
 AGLBlocks.MenuState.prototype.play = function()
 {
 	AGLSuite.log.recordEvent("play",{level:this.AGL.gameLevel});
+	if (Math.random() > 0.5)
+	{
+		AGLSuite.log.recordEvent("grey");
+		this.AGL.lockedTilesAreGrey = true;
+	}
+	else
+	{
+		AGLSuite.log.recordEvent("notgrey");
+		this.AGL.lockedTilesAreGrey = false;
+	}
+		
 	this.AGL.playable = false;
 	this.createOutroTweens();
 	this.AGL.gameLevel = 1;
@@ -333,7 +347,7 @@ AGLBlocks.MainState.prototype.progressBarTween = function()
 	
 AGLBlocks.MainState.prototype.clickToContinueTween = function()
 {
-	this.continueText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY+this.AGL.game.world.centerY*(2/3), 'touch to continue', { font: this.AGL.getMinInnerDimension()/13+'px '+AGLBlocks.defaultFont, fill: '#111111' });
+	this.continueText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY+this.AGL.game.world.centerY*(2/3), 'click to continue', { font: this.AGL.getMinInnerDimension()/13+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 	this.continueText.anchor.setTo(0.5, 0.5);
 	this.continueText.alpha = 0;
 	var tween  = this.AGL.game.add.tween(this.continueText);
