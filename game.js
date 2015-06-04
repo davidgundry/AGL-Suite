@@ -8,7 +8,7 @@ AGLSuite.createGame = function(full,target,minWidth,minHeight)
 	{
 		var container = document.getElementById(target);
 		if (container != null)
-			game = new Phaser.Game(container.clientWidth, container.clientHeight, Phaser.CANVAS, container);
+			game = new Phaser.Game(container.clientWidth, container.clientHeight, Phaser.AUTO, container);
 		else
 		{
 			AGLSuite.log("Invalid target container");
@@ -17,7 +17,7 @@ AGLSuite.createGame = function(full,target,minWidth,minHeight)
 	}
 	else
 	{	
-		game = new Phaser.Game(Math.max(minWidth,window.innerWidth), Math.max(minHeight,window.innerHeight), Phaser.CANVAS);
+		game = new Phaser.Game(Math.max(minWidth,window.innerWidth), Math.max(minHeight,window.innerHeight), Phaser.AUTO);
 	}
 	
 	return game;

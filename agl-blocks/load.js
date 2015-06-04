@@ -6,7 +6,7 @@
         {
             var s = document.createElement('script');
             s.type = 'text/javascript';
-            s.async = false;
+            s.async = true;
             s.src = filenames[numloaded];
             s.addEventListener('load', load, false);
             document.getElementsByTagName("head")[0].appendChild(s);
