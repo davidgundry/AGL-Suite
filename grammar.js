@@ -63,12 +63,29 @@ AGLSuite.grammar.FiniteState.prototype.step = function()
     return symbol;
 };
 
+AGLSuite.grammar.FiniteState.prototype.generateString = function()
+{
+    this.setPosition(0);
+	var string = "";
+	terminalSymbol = false;
+	while (!terminalSymbol)
+	{
+		var newCharacter = this.step();
+		if (newCharacter != '')
+			string += newCharacter;
+		else
+			terminalSymbol = true;
+	}
+	return string;
+}
+
 
 
 AGLSuite.grammar.FSG = function(alphabet,start,transition)
 {
     AGLSuite.grammar.Grammar.call(this,"FSG",alphabet);
 	this.current = start;
+	this.start = start;
 	this.transition = transition;
 };
 
@@ -82,20 +99,36 @@ AGLSuite.grammar.FSG.prototype.next = function()
 	return n.o;
 };
 
+AGLSuite.grammar.FSG.prototype.generateString = function()
+{
+    this.current = this.start;
+	var string = "";
+	terminalSymbol = false;
+	while (!terminalSymbol)
+	{
+		var newCharacter = this.next();
+		if (newCharacter != 0)
+			string += this.alphabet[newCharacter];
+		else
+			terminalSymbol = true;
+	}
+	return string;
+}
+
 /**
 * A really simple finite state grammar with an alphabet of two symbols: a, b
 */
 function fsg1(s) {
 	switch (s) {
 		case 0:
-			return { s: 1, o: "a" };
+			return { s: 1, o: 1 };
 		case 1:
 			if (Math.round(Math.random()) == 0)
-				return { s: 1, o: "b" };
+				return { s: 1, o: 2 };
 			else
-			    return { s: 2, o: "a" };
+			    return { s: 2, o: 1 };
 	    case 2:
-	        return { s: 0, o: " " };
+	        return { s: 0, o: 0 };
 	}
 };
 /**
@@ -111,36 +144,36 @@ function fsg2(s) {
     switch (s) {
         case 0:
             if (Math.round(Math.random()) == 0)
-                return { s: 1, o: "M" };
+                return { s: 1, o: 1 };
             else
-                return { s: 2, o: "V" };
+                return { s: 2, o: 2 };
         case 1:
             if (Math.round(Math.random()) == 0)
-                return { s: 1, o: "S" };
+                return { s: 1, o: 3 };
             else
-                return { s: 3, o: "V" };
+                return { s: 3, o: 2 };
         case 2:
             if (Math.round(Math.random()) == 0)
-                return { s: 1, o: "X" };
+                return { s: 1, o: 4 };
             else
-                return { s: 4, o: "X" };
+                return { s: 4, o: 4 };
         case 3:
             var p = Math.round(Math.random() * 2);
             if (p == 0)
-                return { s: 5, o: "S" };
+                return { s: 5, o: 3 };
             else if (p==1)
-                return { s: 2, o: "R" };
+                return { s: 2, o: 5 };
             else
-                return { s: 0, o: " " };
+                return { s: 0, o: 0 };
         case 4:
             var p = Math.round(Math.random()*2);
             if (p==0)
-                return { s: 4, o: "R" };
+                return { s: 4, o: 5 };
             else if (p==1)
-                return { s: 5, o: "M" };
+                return { s: 5, o: 1 };
             else
-                return { s: 0, o: " " };
+                return { s: 0, o: 0 };
         case 5:
-            return { s: 0, o: " " };
+            return { s: 0, o: 0 };
     }
 };

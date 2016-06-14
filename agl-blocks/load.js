@@ -27,6 +27,7 @@
 		"../phaser.js",
 	    "../log.js",
 	    "../game.js",
+		"../grammar.js",
 	    "game.js",
 	    "states.js"
 	], 

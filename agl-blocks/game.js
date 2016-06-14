@@ -45,7 +45,8 @@ function AGLBlocks(full,targetDiv,greyLocked,contentsType,audio)
 
 AGLBlocks.title = "blocks";
 AGLBlocks.showLoadingScreen = false;
-AGLBlocks.levelList = [
+AGLBlocks.prototype.levelList = [];
+/*AGLBlocks.prototype.levelList = [
 	// starts
 	{level: 		["2124"],
 		locked: 	["0011"],
@@ -139,14 +140,90 @@ AGLBlocks.levelList = [
 		locked: 	["0000010000100000"],
 		solution: 	["1224532245345355"]},	
 
-];
-AGLBlocks.totalLevels = AGLBlocks.levelList.length;
+];*/
 AGLBlocks.minHeight = 200;
 AGLBlocks.minWidth = 200;
 AGLBlocks.defaultFont = 'Sans-Serif';
 AGLBlocks.titleFont = 'Serif';
 AGLBlocks.dropDepth = 1/40;
 AGLBlocks.staticTileContents = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#aaaaaa','#ccaa33'];
+
+AGLBlocks.prototype.createLevelList = function(size)
+{
+	var fsg = new AGLSuite.grammar.FSG([" ","0","1","2","3","4"],0, fsg2);
+	
+	var levelList = [];
+	for (var i=0;i<size;i++)
+	{
+		var desiredMaxLength = (i/2)+3;
+		var desiredLockedBlocks = 0;
+		if (desiredMaxLength <=2)
+			desiredLockedBlocks = 0;
+		if (desiredMaxLength >= 3)
+			desiredLockedBlocks = 1;
+		if (desiredMaxLength >= 5)
+			desiredLockedBlocks = 2;
+		var shuffles = i/3;
+		
+		var newString = "";
+		var shuffledString = "";
+		
+		var lockedBlocks = -1;
+		while (lockedBlocks < desiredLockedBlocks)
+		{
+			newString = fsg.generateString();
+			while ((newString.length > desiredMaxLength) || (newString.length <= 1))
+				newString = fsg.generateString();
+		
+			shuffledString = AGLBlocks.shuffleString(newString,shuffles);
+			while (newString === shuffledString)
+				shuffledString = AGLBlocks.shuffleString(newString,shuffles);
+
+			lockString = AGLBlocks.createLockString(newString,shuffledString);
+			lockedBlocks = AGLBlocks.countLockedBlocks(lockString);
+		}
+
+		AGLSuite.log.recordEvent("newString" + newString,newString);
+		AGLSuite.log.recordEvent("shuffledString" + shuffledString,shuffledString);
+		AGLSuite.log.recordEvent("lockString" + lockString,lockString);
+		levelList.push({
+			level: 		[shuffledString],
+			locked: 	[lockString],
+			solution: 	[newString]});
+	}
+	this.levelList = levelList;
+}
+
+AGLBlocks.countLockedBlocks = function(lockString)
+{
+	return lockString.split("1").length - 1;
+}
+
+AGLBlocks.createLockString = function(levelString,solutionString)
+{
+	var lockString = "";
+
+	for (var j=0;j<levelString.length;j++)
+		lockString += "0";
+
+	for (var j=0;j<levelString.length;j++)
+		if (levelString[j] === solutionString[j])
+		{
+			lockString = spliceSlice(lockString,j,1,"1");
+		}
+		else
+			break;
+		
+	for (var j=levelString.length-1;j>=0;j--)
+		if (levelString[j] === solutionString[j])
+		{
+			lockString = spliceSlice(lockString,j,1,"1");
+		}
+		else
+			break;
+		
+	return lockString;
+}
 
 AGLBlocks.fillArray = function(width,height,fill)
 {
@@ -173,6 +250,25 @@ AGLBlocks.shuffleArray = function(array)
 	}
 	return array;
 };
+
+
+AGLBlocks.shuffleString = function(string,steps)
+{
+	for (var i=steps;i>=0;i--)
+	{
+		var r = Math.round(Math.random()*i);
+		var c = string[r];
+		string = spliceSlice(string,r,1,"");
+		string += c;
+	}
+	return string;
+};
+
+function spliceSlice(str, index, count, add)
+{
+	return str.slice(0, index) + add + str.slice(index + count);
+}
+
 
 AGLBlocks.randomLevel = function(height,width,length)
 {
@@ -222,7 +318,7 @@ AGLBlocks.pointToGridIndex = function(x,y,tiles)
 /**
  * Currently only shuffles within rows.
  */
-AGLBlocks.shuffleLevel = function(level,gameLevel)
+AGLBlocks.prototype.shuffleLevel = function(level,gameLevel)
 {
 	for (var i=level.length*level[0].length;i>=0;i--)
 	{
@@ -231,10 +327,10 @@ AGLBlocks.shuffleLevel = function(level,gameLevel)
 				level[Math.floor(r/level[0].length)].push(c);
 		level[Math.floor(r/level[0].length)].splice(r%level[0].length,1);
 	}
-	if (!AGLBlocks.checkLevel(level,gameLevel))
+	if (!this.checkLevel(level,gameLevel))
 		return level;
 	else
-		return AGLBlocks.shuffleLevel(level);
+		return this.shuffleLevel(level);
 };
 
 Array.prototype.equals = function (array) {
@@ -261,9 +357,9 @@ Array.prototype.equals = function (array) {
     return true;
 }   
 
-AGLBlocks.checkLevel = function(level,gameLevel)
+AGLBlocks.prototype.checkLevel = function(level,gameLevel)
 {
-	var a = AGLBlocks.levelList[gameLevel-1].solution;
+	var a = this.levelList[gameLevel-1].solution;
 	var r = [];
 	for (var i=0;i<level.length;i++)
 		r.push(level[i].join(''));
@@ -271,9 +367,9 @@ AGLBlocks.checkLevel = function(level,gameLevel)
 	return (a.equals(r));
 };
 
-AGLBlocks.createLevel = function(level)
+AGLBlocks.prototype.createLevel = function(level)
 {
-	var a = AGLBlocks.levelList[level-1].level;
+	var a = this.levelList[level-1].level;
 	var r = [];
 	for (var i=0;i<a.length;i++)
 	{
@@ -284,9 +380,9 @@ AGLBlocks.createLevel = function(level)
 	return r;
 };
 
-AGLBlocks.getLockedTiles = function(level)
+AGLBlocks.prototype.getLockedTiles = function(level)
 {
-	var a = AGLBlocks.levelList[level-1].locked;
+	var a = this.levelList[level-1].locked;
 	var r = [];
 	for (var i=0;i<a.length;i++)
 	{
@@ -651,9 +747,14 @@ AGLBlocks.prototype.getProgressHeight = function(p)
 
 AGLBlocks.prototype.updateProgress = function()
 {
-	this.progress = ((this.gameLevel-1)/AGLBlocks.totalLevels);
-	this.progress = Math.max(this.progress,0);
-	this.progress = Math.min(this.progress,1);
+	if (this.levelList.length > 0)
+	{
+			this.progress = Math.max(this.progress,0);
+			this.progress = Math.min(this.progress,1);
+			this.progress = ((this.gameLevel-1)/this.levelList.length);
+	}
+	else
+		this.progress = 0;
 };
 
 AGLBlocks.prototype.swap = function(state,indexX,indexY,ix,iy)
@@ -725,7 +826,7 @@ AGLBlocks.prototype.selected = function(state,iy,ix)
 		{
 			this.swap(state,this.indexX,this.indexY,ix,iy);
 			if (this.gameLevel>=1)
-				if (AGLBlocks.checkLevel(state.level,this.gameLevel))
+				if (this.checkLevel(state.level,this.gameLevel))
 				  state.levelComplete();
 			state.tiles[state.indexY][state.indexX].getChildAt(0).visible = false;
 			state.tiles[iy][ix].getChildAt(0).visible = false;

@@ -191,6 +191,7 @@ AGLBlocks.MenuState.prototype.play = function()
 		
 	this.AGL.playable = false;
 	this.createOutroTweens();
+	this.AGL.createLevelList(20);
 	this.AGL.gameLevel = 1;
 	this.AGL.updateProgress();
 	
@@ -229,7 +230,7 @@ AGLBlocks.LevelState.prototype.preload = function()
 AGLBlocks.LevelState.prototype.create = function()
 {
 	var textTime = 0;
-	if (this.AGL.gameLevel-1 < AGLBlocks.totalLevels)
+	if (this.AGL.gameLevel-1 < this.AGL.levelList.length)
 	{
 		this.lText = this.AGL.game.add.text(this.AGL.game.world.centerX, this.AGL.game.world.centerY, 'Level ' + this.AGL.gameLevel, { font: this.AGL.getMinInnerDimension()/6+'px '+AGLBlocks.defaultFont, fill: '#111111' });
 		this.lText.anchor.setTo(0.5, 0.5);
@@ -295,8 +296,8 @@ AGLBlocks.MainState.prototype.create =function ()
 {
 	AGLSuite.log.recordEvent("createdlevel",{level:this.AGL.gameLevel});
 	var xOffset = -this.AGL.game.width;
-	this.level = AGLBlocks.createLevel(this.AGL.gameLevel);
-	this.lockedTiles = AGLBlocks.getLockedTiles(this.AGL.gameLevel);
+	this.level = this.AGL.createLevel(this.AGL.gameLevel);
+	this.lockedTiles = this.AGL.getLockedTiles(this.AGL.gameLevel);
 	this.tiles = this.AGL.makeLevel(this.level,this.lockedTiles,xOffset,this);
 	this.indexX = -1;
 	this.indexY = -1;
