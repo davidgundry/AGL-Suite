@@ -13,7 +13,7 @@ function AGLBlocks(full,targetDiv,greyLocked,contentsType,audio)
     if (this.game == null)
         return;
 	
-	this.portfolio = true;
+	this.portfolio = false;
 	
 	if (typeof greyLocked !== "undefined")
 		this.lockedTilesAreGrey = greyLocked;
