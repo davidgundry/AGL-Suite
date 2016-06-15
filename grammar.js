@@ -93,8 +93,8 @@ AGLSuite.grammar.FSG.prototype.constructor = AGLSuite.grammar.FSG;
 AGLSuite.grammar.FSG.prototype.next = function()
 {
 	var n = this.transitionFunction(this.currentStateID);
-	this.currentStateID = n.s;
-	return this.alphabet[n.o];
+	this.currentStateID = n.state;
+	return this.alphabet[n.output];
 };
 
 AGLSuite.grammar.FSG.prototype.generateString = function()
@@ -113,20 +113,26 @@ AGLSuite.grammar.FSG.prototype.generateString = function()
 	return string;
 }
 
+AGLSuite.grammar.Transition = function(state,output)
+{
+	this.output = output;
+	this.state = state;
+}
+
 /**
 * A really simple finite state grammar with an alphabet of two symbols: a, b
 */
 function fsg1(s) {
 	switch (s) {
 		case 0:
-			return { s: 1, o: 1 };
+			return new AGLSuite.grammar.Transition(state = 1, output = 1);
 		case 1:
 			if (Math.round(Math.random()) == 0)
-				return { s: 1, o: 2 };
+				return new AGLSuite.grammar.Transition(state = 1, output = 2);
 			else
-			    return { s: 2, o: 1 };
+			    return new AGLSuite.grammar.Transition(state = 2, output = 1);
 	    case 2:
-	        return { s: 0, o: 0 };
+	        return new AGLSuite.grammar.Transition(state = 0, output = 0);
 	}
 };
 /**
@@ -142,36 +148,36 @@ function fsg2(s) {
     switch (s) {
         case 0:
             if (Math.round(Math.random()) == 0)
-                return { s: 1, o: 1 };
+                return new AGLSuite.grammar.Transition(state = 1, output = 1)
             else
-                return { s: 2, o: 2 };
+                return new AGLSuite.grammar.Transition(state = 2, output = 2);
         case 1:
             if (Math.round(Math.random()) == 0)
-                return { s: 1, o: 3 };
+                return new AGLSuite.grammar.Transition(state = 1, output = 3);
             else
-                return { s: 3, o: 2 };
+                return new AGLSuite.grammar.Transition(state = 3, output = 2);
         case 2:
             if (Math.round(Math.random()) == 0)
-                return { s: 1, o: 4 };
+                return new AGLSuite.grammar.Transition(state = 1, output = 4);
             else
-                return { s: 4, o: 4 };
+                return new AGLSuite.grammar.Transition(state = 4, output = 4);
         case 3:
             var p = Math.round(Math.random() * 2);
             if (p == 0)
-                return { s: 5, o: 3 };
+                return new AGLSuite.grammar.Transition(state = 5, output = 3);
             else if (p==1)
-                return { s: 2, o: 5 };
+                return new AGLSuite.grammar.Transition(state = 2, output = 5);
             else
-                return { s: 0, o: 0 };
+                return new AGLSuite.grammar.Transition(state = 0, output = 0);
         case 4:
             var p = Math.round(Math.random()*2);
             if (p==0)
-                return { s: 4, o: 5 };
+                return new AGLSuite.grammar.Transition(state = 4, output = 5);
             else if (p==1)
-                return { s: 5, o: 1 };
+                return new AGLSuite.grammar.Transition(state = 5, output = 1);
             else
-                return { s: 0, o: 0 };
+                return new AGLSuite.grammar.Transition(state = 0, output = 0);
         case 5:
-            return { s: 0, o: 0 };
+            return new AGLSuite.grammar.Transition(state = 0, output = 0);
     }
 };

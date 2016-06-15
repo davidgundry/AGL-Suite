@@ -205,7 +205,7 @@ AGLRun.states.Main.prototype.setGrammar = function()
     if (this.AGL.gameLevel == 0)
     {
         if (Math.round(Math.random()) == 1)
-            g = new AGLSuite.grammar.RG(AGLRun.alphabet);
+            g = new AGLSuite.grammar.Random(AGLRun.alphabet);
         else
             g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, fsg1);
     }
@@ -214,7 +214,7 @@ AGLRun.states.Main.prototype.setGrammar = function()
         if (this.grammar.name == "Random")
             g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, fsg1);
         else
-            g = new AGLSuite.grammar.RG(AGLRun.alphabet);
+            g = new AGLSuite.grammar.Random(AGLRun.alphabet);
     }
     return g;
 };
