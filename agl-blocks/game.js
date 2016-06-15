@@ -258,17 +258,16 @@ AGLBlocks.shuffleString = function(string,steps)
 	{
 		var r = Math.round(Math.random()*i);
 		var c = string[r];
-		string = spliceSlice(string,r,1,"");
+		string = AGLBlocks.spliceSlice(string,r,1,"");
 		string += c;
 	}
 	return string;
 };
 
-function spliceSlice(str, index, count, add)
+AGLBlocks.spliceSlice = function(str, index, count, add)
 {
 	return str.slice(0, index) + add + str.slice(index + count);
 }
-
 
 AGLBlocks.randomLevel = function(height,width,length)
 {
