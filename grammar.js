@@ -11,15 +11,15 @@ AGLSuite.grammar.Grammar = function(name,alphabet)
 
 AGLSuite.grammar.Grammar.prototype.next = function(){};
 
-AGLSuite.grammar.RG = function(alphabet)
+AGLSuite.grammar.Random = function(alphabet)
 {
-    AGLSuite.grammar.Grammar.call(this,"RG",alphabet);
+    AGLSuite.grammar.Grammar.call(this,"Random",alphabet);
 };
 
-AGLSuite.grammar.RG.prototype = new AGLSuite.grammar.Grammar();
-AGLSuite.grammar.RG.prototype.constructor = AGLSuite.grammar.RG;
+AGLSuite.grammar.Random.prototype = new AGLSuite.grammar.Grammar();
+AGLSuite.grammar.Random.prototype.constructor = AGLSuite.grammar.Random;
 
-AGLSuite.grammar.RG.prototype.next = function()
+AGLSuite.grammar.Random.prototype.next = function()
 {
     var r = Math.floor(Math.random()*this.alphabet.length);
     if (r == this.alphabet.length)
@@ -27,12 +27,12 @@ AGLSuite.grammar.RG.prototype.next = function()
     return this.alphabet[r];
 };
 
-AGLSuite.grammar.Node = function()
+/*AGLSuite.grammar.Node = function()
 {
     this.directedEdges = [];
     this.transitionSymbols = [];
-};
-
+};*/
+/*
 AGLSuite.grammar.FiniteState = function(alphabet,numNodes)
 {
     this.nodes = Array(numNodes);
@@ -77,16 +77,14 @@ AGLSuite.grammar.FiniteState.prototype.generateString = function()
 			terminalSymbol = true;
 	}
 	return string;
-}
+}*/
 
-
-
-AGLSuite.grammar.FSG = function(alphabet,start,transition)
+AGLSuite.grammar.FSG = function(alphabet,startStateID,transitionFunction)
 {
     AGLSuite.grammar.Grammar.call(this,"FSG",alphabet);
-	this.current = start;
-	this.start = start;
-	this.transition = transition;
+	this.currentStateID = startStateID;
+	this.startStateID = startStateID;
+	this.transitionFunction = transitionFunction;
 };
 
 AGLSuite.grammar.FSG.prototype = new AGLSuite.grammar.Grammar();
@@ -94,14 +92,14 @@ AGLSuite.grammar.FSG.prototype.constructor = AGLSuite.grammar.FSG;
 
 AGLSuite.grammar.FSG.prototype.next = function()
 {
-	var n = this.transition(this.current);
-	this.current = n.s;
-	return n.o;
+	var n = this.transitionFunction(this.currentStateID);
+	this.currentStateID = n.s;
+	return this.alphabet[n.o];
 };
 
 AGLSuite.grammar.FSG.prototype.generateString = function()
 {
-    this.current = this.start;
+    this.currentStateID = this.startStateID;
 	var string = "";
 	terminalSymbol = false;
 	while (!terminalSymbol)
