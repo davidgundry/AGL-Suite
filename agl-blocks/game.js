@@ -150,7 +150,7 @@ AGLBlocks.staticTileContents = ['#ff2a2a','#8dd35f','#0066ff','#ffaaaa','#aaaaaa
 
 AGLBlocks.prototype.createLevelList = function(size)
 {
-	var fsg = new AGLSuite.grammar.FSG([" ","0","1","2","3","4"],0, fsg2);
+	var fsg = new AGLSuite.grammar.FSG([" ","0","1","2","3","4"],0, AGLSuite.grammar.FSG.Example.Redington);
 	
 	var levelList = [];
 	for (var i=0;i<size;i++)

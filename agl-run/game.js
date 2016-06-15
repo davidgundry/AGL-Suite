@@ -207,12 +207,12 @@ AGLRun.states.Main.prototype.setGrammar = function()
         if (Math.round(Math.random()) == 1)
             g = new AGLSuite.grammar.Random(AGLRun.alphabet);
         else
-            g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, fsg1);
+            g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, AGLSuite.grammar.FSG.Example.Simple);
     }
     else if (typeof this.grammar !== 'undefined')
     {
         if (this.grammar.name == "Random")
-            g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, fsg1);
+            g = new AGLSuite.grammar.FSG(AGLRun.alphabet,0, AGLSuite.grammar.FSG.Example.Simple);
         else
             g = new AGLSuite.grammar.Random(AGLRun.alphabet);
     }

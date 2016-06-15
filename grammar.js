@@ -122,7 +122,7 @@ AGLSuite.grammar.Transition = function(state,output)
 /**
 * A really simple finite state grammar with an alphabet of two symbols: a, b
 */
-function fsg1(s) {
+AGLSuite.grammar.FSG.Example.Simple = function(s) {
 	switch (s) {
 		case 0:
 			return new AGLSuite.grammar.Transition(state = 1, output = 1);
@@ -144,7 +144,7 @@ function fsg1(s) {
 * Journal of experimental psychology: …, 125(2), pp.123–138.
 * Available at: http://psycnet.apa.org/psycinfo/1996-04201-001 [Accessed February 23, 2015].
 */
-function fsg2(s) { 
+AGLSuite.grammar.FSG.Example.Redington = function(s) { 
     switch (s) {
         case 0:
             if (Math.round(Math.random()) == 0)
