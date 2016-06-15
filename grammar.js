@@ -122,6 +122,7 @@ AGLSuite.grammar.Transition = function(state,output)
 /**
 * A really simple finite state grammar with an alphabet of two symbols: a, b
 */
+AGLSuite.grammar.FSG.Example = {};
 AGLSuite.grammar.FSG.Example.Simple = function(s) {
 	switch (s) {
 		case 0:
