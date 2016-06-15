@@ -165,7 +165,7 @@ AGLBlocks.prototype.createLevelList = function(size)
 			desiredLockedBlocks = 2;
 		var shuffles = i/3;
 		
-		var generatedLevel = this.generateLevelCandidate(desiredMaxLength, desiredLockedBlocks)
+		var generatedLevel = this.generateLevelCandidate(fsg, desiredMaxLength, desiredLockedBlocks, shuffles)
 
 		levelList.push(generatedLevel);
 	}
@@ -179,7 +179,7 @@ AGLBlocks.LevelDefinition = function(level,locked,solution)
 	this.solution = solution;
 }
 
-AGLBlocks.prototype.generateLevelCandidate = function(desiredMaxLength, desiredLockedBlocks)
+AGLBlocks.prototype.generateLevelCandidate = function(fsg, desiredMaxLength, desiredLockedBlocks, shuffles)
 {
 	var solutionString = "";
 	var shuffledString = "";
@@ -200,11 +200,11 @@ AGLBlocks.prototype.generateLevelCandidate = function(desiredMaxLength, desiredL
 		lockedBlocks = AGLBlocks.countLockedBlocks(lockString);
 	}
 	
-	AGLSuite.log.recordEvent("newString" + newString,newString);
+	AGLSuite.log.recordEvent("solutionString" + solutionString,solutionString);
 	AGLSuite.log.recordEvent("shuffledString" + shuffledString,shuffledString);
 	AGLSuite.log.recordEvent("lockString" + lockString,lockString);
 	
-	return new LevelDefinition(shuffledString, lockString, solutionString)
+	return new AGLBlocks.LevelDefinition(shuffledString, lockString, solutionString)
 	
 }
 
@@ -223,7 +223,7 @@ AGLBlocks.createLockString = function(levelString,solutionString)
 	for (var j=0;j<levelString.length;j++)
 		if (levelString[j] === solutionString[j])
 		{
-			lockString = spliceSlice(lockString,j,1,"1");
+			lockString = AGLBlocks.spliceSlice(lockString,j,1,"1");
 		}
 		else
 			break;
@@ -231,7 +231,7 @@ AGLBlocks.createLockString = function(levelString,solutionString)
 	for (var j=levelString.length-1;j>=0;j--)
 		if (levelString[j] === solutionString[j])
 		{
-			lockString = spliceSlice(lockString,j,1,"1");
+			lockString = AGLBlocks.spliceSlice(lockString,j,1,"1");
 		}
 		else
 			break;
