@@ -165,33 +165,47 @@ AGLBlocks.prototype.createLevelList = function(size)
 			desiredLockedBlocks = 2;
 		var shuffles = i/3;
 		
-		var newString = "";
-		var shuffledString = "";
-		
-		var lockedBlocks = -1;
-		while (lockedBlocks < desiredLockedBlocks)
-		{
-			newString = fsg.generateString();
-			while ((newString.length > desiredMaxLength) || (newString.length <= 1))
-				newString = fsg.generateString();
-		
-			shuffledString = AGLBlocks.shuffleString(newString,shuffles);
-			while (newString === shuffledString)
-				shuffledString = AGLBlocks.shuffleString(newString,shuffles);
+		var generatedLevel = this.generateLevelCandidate(desiredMaxLength, desiredLockedBlocks)
 
-			lockString = AGLBlocks.createLockString(newString,shuffledString);
-			lockedBlocks = AGLBlocks.countLockedBlocks(lockString);
-		}
-
-		AGLSuite.log.recordEvent("newString" + newString,newString);
-		AGLSuite.log.recordEvent("shuffledString" + shuffledString,shuffledString);
-		AGLSuite.log.recordEvent("lockString" + lockString,lockString);
-		levelList.push({
-			level: 		[shuffledString],
-			locked: 	[lockString],
-			solution: 	[newString]});
+		levelList.push(generatedLevel);
 	}
 	this.levelList = levelList;
+}
+
+AGLBlocks.LevelDefinition = function(level,locked,solution)
+{
+	this.level = level;
+	this.locked = locked;
+	this.solution = solution;
+}
+
+AGLBlocks.prototype.generateLevelCandidate = function(desiredMaxLength, desiredLockedBlocks)
+{
+	var solutionString = "";
+	var shuffledString = "";
+	
+	var lockedBlocks = -1;
+	
+	while (lockedBlocks < desiredLockedBlocks)
+	{
+		solutionString = fsg.generateString();
+		while ((solutionString.length > desiredMaxLength) || (solutionString.length <= 1))
+			solutionString = fsg.generateString();
+
+		shuffledString = AGLBlocks.shuffleString(solutionString,shuffles);
+		while (solutionString === shuffledString)
+			shuffledString = AGLBlocks.shuffleString(solutionString,shuffles);
+
+		lockString = AGLBlocks.createLockString(solutionString,shuffledString);
+		lockedBlocks = AGLBlocks.countLockedBlocks(lockString);
+	}
+	
+	AGLSuite.log.recordEvent("newString" + newString,newString);
+	AGLSuite.log.recordEvent("shuffledString" + shuffledString,shuffledString);
+	AGLSuite.log.recordEvent("lockString" + lockString,lockString);
+	
+	return new LevelDefinition(shuffledString, lockString, solutionString)
+	
 }
 
 AGLBlocks.countLockedBlocks = function(lockString)
