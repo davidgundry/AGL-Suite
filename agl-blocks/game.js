@@ -204,7 +204,7 @@ AGLBlocks.prototype.generateLevelCandidate = function(fsg, desiredMaxLength, des
 	AGLSuite.log.recordEvent("shuffledString" + shuffledString,shuffledString);
 	AGLSuite.log.recordEvent("lockString" + lockString,lockString);
 	
-	return new AGLBlocks.LevelDefinition(shuffledString, lockString, solutionString)
+	return new AGLBlocks.LevelDefinition([shuffledString], [lockString], [solutionString])
 	
 }
 
