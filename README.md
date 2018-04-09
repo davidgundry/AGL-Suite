@@ -1,14 +1,14 @@
 # AGL-Suite
 A set of quick and dirty games for testing ideas about AGL
 
-##AGL-Blocks
+## AGL-Blocks
 Decision-based learning.
 http://davidgundry.github.io/AGL-Suite/agl-blocks
 
-##AGL-Run
+## AGL-Run
 Reaction-based learning.
 http://davidgundry.github.io/AGL-Suite/agl-run
 
-##AGL-Balloons
+## AGL-Balloons
 A slightly unrelated educational game idea.
 http://davidgundry.github.io/AGL-Suite/agl-balloons
