@@ -9,7 +9,7 @@ I did not take these ideas further in my research so these games never got beyon
 
 ## Blocks
 
-[Play run online](http://davidgundry.github.io/AGL-Suite/agl-blocks)
+[Play Blocks online](http://davidgundry.github.io/AGL-Suite/agl-blocks)
 
 In blocks, players have to rearrange a linear sequence of blocks to get them into the correct order. They score points and progress for each level they complete. The intention was to wrap this in a fiction about an Indiana Jones-style explorer solving puzzles to progress into an Aztec pyramid.
 
